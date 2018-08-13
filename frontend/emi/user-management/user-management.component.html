@@ -1,5 +1,105 @@
-<div class="page-layout blank p-24" fusePerfectScrollbar>
-  <h2> {{helloWorld}} </h2>
-  <h2>{{ helloWorldLabelQuery$ | async}}</h2>
-  <h2>{{ helloWorldLabelSubscription$ | async}}</h2>
+<div id="user" class="page-layout carded fullwidth" fusePerfectScrollbar>
+
+  <!-- TOP BACKGROUND -->
+  <div class="top-bg mat-accent-bg"></div>
+  <!-- / TOP BACKGROUND -->
+
+  <!-- CENTER -->
+  <div class="center">
+
+    <!-- HEADER -->
+    <div class="header white-fg" fxLayout="column" fxLayoutAlign="center center" fxLayout.gt-xs="row" fxLayoutAlign.gt-xs="space-between center">
+
+      <!-- APP TITLE -->
+      <div class="logo my-12 m-sm-0" fxLayout="row" fxLayoutAlign="start center">
+        <mat-icon class="logo-icon mr-16" *fuseIfOnDom [@animate]="{value:'*',params:{delay:'50ms',scale:'0.2'}}">user</mat-icon>
+        <span class="logo-text h1" *fuseIfOnDom [@animate]="{value:'*',params:{delay:'100ms',x:'-25px'}}">{{'USER.USER' | translate}}</span>
+      </div>
+
+      <!-- / APP TITLE -->
+
+      <!-- SEARCH -->
+      <div class="search-input-wrapper mx-12 m-md-0" fxFlex="1 0 auto" fxLayout="row" fxLayoutAlign="start center">
+        <label for="search" class="mr-8">
+          <mat-icon class="secondary-text">search</mat-icon>
+        </label>
+        <mat-form-field floatPlaceholder="never" fxFlex="1 0 auto">
+          <input id="search" matInput #filter placeholder="{{'USER.SEARCH' | translate}}">
+        </mat-form-field>
+      </div>
+      <!-- / SEARCH -->
+
+      <button mat-raised-button (click)="addNewUser()" class="add-product-button mat-white-bg my-12 mt-sm-0">
+        <span>{{'USER.ADD_USER' | translate}}</span>
+      </button>
+    </div>
+    <!-- / HEADER -->
+
+    <!-- CONTENT CARD -->
+    <div class="content-card mat-white-bg">
+
+      <div fxLayout="column" style="width: 100%; justify-content: space-between" fxLayout.gt-sm="row">
+        <div fxLayout="column" fxFlex="100" fxFlex.gt-sm="100" fxFlex.gt-md="100">
+          <mat-table class="user-table" #table (matSortChange)="sortData($event)" [dataSource]="dataSource" matSort [@animateStagger]="{value:'50'}"
+            fusePerfectScrollbar>
+
+            <!-- ID Column -->
+            <ng-container cdkColumnDef="username">
+              <mat-header-cell mat-sort-header="username" *cdkHeaderCellDef>{{'USER.USERNAME' | translate}}</mat-header-cell>
+              <mat-cell *cdkCellDef="let user">
+                <p class="text-truncate">{{user.generalInfo.username}}</p>
+              </mat-cell>
+            </ng-container>
+
+            <!-- Type Column -->
+            <ng-container cdkColumnDef="doc_type">
+              <mat-header-cell *cdkHeaderCellDef>{{'USER.DOC_TYPE' | translate}}</mat-header-cell>
+              <mat-cell *cdkCellDef="let user">
+                <p class="text-truncate" *ngIf="user.generalInfo.documentType == 'CC'">{{'USER.CC' | translate}}</p>
+                <p class="text-truncate" *ngIf="user.generalInfo.documentType == 'TI'">{{'USER.TI' | translate}}</p>
+              </mat-cell>
+            </ng-container>
+
+            <!-- Name Column -->
+            <ng-container cdkColumnDef="doc_id">
+              <mat-header-cell mat-sort-header="name" *cdkHeaderCellDef>{{'USER.DOC_ID' | translate}}</mat-header-cell>
+              <mat-cell *cdkCellDef="let user">
+                <p class="text-truncate">{{user.generalInfo.documentId}}</p>
+              </mat-cell>
+            </ng-container>
+
+            <!-- Active Column -->
+            <ng-container cdkColumnDef="state">
+              <mat-header-cell *cdkHeaderCellDef fxHide fxShow.gt-xs>{{'USER.ACTIVE' | translate}}</mat-header-cell>
+              <mat-cell *cdkCellDef="let user" fxHide fxShow.gt-xs>
+                <span class="quantity-indicator text-truncate" [ngClass]="{'mat-primary-200-bg': !user.state, 'mat-green-600-bg': user.state}">
+                </span>
+              </mat-cell>
+            </ng-container>
+
+            <!-- Roles Column 
+            <ng-container cdkColumnDef="roles">
+              <mat-header-cell *cdkHeaderCellDef fxHide fxShow.gt-xs>{{'USER.ACTIVE' | translate}}</mat-header-cell>
+              <mat-cell *cdkCellDef="let user" fxHide fxShow.gt-xs>
+                <span class="quantity-indicator text-truncate" [ngClass]="{'mat-primary-200-bg': !user.state, 'mat-green-600-bg': user.state}">
+                </span>
+              </mat-cell>
+            </ng-container>-->
+
+            <mat-header-row *cdkHeaderRowDef="displayedColumns"></mat-header-row>
+
+            <mat-row *cdkRowDef="let user; columns: displayedColumns;" (click)="selectRow(user)" class="product" [ngClass]="{'highlight': selectedUser && selectedUser.generalInfo.username == user.generalInfo.username}"
+              matRipple>
+            </mat-row>
+
+          </mat-table>
+
+          <mat-paginator #paginator [length]="tableSize" [pageIndex]="0" [pageSize]="10" [pageSizeOptions]="[5, 10, 25, 100]">
+          </mat-paginator>
+        </div>
+      </div>
+    </div>
+    <!-- / CONTENT CARD -->
+  </div>
+  <!-- / CENTER -->
 </div>
