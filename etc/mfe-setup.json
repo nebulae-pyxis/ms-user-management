@@ -1,0 +1,37 @@
+[
+    {
+        "name": "user-management",
+        "src": "frontend/emi/user-management",
+        "groups": [
+            {
+              "id": "GROUP_NAME",
+              "icon": "location_searching",
+              "translate": {
+                "en": "Group Name",
+                "es": "Nombre de Grupo"
+              },
+              "priority": 1000
+            }
+          ],
+        "contents": [
+            {
+                "groupId": "GROUP_NAME",
+                "id": "user-management",
+                "icon": "dashboard",
+                "translate": {
+                    "en": "user-management_en",
+                    "es": "user-management_es"
+                },
+                "navURL": "/user-management",
+                "path": "user-management",
+                "loadChildren": "./main/content/user-management/user-management.module#UserManagementModule",
+                "priority": 1000,
+                "roles" : ["developer"],
+                "default" : false
+            }            
+        ],
+        "preBuildCommands": [],
+        "environmentVars": {
+        }
+    }
+]
