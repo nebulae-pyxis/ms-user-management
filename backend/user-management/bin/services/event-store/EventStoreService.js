@@ -1,7 +1,7 @@
 "use strict";
 const Rx = require("rxjs");
 const eventSourcing = require("../../tools/EventSourcing")();
-const helloWorld = require("../../domain/HelloWorld")();
+const userEventConsumer = require("../../domain/UserEventConsumer")();
 
 /**
  * Singleton instance
@@ -115,13 +115,30 @@ class EventStoreService {
 
   generateFunctionMap() {
     return {
-
-      //Sample for handling event-sourcing events, please remove
-      HelloWorldEvent: {
-        fn: helloWorld.handleHelloWorld$,
-        obj: helloWorld
+      UserCreated:{
+        fn: userEventConsumer.handleUserCreated$,
+        obj: userEventConsumer 
       },
-
+      // UserGeneralInfoUpdated:{
+      //   fn: userEventConsumer.handleUserGeneralInfoUpdated$,
+      //   obj: userEventConsumer 
+      // },
+      // UserPasswordChanged:{
+      //   fn: userEventConsumer.handleUserPasswordChanged$,
+      //   obj: userEventConsumer 
+      // },
+      // UserRoleChanged:{
+      //   fn: userEventConsumer.handleUserRoleChanged$,
+      //   obj: userEventConsumer 
+      // },
+      // UserActivated:{
+      //   fn: userEventConsumer.handleUserState$,
+      //   obj: userEventConsumer 
+      // },
+      // UserDeactivated:{
+      //   fn: userEventConsumer.handleUserState$,
+      //   obj: userEventConsumer 
+      // }
     };
   }
 
@@ -130,13 +147,30 @@ class EventStoreService {
   */
   generateAggregateEventsArray() {
     return [
-
-      //Sample for assoc events and aggregates, please remove
       {
-        aggregateType: "HelloWorld",
-        eventType: "HelloWorldEvent"
+        aggregateType: "User",
+        eventType: "UserCreated"
       },
-
+      // {
+      //   aggregateType: "User",
+      //   eventType: "UserGeneralInfoUpdated"
+      // },
+      // {
+      //   aggregateType: "User",
+      //   eventType: "UserPasswordChanged"
+      // },
+      // {
+      //   aggregateType: "User",
+      //   eventType: "UserRoleChanged"
+      // },
+      // {
+      //   aggregateType: "User",
+      //   eventType: "UserActivated"
+      // },
+      // {
+      //   aggregateType: "User",
+      //   eventType: "UserPasswordChanged"
+      // }
     ]
   }
 }

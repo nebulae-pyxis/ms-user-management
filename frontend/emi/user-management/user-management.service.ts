@@ -16,6 +16,19 @@ export class UserManagementService {
   }
 
   /**
+   * Gets the users filtered according to the given parameters
+   * 
+   * @param pageValue
+   * @param countValue
+   * @param filterText
+   * @param sortColumn
+   * @param sortOrder
+   */
+  getUsers$(pageValue, countValue, filterText, sortColumn, sortOrder){
+    return Rx.Observable.of({});
+  }
+
+  /**
    * Hello World sample, please remove
    */
   getHelloWorld$() {

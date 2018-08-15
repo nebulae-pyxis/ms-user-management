@@ -1,108 +1,167 @@
 const withFilter = require("graphql-subscriptions").withFilter;
+const RoleValidator  = require("../../tools/RoleValidator");
+const { CustomError } = require("../../tools/customError");
 const PubSub = require("graphql-subscriptions").PubSub;
 const pubsub = new PubSub();
 const Rx = require("rxjs");
 const broker = require("../../broker/BrokerFactory")();
+const contextName = "User-Management";
+
+//Every single error code
+// please use the prefix assigned to this microservice
+const INTERNAL_SERVER_ERROR_CODE = 16001;
+const USERS_PERMISSION_DENIED_ERROR_CODE = 16002;
 
 function getResponseFromBackEnd$(response) {
-    return Rx.Observable.of(response)
-        .map(resp => {
-            if (resp.result.code != 200) {
-                const err = new Error();
-                err.name = 'Error';
-                err.message = resp.result.error;
-                // this[Symbol()] = resp.result.error;
-                Error.captureStackTrace(err, 'Error');
-                throw err;
-            }
-            return resp.data;
-        });
+  return Rx.Observable.of(response).map(resp => {
+    if (resp.result.code != 200) {
+      const err = new Error();
+      err.name = "Error";
+      err.message = resp.result.error;
+      Error.captureStackTrace(err, "Error");
+
+      throw err;
+    }
+    return resp.data;
+  });
 }
 
+/**
+ * Handles errors
+ * @param {*} err
+ * @param {*} operationName
+ */
+function handleError$(err, methodName) {
+  return Rx.Observable.of(err).map(err => {
+    const exception = { data: null, result: {} };
+    const isCustomError = err instanceof CustomError;
+    if (!isCustomError) {
+      err = new CustomError(
+        err.name,
+        methodName,
+        INTERNAL_SERVER_ERROR_CODE,
+        err.message
+      );
+    }
+    exception.result = {
+      code: err.code,
+      error: { ...err.getContent() }
+    };
+    return exception;
+  });
+}
 
 module.exports = {
+  //// QUERY ///////
 
-    //// QUERY ///////
-
-    Query: {
-        getHelloWorldFromUserManagement(root, args, context) {
-            return broker
-                .forwardAndGetReply$(
-                    "HelloWorld",
-                    "gateway.graphql.query.getHelloWorldFromUserManagement",
-                    { root, args, jwt: context.encodedToken },
-                    2000
-                )
-                .mergeMap(response => getResponseFromBackEnd$(response))
-                .toPromise();
-        }
+  Query: {
+    getUsers(root, args, context) {
+      return RoleValidator.checkPermissions$(
+        context.authToken.realm_access.roles,
+        contextName,
+        "getUsers",
+        USERS_PERMISSION_DENIED_ERROR_CODE,
+        "Permission denied",
+        ["business-admin"]
+      )
+        .mergeMap(response => {
+          return broker.forwardAndGetReply$(
+            "User",
+            "gateway.graphql.query.getUsers",
+            { root, args, jwt: context.encodedToken },
+            2000
+          );
+        })
+        .catch(err => handleError$(err, "getUsers"))
+        .mergeMap(response => getResponseFromBackEnd$(response))
+        .toPromise();
     },
-
-    //// MUTATIONS ///////
-
-
-    //// SUBSCRIPTIONS ///////
-    Subscription: {
-        UserManagementHelloWorldSubscription: {
-            subscribe: withFilter(
-                (payload, variables, context, info) => {
-                    return pubsub.asyncIterator("UserManagementHelloWorldSubscription");
-                },
-                (payload, variables, context, info) => {
-                    return true;
-                }
-            )
-        }
-
+    getUser(root, args, context) {
+      return RoleValidator.checkPermissions$(
+        context.authToken.realm_access.roles,
+        contextName,
+        "getUser",
+        USERS_PERMISSION_DENIED_ERROR_CODE,
+        "Permission denied",
+        ["business-admin"]
+      )
+        .mergeMap(response => {
+          return broker.forwardAndGetReply$(
+            "User",
+            "gateway.graphql.query.getUser",
+            { root, args, jwt: context.encodedToken },
+            2000
+          );
+        })
+        .catch(err => handleError$(err, "getUser"))
+        .mergeMap(response => getResponseFromBackEnd$(response))
+        .toPromise();
     }
+  },
+
+  //// MUTATIONS ///////
+
+  //// SUBSCRIPTIONS ///////
+  Subscription: {
+    UserUpdatedSubscription: {
+      subscribe: withFilter(
+        (payload, variables, context, info) => {
+          //Checks the roles of the user, if the user does not have at least one of the required roles, an error will be thrown
+          RoleValidator.checkAndThrowError(
+            context.authToken.realm_access.roles,
+            ["business-admin"],
+            contextName,
+            "UserUpdatedSubscription",
+            USERS_PERMISSION_DENIED_ERROR_CODE,
+            "Permission denied"
+          );
+          return pubsub.asyncIterator("UserUpdatedSubscription");
+        },
+        (payload, variables, context, info) => {
+          return true;
+        }
+      )
+    }
+  }
 };
-
-
 
 //// SUBSCRIPTIONS SOURCES ////
 
 const eventDescriptors = [
-    {
-        backendEventName: 'UserManagementHelloWorldEvent',
-        gqlSubscriptionName: 'UserManagementHelloWorldSubscription',
-        dataExtractor: (evt) => evt.data,// OPTIONAL, only use if needed
-        onError: (error, descriptor) => console.log(`Error processing ${descriptor.backendEventName}`),// OPTIONAL, only use if needed
-        onEvent: (evt, descriptor) => console.log(`Event of type  ${descriptor.backendEventName} arraived`),// OPTIONAL, only use if needed
-    },
+  {
+    backendEventName: "UserUpdatedSubscription",
+    gqlSubscriptionName: "UserUpdatedSubscription",
+    dataExtractor: evt => evt.data, // OPTIONAL, only use if needed
+    onError: (error, descriptor) =>
+      console.log(`Error processing ${descriptor.backendEventName}`), // OPTIONAL, only use if needed
+    onEvent: (evt, descriptor) =>
+      console.log(`Event of type  ${descriptor.backendEventName} arraived`) // OPTIONAL, only use if needed
+  }
 ];
-
 
 /**
  * Connects every backend event to the right GQL subscription
  */
 eventDescriptors.forEach(descriptor => {
-    broker
-        .getMaterializedViewsUpdates$([descriptor.backendEventName])
-        .subscribe(
-            evt => {
-                if (descriptor.onEvent) {
-                    descriptor.onEvent(evt, descriptor);
-                }
-                const payload = {};
-                payload[descriptor.gqlSubscriptionName] = descriptor.dataExtractor ? descriptor.dataExtractor(evt) : evt.data
-                pubsub.publish(descriptor.gqlSubscriptionName, payload);
-            },
+  broker.getMaterializedViewsUpdates$([descriptor.backendEventName]).subscribe(
+    evt => {
+      if (descriptor.onEvent) {
+        descriptor.onEvent(evt, descriptor);
+      }
+      const payload = {};
+      payload[descriptor.gqlSubscriptionName] = descriptor.dataExtractor
+        ? descriptor.dataExtractor(evt)
+        : evt.data;
+      pubsub.publish(descriptor.gqlSubscriptionName, payload);
+    },
 
-            error => {
-                if (descriptor.onError) {
-                    descriptor.onError(error, descriptor);
-                }
-                console.error(
-                    `Error listening ${descriptor.gqlSubscriptionName}`,
-                    error
-                );
-            },
+    error => {
+      if (descriptor.onError) {
+        descriptor.onError(error, descriptor);
+      }
+      console.error(`Error listening ${descriptor.gqlSubscriptionName}`, error);
+    },
 
-            () =>
-                console.log(
-                    `${descriptor.gqlSubscriptionName} listener STOPED`
-                )
-        );
+    () => console.log(`${descriptor.gqlSubscriptionName} listener STOPED`)
+  );
 });
-
-

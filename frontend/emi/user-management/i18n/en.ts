@@ -8,6 +8,11 @@ export const locale = {
       CC: 'Indetification card',
       TI: 'Identity card',
       DOC_ID: 'Document ID',
-      ACTIVE: 'Active'
+      ACTIVE: 'Active',
+      ADD_USER: 'Add user',
+      GENERAL_INFO: 'General info',
+      CREDENTIALS: 'Credencials',
+      ROLES: 'Roles',
+      SESSIONS: 'Sessions'
   }
 };

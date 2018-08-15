@@ -1,6 +1,6 @@
 "use strict";
 
-const helloWorld = require("../../domain/HelloWorld")();
+const user = require("../../domain/User")();
 const broker = require("../../tools/broker/BrokerFactory")();
 const Rx = require("rxjs");
 const jsonwebtoken = require("jsonwebtoken");
@@ -9,8 +9,6 @@ const jwtPublicKey = process.env.JWT_PUBLIC_KEY.replace(/\\n/g, "\n");
 let instance;
 
 class GraphQlService {
-
-
   constructor() {
     this.functionMap = this.generateFunctionMap();
     this.subscriptions = [];
@@ -20,13 +18,14 @@ class GraphQlService {
    * Starts GraphQL actions listener
    */
   start$() {
-    return Rx.Observable.from(this.getSubscriptionDescriptors())
-      .map(params => this.subscribeEventHandler(params));
+    return Rx.Observable.from(this.getSubscriptionDescriptors()).map(params =>
+      this.subscribeEventHandler(params)
+    );
   }
 
   /**
    * build a Broker listener to handle GraphQL requests procesor
-   * @param {*} descriptor 
+   * @param {*} descriptor
    */
   subscribeEventHandler({
     aggregateType,
@@ -46,15 +45,13 @@ class GraphQlService {
       })
       //ROUTE MESSAGE TO RESOLVER
       .mergeMap(({ authToken, message }) =>
-        handler.fn
-          .call(handler.obj, message.data, authToken)
-          .map(response => {
-            return {
-              response,
-              correlationId: message.id,
-              replyTo: message.attributes.replyTo
-            };
-          })
+        handler.fn.call(handler.obj, message.data, authToken).map(response => {
+          return {
+            response,
+            correlationId: message.id,
+            replyTo: message.attributes.replyTo
+          };
+        })
       )
       //send response back if neccesary
       .mergeMap(({ response, correlationId, replyTo }) => {
@@ -100,7 +97,6 @@ class GraphQlService {
   /////////////////// CONFIG SECTION, ASSOC EVENTS AND PROCESSORS BELOW  /////////////////
   ////////////////////////////////////////////////////////////////////////////////////////
 
-
   /**
    * returns an array of broker subscriptions for listening to GraphQL requests
    */
@@ -118,32 +114,97 @@ class GraphQlService {
     console.log("GraphQl Service starting ...");
 
     return [
-
-      //Sample incoming request, please remove
       {
-        aggregateType: "HelloWorld",
-        messageType: "gateway.graphql.query.getHelloWorldFromUserManagement",
+        aggregateType: "User",
+        messageType: "gateway.graphql.mutation.createUser",
         onErrorHandler,
         onCompleteHandler
-      },      
+      },
+      {
+        aggregateType: "User",
+        messageType: "gateway.graphql.mutation.updateUserGeneralInfo",
+        onErrorHandler,
+        onCompleteHandler
+      },
+      {
+        aggregateType: "User",
+        messageType: "gateway.graphql.mutation.updateUserState",
+        onErrorHandler,
+        onCompleteHandler
+      },
+      {
+        aggregateType: "User",
+        messageType: "gateway.graphql.mutation.changeUserPassword",
+        onErrorHandler,
+        onCompleteHandler
+      },
+      {
+        aggregateType: "User",
+        messageType: "gateway.graphql.mutation.changeUserRole",
+        onErrorHandler,
+        onCompleteHandler
+      },
+      {
+        aggregateType: "User",
+        messageType: "gateway.graphql.query.getUsers",
+        onErrorHandler,
+        onCompleteHandler
+      },
+      {
+        aggregateType: "User",
+        messageType: "gateway.graphql.query.getUser",
+        onErrorHandler,
+        onCompleteHandler
+      },
+      {
+        aggregateType: "User",
+        messageType: "gateway.graphql.query.getUserCount",
+        onErrorHandler,
+        onCompleteHandler
+      },
     ];
   }
 
   /**
    * returns a map that assocs GraphQL request with its processor
    */
-  generateFunctionMap() {    
+  generateFunctionMap() {
     return {
-      //Sample incoming request, please remove
-      "gateway.graphql.query.getHelloWorldFromUserManagement": {
-        fn: helloWorld.getHelloWorld$,
-        obj: helloWorld
-      },      
+      "gateway.graphql.mutation.createUser": {
+        fn: user.createUser$,
+        obj: user
+      },
+      "gateway.graphql.mutation.updateUserGeneralInfo": {
+        fn: user.updateUserGeneralInfo$,
+        obj: user
+      },
+      "gateway.graphql.mutation.updateUserState": {
+        fn: user.updateUserState$,
+        obj: user
+      },
+      'gateway.graphql.mutation.changeUserPassword': {
+        fn: user.changeUserPassword$,
+        obj: user
+      },
+      'gateway.graphql.mutation.changeUserRole': {
+        fn: user.changeUserRole$,
+        obj: user
+      },
+      'gateway.graphql.query.getUserCount': {
+        fn: user.getUserCount$,
+        obj: user
+      },
+      'gateway.graphql.query.getUsers': {
+        fn: user.getUsers$,
+        obj: user
+      },
+      'gateway.graphql.query.getUser': {
+        fn: user.getUser$,
+        obj: user
+      }
     };
   }
-
 }
-
 
 module.exports = () => {
   if (!instance) {

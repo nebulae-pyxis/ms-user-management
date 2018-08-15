@@ -6,11 +6,20 @@ import { FuseWidgetModule } from '../../../core/components/widget/widget.module'
 
 import { UserManagementService } from './user-management.service';
 import { UserManagementComponent } from './user-management.component';
+import { UserFormComponent } from './user-form/user-form.component';
+import { UserCredentialsComponent } from './user-form/user-credentials/user-credentials.component';
+import { UserGeneralInfoComponent } from './user-form/user-general-info/user-general-info.component';
+import { UserRoleComponent } from './user-form/user-role/user-role.component';
+import { UserSesionsComponent } from './user-form/user-sesions/user-sesions.component';
 
 const routes: Routes = [
   {
     path: '',
     component: UserManagementComponent,
+  },
+  {
+    path: 'user/:username',
+    component: UserFormComponent,
   }
 ];
 
@@ -21,7 +30,12 @@ const routes: Routes = [
     FuseWidgetModule
   ],
   declarations: [
-    UserManagementComponent    
+    UserManagementComponent,
+    UserFormComponent,
+    UserCredentialsComponent,
+    UserGeneralInfoComponent,
+    UserRoleComponent,
+    UserSesionsComponent    
   ],
   providers: [ UserManagementService, DatePipe]
 })

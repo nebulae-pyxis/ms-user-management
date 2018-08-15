@@ -1,15 +1,92 @@
-"Hello world sample, please remove"
-type HelloWorldUserManagement{
-  "text"
-  sn: String!  
+enum DocumentType {
+  CITIZENSHIP_CARD
+  PASSPORT
+  FORNEIGNER_ID
+}
+
+"User type"
+type User {
+  "User ID"
+  id: ID!
+  "Username"
+  username: String!
+  "Name"
+  name: String
+  "Lastname"
+  lastname: String
+  "Document type"
+  documentType: DocumentType
+  "Document ID"
+  documentId: String
+  "Email"
+  email: String
+  "Phone"
+  phone: String
+  "User state"
+  state: Boolean!
+}
+
+type Role {
+  "Role ID"
+  id: String!
+  "Role name"
+  name: String!  
+}
+
+input UserInput {
+  "Username"
+  username: String!
+  "Name"
+  name: String!
+  "Lastname"
+  lastname: String!
+  "Docuemnt type"
+  documentType: String
+  "Document ID"
+  documentId: String
+  "Email"
+  email: String
+  "Phone"
+  phone: String
+}
+
+input RoleInput {
+  "Role Name"
+  name: String!
+}
+
+type CommandResponse {
+  "Response code"
+  code: Int
+  "Response message"
+  message: String
 }
 
 type Query {
-  "Hello world sample, please remove"
-  getHelloWorldFromUserManagement: HelloWorldUserManagement
+  "Gets the users "
+  getUsers(page: Int!, count: Int!, searchFilter: String!): [User]
+  "Gets a user by its username"
+  getUser(username: String!): User
+  "Gets the user roles"
+  getUserRoles(username: String!): Role
+}
+
+type Mutation {
+  "Create a new user"
+  createUser(input: UserInput): CommandResponse
+  "Updates the user according to the ID"
+  updateUserGeneralInfo(userId: ID, input: UserInput): CommandResponse
+  # "Changes user password"
+  # changeUserPassword(userId: ID): CommandResponse
+  "Adds the role to the user"
+  addUserRole(userId: ID, input: RoleInput): CommandResponse
+  "Removes the role from the user"
+  removeUserRole(userId: ID, input: RoleInput): CommandResponse
+  "Updates the user state"
+  updateUserState(userId: ID, state: Boolean!): CommandResponse
 }
 
 type Subscription {
-  "Hello world sample, please remove"
-  UserManagementHelloWorldSubscription: HelloWorldUserManagement  
+  "This events is triggered when a user is created or updated"
+  UserUpdatedSubscription: User
 }

@@ -9,7 +9,12 @@ export const locale = {
       CC: 'Cédula',
       TI: 'Tarjeta de identidad',
       DOC_ID: 'ID documento',
-      ACTIVE: 'Activo'
+      ACTIVE: 'Activo',
+      ADD_USER: 'Agregar usuario',
+      GENERAL_INFO: 'Información general',
+      CREDENTIALS: 'Credenciales',
+      ROLES: 'Roles',
+      SESSIONS: 'Sesiones'
     }
   }
 };

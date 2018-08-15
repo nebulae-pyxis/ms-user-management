@@ -29,7 +29,9 @@
       </div>
       <!-- / SEARCH -->
 
-      <button mat-raised-button (click)="addNewUser()" class="add-product-button mat-white-bg my-12 mt-sm-0">
+      <button mat-raised-button 
+      
+      class="add-product-button mat-white-bg my-12 mt-sm-0" [routerLink]="'user/esteban.zapata'">
         <span>{{'USER.ADD_USER' | translate}}</span>
       </button>
     </div>
@@ -43,7 +45,7 @@
           <mat-table class="user-table" #table (matSortChange)="sortData($event)" [dataSource]="dataSource" matSort [@animateStagger]="{value:'50'}"
             fusePerfectScrollbar>
 
-            <!-- ID Column -->
+            <!-- Username Column -->
             <ng-container cdkColumnDef="username">
               <mat-header-cell mat-sort-header="username" *cdkHeaderCellDef>{{'USER.USERNAME' | translate}}</mat-header-cell>
               <mat-cell *cdkCellDef="let user">
@@ -88,8 +90,11 @@
 
             <mat-header-row *cdkHeaderRowDef="displayedColumns"></mat-header-row>
 
-            <mat-row *cdkRowDef="let user; columns: displayedColumns;" (click)="selectRow(user)" class="product" [ngClass]="{'highlight': selectedUser && selectedUser.generalInfo.username == user.generalInfo.username}"
+            <!-- <mat-row *cdkRowDef="let user; columns: displayedColumns;" (click)="selectRow(user)" class="product" [ngClass]="{'highlight': selectedUser && selectedUser.generalInfo.username == user.generalInfo.username}"
               matRipple>
+            </mat-row> -->
+
+            <mat-row *cdkRowDef="let user; columns: displayedColumns;" class="product" matRipple [routerLink]="'user/'+user.generalInfo.username">
             </mat-row>
 
           </mat-table>
