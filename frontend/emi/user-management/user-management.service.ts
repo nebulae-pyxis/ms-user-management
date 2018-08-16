@@ -1,10 +1,10 @@
+import { query } from '@angular/animations';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
 import * as Rx from 'rxjs';
 import { GatewayService } from '../../../api/gateway.service';
 import {
-  getHelloWorld,
-  UserManagementHelloWorldSubscription
+  getUsers
 } from './gql/UserManagement';
 
 @Injectable()
@@ -15,42 +15,35 @@ export class UserManagementService {
 
   }
 
-  /**
-   * Gets the users filtered according to the given parameters
-   * 
-   * @param pageValue
-   * @param countValue
-   * @param filterText
-   * @param sortColumn
-   * @param sortOrder
-   */
-  getUsers$(pageValue, countValue, filterText, sortColumn, sortOrder){
-    return Rx.Observable.of({});
-  }
-
-  /**
-   * Hello World sample, please remove
-   */
-  getHelloWorld$() {
+/**
+ * Gets the users
+ * @param pageValue
+ * @param countValue
+ * @param searchFilter
+ */
+  getUsers$(pageValue, countValue, searchFilter){
     return this.gateway.apollo
-      .watchQuery<any>({
-        query: getHelloWorld,
-        fetchPolicy: "network-only"
-      })
-      .valueChanges.map(
-        resp => resp.data.getHelloWorldFromUserManagement.sn
-      );
+    .query<any>({
+      query: getUsers,
+      variables: {
+        page: pageValue,
+        count: countValue,
+        searchFilter: searchFilter
+      },
+      fetchPolicy: 'network-only',
+      errorPolicy: 'all'
+    });
   }
 
-  /**
-  * Hello World subscription sample, please remove
-  */
- getEventSourcingMonitorHelloWorldSubscription$(): Observable<any> {
-  return this.gateway.apollo
-    .subscribe({
-      query: UserManagementHelloWorldSubscription
-    })
-    .map(resp => resp.data.EventSourcingMonitorHelloWorldSubscription.sn);
-}
+//   /**
+//   * Hello World subscription sample, please remove
+//   */
+//  getEventSourcingMonitorHelloWorldSubscription$(): Observable<any> {
+//   return this.gateway.apollo
+//     .subscribe({
+//       query: UserManagementHelloWorldSubscription
+//     })
+//     .map(resp => resp.data.EventSourcingMonitorHelloWorldSubscription.sn);
+// }
 
 }

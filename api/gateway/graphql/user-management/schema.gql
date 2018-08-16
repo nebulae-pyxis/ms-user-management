@@ -1,7 +1,7 @@
 enum DocumentType {
   CITIZENSHIP_CARD
   PASSPORT
-  FORNEIGNER_ID
+  FOREIGNER_ID
 }
 
 "User type"
@@ -10,6 +10,14 @@ type User {
   id: ID!
   "Username"
   username: String!
+  "User general info"
+  generalInfo: UserGeneralInfo
+  "User state"
+  state: Boolean!
+}
+
+"user general info"
+type UserGeneralInfo {
   "Name"
   name: String
   "Lastname"
@@ -22,8 +30,6 @@ type User {
   email: String
   "Phone"
   phone: String
-  "User state"
-  state: Boolean!
 }
 
 type Role {
@@ -64,7 +70,7 @@ type CommandResponse {
 
 type Query {
   "Gets the users "
-  getUsers(page: Int!, count: Int!, searchFilter: String!): [User]
+  getUsers(page: Int!, count: Int!, searchFilter: String): [User]
   "Gets a user by its username"
   getUser(username: String!): User
   "Gets the user roles"

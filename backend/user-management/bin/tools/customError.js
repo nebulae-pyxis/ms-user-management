@@ -26,7 +26,7 @@ class CustomError extends Error {
 
   class DefaultError extends Error{
     constructor(anyError){
-      super(anyError.message)
+      super(anyError ? anyError.message: 'Unknown')
       this.code = INTERNAL_SERVER_ERROR_CODE;
       this.name = anyError.name;
       this.msg = anyError.message;

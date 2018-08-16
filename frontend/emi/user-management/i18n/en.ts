@@ -13,6 +13,23 @@ export const locale = {
       GENERAL_INFO: 'General info',
       CREDENTIALS: 'Credencials',
       ROLES: 'Roles',
-      SESSIONS: 'Sessions'
+      SESSIONS: 'Sessions',
+      FULLNAME: 'Full name',
+      FOREIGNER_ID: 'Foreigner ID',
+      CITIZENSHIP_CARD: 'Citizenship card',
+      PASSPORT: 'Passport',
+      NEW_USER: 'Nwe user',
+      USER_DETAIL: 'User detail',
+      NAME: 'Name',
+      LASTNAME: 'Last name',
+      DOCUMENT_TYPE: 'Document type',
+      DOCUMENT_ID: 'Document ID',
+      EMAIL: 'Email',
+      PHONE: 'Phone',
+      STATE: 'State',
+      USER_ENABLED: 'User enabled',
+      USER_DISABLED: 'User disabled',
+      SAVE: 'Save',
+      CREATE: 'Create'
   }
 };

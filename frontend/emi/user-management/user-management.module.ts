@@ -4,6 +4,7 @@ import { SharedModule } from '../../../core/modules/shared.module';
 import { DatePipe } from '@angular/common';
 import { FuseWidgetModule } from '../../../core/components/widget/widget.module';
 
+import { MatPaginatorIntl } from '@angular/material';
 import { UserManagementService } from './user-management.service';
 import { UserManagementComponent } from './user-management.component';
 import { UserFormComponent } from './user-form/user-form.component';
@@ -11,6 +12,8 @@ import { UserCredentialsComponent } from './user-form/user-credentials/user-cred
 import { UserGeneralInfoComponent } from './user-form/user-general-info/user-general-info.component';
 import { UserRoleComponent } from './user-form/user-role/user-role.component';
 import { UserSesionsComponent } from './user-form/user-sesions/user-sesions.component';
+import { CustomTest } from './utils/custom-test';
+import { UserFormService } from './user-form/user-form.service';
 
 const routes: Routes = [
   {
@@ -20,6 +23,9 @@ const routes: Routes = [
   {
     path: 'user/:username',
     component: UserFormComponent,
+    resolve: {
+      data: UserFormService
+    }
   }
 ];
 
@@ -35,9 +41,9 @@ const routes: Routes = [
     UserCredentialsComponent,
     UserGeneralInfoComponent,
     UserRoleComponent,
-    UserSesionsComponent    
+    UserSesionsComponent
   ],
-  providers: [ UserManagementService, DatePipe]
+  providers: [ UserManagementService, DatePipe, UserFormService]
 })
 
 export class UserManagementModule {}

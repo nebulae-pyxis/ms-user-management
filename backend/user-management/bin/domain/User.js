@@ -12,7 +12,7 @@ const { CustomError, DefaultError } = require("../tools/customError");
 const {
   USER_MISSING_DATA_ERROR_CODE,
   USER_NAME_EXISTS_ERROR_CODE,
-  USER_PERMISSION_DENIED_ERROR_CODE
+  PERMISSION_DENIED_ERROR_CODE
 } = require("../tools/ErrorCodes");
 
 /**
@@ -24,43 +24,18 @@ class User {
   constructor() {}
 
   /**
-   * Gets the user according to the ID passed by args.
-   *
-   * @param {*} args args that contain the user ID
-   * @param {string} jwt JWT token
-   * @param {string} fieldASTs indicates the user attributes that will be returned
-   */
-  getUser$({ args, jwt, fieldASTs }, authToken) {
-    return RoleValidator.checkPermissions$(
-      authToken.realm_access.roles,
-      "UserManagement",
-      "changeUserState$()",
-      USER_PERMISSION_DENIED_ERROR_CODE,
-      "Permission denied",
-      ["business-admin"]
-    )
-      .mergeMap(val => {
-        return UserKeycloakDA.getUser$(args.id);
-      })
-      .mergeMap(rawResponse => this.buildSuccessResponse$(rawResponse))
-      .catch(err => {
-        return this.handleError$(err);
-      });
-  }
-
-  /**
    * Gets the useres filtered by page, count, textFilter, order and column
    *
    * @param {*} args args that contain the user filters
    */
   getUsers$({ args }, authToken) {
     // const requestedFields = this.getProjection(fieldASTs);
-    console.log("AuthToken ==> ", authToken);
+    //console.log("AuthToken ==> ", authToken);
     return RoleValidator.checkPermissions$(
       authToken.realm_access.roles,
       "UserManagement",
       "getUsers$()",
-      USER_PERMISSION_DENIED_ERROR_CODE,
+      PERMISSION_DENIED_ERROR_CODE,
       "Permission denied",
       ["business-admin"]
     )
@@ -79,6 +54,31 @@ class User {
   }
 
   /**
+   * Gets an user by its username
+   *
+   * @param {*} args args that contain the username of the user to query
+   * @param {string} jwt JWT token
+   * @param {string} fieldASTs indicates the user attributes that will be returned
+   */
+  getUser$({ args, jwt, fieldASTs }, authToken) {
+    return RoleValidator.checkPermissions$(
+      authToken.realm_access.roles,
+      "UserManagement",
+      "getUser$()",
+      PERMISSION_DENIED_ERROR_CODE,
+      "Permission denied",
+      ["business-admin"]
+    )
+      .mergeMap(val => {
+        return UserKeycloakDA.getUser$(args.username, authToken.businessId);
+      })
+      .mergeMap(rawResponse => this.buildSuccessResponse$(rawResponse))
+      .catch(err => {
+        return this.handleError$(err);
+      });
+  }
+
+  /**
    * Get the amount of rows from the user collection
    */
   getUserCount$(data, authToken) {
@@ -86,7 +86,7 @@ class User {
       authToken.realm_access.roles,
       "UserManagement",
       "changeUserState$()",
-      USER_PERMISSION_DENIED_ERROR_CODE,
+      PERMISSION_DENIED_ERROR_CODE,
       "Permission denied",
       ["business-admin"]
     )
@@ -122,11 +122,11 @@ class User {
       authToken.realm_access.roles,
       "UserManagement",
       "createUser$()",
-      USER_PERMISSION_DENIED_ERROR_CODE,
+      PERMISSION_DENIED_ERROR_CODE,
       "Permission denied"
     )
       .mergeMap(val => {
-        return UserKeycloakDA.findUserName$(
+        return UserKeycloakDA.getUser$(
           null,
           user.generalInfo.name
         ).mergeMap(count => {
@@ -196,7 +196,7 @@ class User {
       authToken.realm_access.roles,
       "UserManagement",
       "updateUserGeneralInfo$()",
-      USER_PERMISSION_DENIED_ERROR_CODE,
+      PERMISSION_DENIED_ERROR_CODE,
       "Permission denied",
       ["business-admin"]
     )
@@ -269,7 +269,7 @@ class User {
       authToken.realm_access.roles,
       "UserManagement",
       "updateUserGeneralInfo$()",
-      USER_PERMISSION_DENIED_ERROR_CODE,
+      PERMISSION_DENIED_ERROR_CODE,
       "Permission denied",
       ["business-admin"]
     )
@@ -342,7 +342,7 @@ class User {
       authToken.realm_access.roles,
       "UserManagement",
       "updateUserGeneralInfo$()",
-      USER_PERMISSION_DENIED_ERROR_CODE,
+      PERMISSION_DENIED_ERROR_CODE,
       "Permission denied",
       ["business-admin"]
     )
@@ -407,7 +407,7 @@ class User {
       authToken.realm_access.roles,
       "UserManagement",
       "changeUserState$()",
-      USER_PERMISSION_DENIED_ERROR_CODE,
+      PERMISSION_DENIED_ERROR_CODE,
       "Permission denied",
       ["business-admin"]
     )
@@ -440,6 +440,7 @@ class User {
       const exception = { data: null, result: {} };
       const isCustomError = err instanceof CustomError;
       if (!isCustomError) {
+        console.log('ERROR HANDLE ==> ',err);
         err = new DefaultError(err);
       }
       exception.result = {

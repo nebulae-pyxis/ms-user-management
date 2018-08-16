@@ -14,7 +14,24 @@ export const locale = {
       GENERAL_INFO: 'Información general',
       CREDENTIALS: 'Credenciales',
       ROLES: 'Roles',
-      SESSIONS: 'Sesiones'
+      SESSIONS: 'Sesiones',
+      FULLNAME: 'Nombre completo',
+      FOREIGNER_ID: 'Cédula de extranjería',
+      CITIZENSHIP_CARD: 'Cédula de ciudadanía',
+      PASSPORT: 'Pasaporte',
+      NEW_USER: 'Nuevo usuario',
+      USER_DETAIL: 'Detalle de usuario',
+      NAME: 'Nombre',
+      LASTNAME: 'Apellido',
+      DOCUMENT_TYPE: 'Tipo documento',
+      DOCUMENT_ID: 'ID documento',
+      EMAIL: 'Email',
+      PHONE: 'Teléfono',
+      STATE: 'Estado',
+      USER_ENABLED: 'Usuario habilitado',
+      USER_DISABLED: 'Usuario inhabilitado',
+      SAVE: 'Guardar',
+      CREATE: 'Crear'
     }
   }
 };

@@ -11,19 +11,24 @@
     <div class="header white-fg" fxLayout="row" fxLayoutAlign="space-between center">
 
       <!-- APP TITLE -->
-      <div *ngIf="user" fxLayout="row" fxLayoutAlign="start center">
+      <div fxLayout="row" fxLayoutAlign="start center">
 
         <button class="mr-0 mr-sm-16" mat-icon-button [routerLink]="'/user-management'">
           <mat-icon>arrow_back</mat-icon>
         </button>
 
-        <div fxLayout="column" fxLayoutAlign="start start" *fuseIfOnDom [@animate]="{value:'*',params:{delay:'100ms',x:'-25px'}}">
-          <div class="h2">
-            EXAMPLE
+        <div fxLayout="column" fxLayoutAlign="start start" *fuseIfOnDom>
+
+          <div class="h2" *ngIf="user.id">
+            {{user.username}}
+          </div>
+
+          <div class="h2" *ngIf="!user.id">
+            {{'USER.NEW_USER' | translate}}
           </div>
 
           <div class="subtitle secondary-text">
-            <span>ID</span>
+            <span>{{'USER.USER_DETAIL' | translate}}</span>
           </div>
         </div>
       </div>
@@ -36,24 +41,102 @@
       <mat-tab-group>
 
         <mat-tab label="{{'USER.GENERAL_INFO' | translate}}">
-          <div class="tab-content p-24" fusePerfectScrollbar>
-            <!--app-device-state deviceValue="{{deviceVal}}"></app-device-state-->
+          
+          <div class="tab-content p-24" fxLayout="column" fusePerfectScrollbar>
+
+              
+
+            <form name="userGeneralInfoForm" [formGroup]="userGeneralInfoForm" class="user w-100-p" fxLayout="column" class="mat-white-bg mat-elevation-z4 p-24 mr-24 mb-24">
+
+              <div fxLayout="row">
+                  <div fxFlex="80" fxLayoutAlign="start start" class="h2">{{'USER.GENERAL_INFO' | translate}}</div>  
+                  
+                  <form fxFlex="20" fxLayoutAlign="end start" name="userStateForm" [formGroup]="userStateForm" class="user" fxLayout="column">
+                      <!--mat-checkbox formControlName="state" [(ngModel)]="user.state">{{'USER.USER_ENABLED' | translate}}</mat-checkbox-->
+                    <mat-slide-toggle
+                      formControlName="state"
+                      color="accent"
+                      [(ngModel)]="user.state">    
+                      <label *ngIf="user.state">{{'USER.USER_ENABLED' | translate}}</label>
+                      <label *ngIf="!user.state">{{'USER.USER_DISABLED' | translate}}</label>                  
+                    </mat-slide-toggle>
+                  </form>
+              </div>
+              
+
+              <mat-form-field class="w-100-p">
+                <input matInput name="username" formControlName="username" placeholder="{{'USER.USERNAME' | translate}}">
+                <mat-error *ngIf="userGeneralInfoForm.hasError('required', 'username')">
+                  {{'USER.USERNAME_REQUIRED' | translate}}
+                </mat-error>
+              </mat-form-field>
+
+              <mat-form-field class="w-100-p">
+                <input matInput name="name" formControlName="name" placeholder="{{'USER.NAME' | translate}}">
+                <mat-error *ngIf="userGeneralInfoForm.hasError('required', 'name')">
+                  {{'USER.NAME_REQUIRED' | translate}}
+                </mat-error>
+              </mat-form-field>
+
+              <mat-form-field class="w-100-p">
+                <input matInput name="lastname" formControlName="lastname" placeholder="{{'USER.LASTNAME' | translate}}">
+                <mat-error *ngIf="userGeneralInfoForm.hasError('required', 'lastname')">
+                  {{'USER.LASTNAME_REQUIRED' | translate}}
+                </mat-error>
+              </mat-form-field>
+
+              <mat-form-field class="w-100-p">
+                <mat-select placeholder="{{'USER.DOCUMENT_TYPE' | translate}}" [(value)]="user.generalInfo.documentType">
+                  <mat-option value="CITIZENSHIP_CARD">{{ 'USER.CITIZENSHIP_CARD' | translate }}</mat-option>
+                  <mat-option value="FOREIGNER_ID">{{ 'USER.FOREIGNER_ID' | translate }}</mat-option>
+                  <mat-option value="PASSPORT">{{ 'USER.PASSPORT' | translate }}</mat-option>
+                </mat-select>
+                <mat-error *ngIf="userGeneralInfoForm.hasError('required', 'documentType')">
+                  {{'USER.DOCUMENT_TYPE_REQUIRED' | translate}}
+                </mat-error>
+              </mat-form-field>
+
+              <mat-form-field class="w-100-p">
+                <input matInput name="documentId" formControlName="documentId" placeholder="{{'USER.DOCUMENT_ID' | translate}}">
+                <mat-error *ngIf="userGeneralInfoForm.hasError('required', 'documentId')">
+                  {{'USER.DOCUMENT_ID_REQUIRED' | translate}}
+                </mat-error>
+              </mat-form-field>
+
+              <mat-form-field class="w-100-p">
+                <input matInput name="email" formControlName="email" placeholder="{{'USER.EMAIL' | translate}}">
+                <mat-error *ngIf="userGeneralInfoForm.hasError('required', 'documentType')">
+                  {{'USER.DOCUMENT_TYPE_REQUIRED' | translate}}
+                </mat-error>
+              </mat-form-field>
+
+              <mat-form-field class="w-100-p">
+                <input matInput name="phone" formControlName="phone" placeholder="{{'USER.PHONE' | translate}}">
+              </mat-form-field>
+
+              <div class="mt-16">
+                  <button mat-raised-button *ngIf="!user.id" (click)="createUser()" [disabled]="userGeneralInfoForm.invalid || userGeneralInfoForm.pristine">{{'USER.CREATE' | translate}}</button>
+                  <button mat-raised-button *ngIf="user.id" (click)="updateUserGeneralInfo()" [disabled]="userGeneralInfoForm.invalid || userGeneralInfoForm.pristine">{{'USER.SAVE' | translate}}</button>
+              </div>
+
+            </form>
+
           </div>
         </mat-tab>
 
-        <mat-tab label="{{'USER.CREDENTIALS' | translate}}">
+        <mat-tab label="{{'USER.CREDENTIALS' | translate}}" *ngIf="user.id">
           <div class="tab-content p-24" fusePerfectScrollbar>
             <!--app-device-network deviceValue="{{deviceVal}}"></app-device-network-->
           </div>
         </mat-tab>
 
-        <mat-tab label="{{'USER.ROLES' | translate}}">
+        <mat-tab label="{{'USER.ROLES' | translate}}" *ngIf="user.id">
           <div class="tab-content p-24" fusePerfectScrollbar>
             <!--app-device-network deviceValue="{{deviceVal}}"></app-device-network-->
           </div>
         </mat-tab>
 
-        <mat-tab label="{{'USER.SESSIONS' | translate}}">
+        <mat-tab label="{{'USER.SESSIONS' | translate}}" *ngIf="user.id">
           <div class="tab-content p-24" fusePerfectScrollbar>
             <!--app-device-network deviceValue="{{deviceVal}}"></app-device-network-->
           </div>

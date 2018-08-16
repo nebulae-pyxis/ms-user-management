@@ -21,8 +21,8 @@ import {
   MatTableDataSource,
   MatDialog,
   MatSnackBar
-} from "@angular/material";
-import { fuseAnimations } from "../../../core/animations";
+} from '@angular/material';
+import { fuseAnimations } from '../../../core/animations';
 
 //////////// RXJS ////////////
 import * as Rx from "rxjs/Rx";
@@ -45,24 +45,24 @@ import { Subscription } from "rxjs/Subscription";
   animations: fuseAnimations
 })
 export class UserManagementComponent implements OnInit, OnDestroy {
-  //Rxjs subscriptions
+  // Rxjs subscriptions
   subscriptions = [];
-  //Table data
+  // Table data
   dataSource = new MatTableDataSource();
-  //Columns to show in the table
-  displayedColumns = ["username", "doc_type", "doc_id", "state"];
+  // Columns to show in the table
+  displayedColumns = ['username', 'fullname', 'doc_type', 'doc_id', 'state'];
 
-  //Table values
+  // Table values
   @ViewChild(MatPaginator) paginator: MatPaginator;
-  @ViewChild("filter") filter: ElementRef;
+  @ViewChild('filter') filter: ElementRef;
   @ViewChild(MatSort) sort: MatSort;
   tableSize: number;
   page = 0;
   count = 10;
-  filterText = "";
+  searchFilter = '';
   sortColumn = null;
   sortOrder = null;
-  itemPerPage = "";
+  itemPerPage = '';
 
   selectedUser: any;
 
@@ -72,22 +72,20 @@ export class UserManagementComponent implements OnInit, OnDestroy {
     private translate: TranslateService,
     private dialog: MatDialog,
     private snackBar: MatSnackBar
-  ) {    
+  ) {
     this.translationLoader.loadTranslations(english, spanish);
   }
-    
+
 
   ngOnInit() {
     // this.helloWorldLabelQuery$ = this.UserManagementervice.getHelloWorld$();
     // this.helloWorldLabelSubscription$ = this.UserManagementervice.getEventSourcingMonitorHelloWorldSubscription$();
-    
-    //Refresh the business table
+
+    // Refresh the users table
     this.refreshDataTable(
       this.page,
       this.count,
-      this.filterText,
-      this.sortColumn,
-      this.sortOrder
+      this.searchFilter
     );
   }
 
@@ -95,24 +93,24 @@ export class UserManagementComponent implements OnInit, OnDestroy {
    * Finds the users and updates the table data
    * @param page page number
    * @param count Limits the number of documents in the result set
-   * @param filterText Filter text
-   * @param sortColumn Orders the documents by the specified column
-   * @param sortOrder Orders the documents in the result set
+   * @param searchFilter Search filter
    */
-  refreshDataTable(page, count, filterText, sortColumn, sortOrder) {
+  refreshDataTable(page, count, searchFilter) {
     this.userManagementService
-      .getUsers$(page, count, filterText, sortColumn, sortOrder)
+      .getUsers$(page, count, searchFilter)
       .pipe(
         mergeMap(resp => this.graphQlAlarmsErrorHandler$(resp)),
         filter((resp: any) => !resp.errors || resp.errors.length === 0),
       ).subscribe(model => {
+        console.log('Refresh table ==> ', model);
+
         this.dataSource.data = model.data.getUsers;
       });
   }
 
   /**
    * Handles the Graphql errors and show a message to the user
-   * @param response 
+   * @param response
    */
   graphQlAlarmsErrorHandler$(response){
     return Rx.Observable.of(JSON.parse(JSON.stringify(response)))
@@ -128,7 +126,7 @@ export class UserManagementComponent implements OnInit, OnDestroy {
    * Shows an error snackbar
    * @param response
    */
-  showSnackBarError(response){    
+  showSnackBarError(response){
     if (response.errors){
 
       if (Array.isArray(response.errors)) {
@@ -173,7 +171,7 @@ export class UserManagementComponent implements OnInit, OnDestroy {
       );
     });
   }
-  
+
   ngOnDestroy() {
     if (this.subscriptions) {
       this.subscriptions.forEach(sub => {
