@@ -30,6 +30,16 @@ export const locale = {
       USER_ENABLED: 'User enabled',
       USER_DISABLED: 'User disabled',
       SAVE: 'Save',
-      CREATE: 'Create'
+      CREATE: 'Create',
+      NEW_PASSWORD: 'New password',
+      PASSWORD_CONFIRMATION: 'Confirm new password',
+      TEMPORARY: 'Temporary',
+      RESET_CREDENTIALS: 'Reset password'
+  },
+  ERRORS: {
+    15001: 'Internal server error',
+    15002: 'Permission denied',
+    15010: 'User missing data',
+    15011: 'User name or email already exists'
   }
 };

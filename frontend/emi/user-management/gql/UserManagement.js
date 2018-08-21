@@ -50,3 +50,29 @@ export const createUser = gql`
   }
 `;
 
+export const updateUserGeneralInfo = gql`
+  mutation updateUserGeneralInfo($userId: ID,$input: UserInput) {
+    updateUserGeneralInfo(userId: $userId, input: $input) {
+      code
+      message
+    }
+  }
+`;
+
+export const updateUserState = gql`
+  mutation updateUserState($userId: ID!, $username: String!, $state: Boolean!) {
+    updateUserState(userId: $userId, username: $username, state: $state) {
+      code
+      message
+    }
+  }
+`;
+
+export const resetUserPassword = gql`
+  mutation resetUserPassword($userId: ID!, $input: UserPasswordInput) {
+    resetUserPassword(userId: $userId, input: $userPasswordInput) {
+      code
+      message
+    }
+  }
+`;

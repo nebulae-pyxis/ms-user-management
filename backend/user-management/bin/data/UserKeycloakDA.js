@@ -5,30 +5,108 @@ const KeycloakDA = require("./KeycloakDA").singleton();
 
 class UserKeycloakDA {
 
-  // static getUsersFilter(){
-  //   return Rx.Observable.defer(() =>
-  //   KeycloakDA.keycloakClient.users.count(
-  //     process.env.KEYCLOAK_USERS_REALM_NAME
-  //   )
-  // )
-  //   //According to the amount of user, it generates ranges which will help us to get the users by batches
-  //   .mergeMap(usersCount =>
-  //     Rx.Observable.range(0, Math.ceil(usersCount / paginationCount))
-  //   )
-  //   //Gets the users from Keycloak
-  //   .concatMap(page => {
-  //     const optionsFilter = {
-  //       first: 100 * page,
-  //       max: paginationCount,
-  //       search: searchFilter,
-  //       username: username
-  //     };
-  //     return KeycloakDA.keycloakClient.users.find(
-  //       process.env.KEYCLOAK_USERS_REALM_NAME,
-  //       optionsFilter
-  //     );
-  //   })
-  // }
+ /**
+   * Creates a new user
+   * @param {*} user user to create
+   */
+  static createUser$(user) {
+    console.log('Creating user DA ==> ', user);
+    const attributes = {};
+    attributes['documentType'] = user.documentType;
+    attributes['documentId'] = user.documentId;
+    attributes['phone'] = user.phone;
+    attributes['businessId'] = user.businessId;
+
+    const userKeycloak = {
+      username: user.username,
+      firstName: user.name,
+      lastName: user.lastname,
+      attributes: attributes,
+      email: user.email,
+      enabled: user.state,
+      id: user.id
+    };
+
+    return Rx.Observable.defer(() =>
+        KeycloakDA.keycloakClient.users.create(
+          process.env.KEYCLOAK_USERS_REALM_NAME,
+          userKeycloak
+        )
+    );
+  }
+
+   /**
+   * Updates the user
+   * @param {*} userId User ID
+   * @param {*} user user to updated
+   */
+  static updateUserGeneralInfo$(userId, user) {
+    console.log('Updating user DA ==> ', user);
+
+
+    const attributes = {};
+    attributes['documentType'] = user.generalInfo.documentType;
+    attributes['documentId'] = user.generalInfo.documentId;
+    attributes['phone'] = user.generalInfo.phone;
+    attributes['businessId'] = user.businessId;    
+
+    const userKeycloak = {
+      id: userId,
+      username: user.username,
+      firstName: user.generalInfo.name,
+      lastName: user.generalInfo.lastname,
+      attributes: attributes,
+      email: user.generalInfo.email,
+    };
+
+    return Rx.Observable.defer(() =>
+        KeycloakDA.keycloakClient.users.update(
+          process.env.KEYCLOAK_USERS_REALM_NAME,
+          userKeycloak
+        )
+    );
+  }
+
+  /**
+   * Updates the user state
+   * @param {*} userId User ID
+   * @param {*} username Username
+   * @param {*} newUserState boolean that indicates the new user state
+   */
+  static updateUserState$(userId, username, newUserState) {
+    console.log('Updating user state ==> ', userId, username, newUserState);
+
+    const userKeycloak = {
+      id: userId,
+      username: username,
+      enabled: newUserState
+    };
+
+    return Rx.Observable.defer(() =>
+        KeycloakDA.keycloakClient.users.update(
+          process.env.KEYCLOAK_USERS_REALM_NAME,
+          userKeycloak
+        )
+    );
+  }
+
+  /**
+   * Resets the user password
+   * @param {*} userId 
+   * @param {*} userPassword 
+   */
+  static resetUserPassword$(userId, userPassword) {
+    console.log('Reset user password ==> ', userId, userPassword);
+
+
+    return Rx.Observable.defer(() =>
+        KeycloakDA.keycloakClient.users.resetPassword(
+          process.env.KEYCLOAK_USERS_REALM_NAME,
+          userId,
+          userPassword
+        )
+    );
+  }
 
   /**
    * Gets the users paging
@@ -37,8 +115,9 @@ class UserKeycloakDA {
    * @param {*} searchFilter
    * @param {*} businessId
    * @param {*} username
+   * @param {*} email
    */
-  static getUsers$(page, paginationCount, searchFilter, businessId, username) {
+  static getUsers$(page, paginationCount, searchFilter, businessId, username, email) {
     //Gets the amount of user registered on Keycloak
     return (
       Rx.Observable.defer(() =>
@@ -56,7 +135,8 @@ class UserKeycloakDA {
             first: 100 * page,
             max: paginationCount,
             search: searchFilter,
-            username: username
+            username: username,
+            email: email
           };
           return KeycloakDA.keycloakClient.users.find(
             process.env.KEYCLOAK_USERS_REALM_NAME,
@@ -67,9 +147,10 @@ class UserKeycloakDA {
         // We can only return the users belonging to the same business of the user that is making the query.
         .filter(
           user =>
-            user.attributes &&
+            businessId == null ||  
+            (user.attributes &&
             user.attributes.businessId &&
-            user.attributes.businessId[0] == businessId
+            user.attributes.businessId[0] == businessId)
         )
         .map(result => {
           const attributes = result.attributes;
@@ -92,35 +173,13 @@ class UserKeycloakDA {
         .take(paginationCount)
         .toArray()
     );
-
-    // return Rx.Observable.defer(() => {
-    //   return KeycloakDA.keycloakClient.users.find(KEYCLOAK_REALM_NAME);
-    // }).mergeMap(array => Rx.Observable.from(array))
-    // .map(result => {
-
-    //   const attributes = result.attributes;
-    //   const user = {
-    //     id: result.id,
-    //     username: result.username,
-    //     name: result.firstName ? result.firstName: '',
-    //     lastname: result.lastName ? result.lastName: '',
-    //     documentType: !attributes || !attributes.documentType ? undefined: attributes.documentType[0],
-    //     documentId: !attributes || !attributes.documentId ? undefined: attributes.documentId[0],
-    //     email: result.email,
-    //     phone: !attributes || !attributes.phone ? undefined: attributes.phone[0],
-    //     state: result.enabled
-    //   };
-
-    //   return user;
-    // })
-    // .toArray();
   }
 
   /**
    * Gets an user by its username
    */
-  static getUser$(username, businessId) {
-    return this.getUsers$(0, 1, undefined, businessId, username)
+  static getUser$(username, email, businessId) {
+    return this.getUsers$(0, 1, undefined, businessId, username, email)
     .map(users => {
       if(!users || users.length == 0){        
         return null;
@@ -129,18 +188,8 @@ class UserKeycloakDA {
     });
   }
 
-    /**
-   * Gets an user by its username
-   */
-  static getUser$(username, businessId) {
-    return this.getUsers$(0, 1, undefined, businessId, username)
-    .map(users => {
-      if(!users || users.length == 0){        
-        return null;
-      }
-      return users[0];
-    });
-  }
+ 
+
 }
 
 module.exports = UserKeycloakDA;

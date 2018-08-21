@@ -20,23 +20,44 @@ class UserEventConsumer {
   handleUserCreated$(userCreatedEvent) {
     const user = userCreatedEvent.data;
     return UserKeycloakDA.createUser$(user).mergeMap(result => {
+      console.log('Handle user created: ', result);
       return broker.send$(
         MATERIALIZED_VIEW_TOPIC,
         `UserUpdatedSubscription`,
-        result.ops[0]
+        result
       );
     });
   }
 
   /**
-   * updates the user attributes on the materialized view according to the received data from the event store.
-   * @param {*} userAttributesUpdatedEvent user attributes updated event
+   * updates the user general info on the materialized view according to the received data from the event store.
+   * @param {*} userAttributesUpdatedEvent user general info updated event
    */
-  handleUserAttributesUpdated$(userAttributesUpdatedEvent) {
-    const userAttributes = userAttributesUpdatedEvent.data;
-    return UserKeycloakDA.updateUserAttributes$(
-      userAttributesUpdatedEvent.aid,
-      userAttributes
+  handleUserGeneralInfoUpdated$(userGeneralInfoUpdatedEvent) {
+    console.log('userGeneralInfoUpdatedEvent ==> ', userGeneralInfoUpdatedEvent);
+    const userGeneralInfo = userGeneralInfoUpdatedEvent.data;
+    return UserKeycloakDA.updateUserGeneralInfo$(
+      userGeneralInfo.id,
+      userGeneralInfo
+    ).mergeMap(result => {
+      return broker.send$(
+        MATERIALIZED_VIEW_TOPIC,
+        `UserUpdatedSubscription`,
+        result
+      );
+    });
+  }
+
+    /**
+   * updates the user state on the materialized view according to the received data from the event store.
+   * @param {*} userState events that indicates the new state of the user
+   */
+  handleUserState$(userStateEvent) {
+    const userState = userStateEvent.data;
+    return UserKeycloakDA.updateUserState$(
+      userState.id,
+      userState.username,
+      userState.state
     ).mergeMap(result => {
       return broker.send$(
         MATERIALIZED_VIEW_TOPIC,
@@ -64,22 +85,6 @@ class UserEventConsumer {
     });
   }
 
-  /**
-   * updates the user state on the materialized view according to the received data from the event store.
-   * @param {*} userState events that indicates the new state of the user
-   */
-  handleUserState$(userStateEvent) {
-    return UserKeycloakDA.changeUserState$(
-      userStateEvent.aid,
-      userStateEvent.data
-    ).mergeMap(result => {
-      return broker.send$(
-        MATERIALIZED_VIEW_TOPIC,
-        `UserUpdatedSubscription`,
-        result
-      );
-    });
-  }
 
   /**
    * updates the user role on the materialized view according to the received data from the event store.

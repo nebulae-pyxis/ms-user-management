@@ -62,7 +62,7 @@ class EventStoreService {
     const subscription =
       //MANDATORY:  AVOIDS ACK REGISTRY DUPLICATIONS
       eventSourcing.eventStore.ensureAcknowledgeRegistry$(aggregateType)
-        .mergeMap(() => eventSourcing.eventStore.getEventListener$(aggregateType, mbeKey))
+        .mergeMap(() => eventSourcing.eventStore.getEventListener$(aggregateType, mbeKey, false))
         .filter(evt => evt.et === eventType)
         .mergeMap(evt => Rx.Observable.concat(
           handler.fn.call(handler.obj, evt),
@@ -119,10 +119,18 @@ class EventStoreService {
         fn: userEventConsumer.handleUserCreated$,
         obj: userEventConsumer 
       },
-      // UserGeneralInfoUpdated:{
-      //   fn: userEventConsumer.handleUserGeneralInfoUpdated$,
-      //   obj: userEventConsumer 
-      // },
+      UserGeneralInfoUpdated:{
+        fn: userEventConsumer.handleUserGeneralInfoUpdated$,
+        obj: userEventConsumer 
+      },
+      UserActivated:{
+        fn: userEventConsumer.handleUserState$,
+        obj: userEventConsumer 
+      },
+      UserDeactivated:{
+        fn: userEventConsumer.handleUserState$,
+        obj: userEventConsumer 
+      },
       // UserPasswordChanged:{
       //   fn: userEventConsumer.handleUserPasswordChanged$,
       //   obj: userEventConsumer 
@@ -131,14 +139,6 @@ class EventStoreService {
       //   fn: userEventConsumer.handleUserRoleChanged$,
       //   obj: userEventConsumer 
       // },
-      // UserActivated:{
-      //   fn: userEventConsumer.handleUserState$,
-      //   obj: userEventConsumer 
-      // },
-      // UserDeactivated:{
-      //   fn: userEventConsumer.handleUserState$,
-      //   obj: userEventConsumer 
-      // }
     };
   }
 
@@ -151,10 +151,20 @@ class EventStoreService {
         aggregateType: "User",
         eventType: "UserCreated"
       },
-      // {
-      //   aggregateType: "User",
-      //   eventType: "UserGeneralInfoUpdated"
-      // },
+      {
+        aggregateType: "User",
+        eventType: "UserGeneralInfoUpdated"
+      },
+      {
+        aggregateType: "User",
+        eventType: "UserActivated"
+      },
+      {
+        aggregateType: "User",
+        eventType: "UserDeactivated"
+      }
+
+
       // {
       //   aggregateType: "User",
       //   eventType: "UserPasswordChanged"
@@ -163,14 +173,6 @@ class EventStoreService {
       //   aggregateType: "User",
       //   eventType: "UserRoleChanged"
       // },
-      // {
-      //   aggregateType: "User",
-      //   eventType: "UserActivated"
-      // },
-      // {
-      //   aggregateType: "User",
-      //   eventType: "UserPasswordChanged"
-      // }
     ]
   }
 }

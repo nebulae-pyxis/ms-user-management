@@ -7,7 +7,10 @@ import { Observable } from 'rxjs/Observable';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import {
   getUser,
-  createUser
+  createUser,
+  updateUserGeneralInfo,
+  updateUserState,
+  resetUserPassword
 } from '../gql/UserManagement';
 
 @Injectable()
@@ -56,7 +59,7 @@ export class UserFormService {
     });
   }
 
-    /**
+  /**
    * Creates a new user
    * @param user user to be created
    */
@@ -77,6 +80,76 @@ export class UserFormService {
         mutation: createUser,
         variables: {
           input: userInput
+        },
+        errorPolicy: 'all'
+      });
+  }
+
+  /**
+   * Updates the user general info
+   * @param userId Id of the user to be updated
+   * @param user New general info of the user
+   */
+  updateUser$(userId, user): Observable<any> {
+    const userInput = {
+      username: user.username,
+      name: user.name,
+      lastname: user.lastname,
+      documentType: user.documentType,
+      documentId: user.documentId,
+      email: user.email,
+      phone: user.phone
+    };
+
+    return this.gateway.apollo
+      .mutate<any>({
+        mutation: updateUserGeneralInfo,
+        variables: {
+          userId: userId,
+          input: userInput
+        },
+        errorPolicy: 'all'
+      });
+  }
+
+  /**
+   * Updates the user state
+   * @param userId User ID
+   * @param username username
+   * @param newState New state of the user
+   */
+  updateUserState$(userId, username, newState): Observable<any> {
+    console.log('UPDATE ==> ', userId, username, newState);
+    return this.gateway.apollo
+      .mutate<any>({
+        mutation: updateUserState,
+        variables: {
+          userId: userId,
+          username: username,
+          state: newState
+        },
+        errorPolicy: 'all'
+      });
+  }
+
+    /**
+   * Resets the user password
+   */
+  resetUserPassword$(userId, userPassword): Observable<any> {
+    
+    const userPasswordInput = {
+      password: userPassword.password,
+      temporary: userPassword.temporary
+    };
+
+    console.log('userPasswordInput => ', userPasswordInput);
+
+    return this.gateway.apollo
+      .mutate<any>({
+        mutation: resetUserPassword,
+        variables: {
+          userId: userId,
+          input: userPasswordInput
         },
         errorPolicy: 'all'
       });

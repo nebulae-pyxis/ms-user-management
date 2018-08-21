@@ -99,6 +99,92 @@ module.exports = {
   },
 
   //// MUTATIONS ///////
+  Mutation: {
+    createUser(root, args, context) {
+      return RoleValidator.checkPermissions$(
+        context.authToken.realm_access.roles,
+        contextName,
+        "createUser",
+        USERS_PERMISSION_DENIED_ERROR_CODE,
+        "Permission denied",
+        ["business-admin"]
+      )
+        .mergeMap(response => {
+          return context.broker.forwardAndGetReply$(
+            "User",
+            "gateway.graphql.mutation.createUser",
+            { root, args, jwt: context.encodedToken },
+            2000
+          );
+        })
+        .catch(err => handleError$(err, "createUser"))
+        .mergeMap(response => getResponseFromBackEnd$(response))
+        .toPromise();
+    },
+    updateUserGeneralInfo(root, args, context) {
+      return RoleValidator.checkPermissions$(
+        context.authToken.realm_access.roles,
+        contextName,
+        "updateUserGeneralInfo",
+        USERS_PERMISSION_DENIED_ERROR_CODE,
+        "Permission denied",
+        ["business-admin"]
+      )
+        .mergeMap(response => {
+          return context.broker.forwardAndGetReply$(
+            "User",
+            "gateway.graphql.mutation.updateUserGeneralInfo",
+            { root, args, jwt: context.encodedToken },
+            2000
+          );
+        })
+        .catch(err => handleError$(err, " updateUserGeneralInfo"))
+        .mergeMap(response => getResponseFromBackEnd$(response))
+        .toPromise();
+    },
+    updateUserState(root, args, context) {
+      return RoleValidator.checkPermissions$(
+        context.authToken.realm_access.roles,
+        contextName,
+        "updateUserState",
+        USERS_PERMISSION_DENIED_ERROR_CODE,
+        "Permission denied",
+        ["business-admin"]
+      )
+        .mergeMap(response => {
+          return context.broker.forwardAndGetReply$(
+            "User",
+            "gateway.graphql.mutation.updateUserState",
+            { root, args, jwt: context.encodedToken },
+            2000
+          );
+        })
+        .catch(err => handleError$(err, " updateUserState"))
+        .mergeMap(response => getResponseFromBackEnd$(response))
+        .toPromise();
+    },
+    resetUserPassword(root, args, context) {
+      return RoleValidator.checkPermissions$(
+        context.authToken.realm_access.roles,
+        contextName,
+        "resetUserPassword",
+        USERS_PERMISSION_DENIED_ERROR_CODE,
+        "Permission denied",
+        ["business-admin"]
+      )
+        .mergeMap(response => {
+          return context.broker.forwardAndGetReply$(
+            "User",
+            "gateway.graphql.mutation.resetUserState",
+            { root, args, jwt: context.encodedToken },
+            2000
+          );
+        })
+        .catch(err => handleError$(err, " resetUserState"))
+        .mergeMap(response => getResponseFromBackEnd$(response))
+        .toPromise();
+    },
+  },
 
   //// SUBSCRIPTIONS ///////
   Subscription: {

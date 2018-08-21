@@ -46,7 +46,7 @@ input UserInput {
   name: String!
   "Lastname"
   lastname: String!
-  "Docuemnt type"
+  "Document type"
   documentType: String
   "Document ID"
   documentId: String
@@ -54,6 +54,15 @@ input UserInput {
   email: String
   "Phone"
   phone: String
+  "User state"
+  state: Boolean
+}
+
+input UserPasswordInput {
+  "User password"
+  password: String!
+  "User temporary"
+  temporary: Boolean!
 }
 
 input RoleInput {
@@ -81,15 +90,15 @@ type Mutation {
   "Create a new user"
   createUser(input: UserInput): CommandResponse
   "Updates the user according to the ID"
-  updateUserGeneralInfo(userId: ID, input: UserInput): CommandResponse
-  # "Changes user password"
-  # changeUserPassword(userId: ID): CommandResponse
+  updateUserGeneralInfo(userId: ID!, input: UserInput): CommandResponse
+  "Updates the user state"
+  updateUserState(userId: ID!, username: String!, state: Boolean!): CommandResponse
+  "Changes user password"
+  resetUserPassword(userId: ID!, input: UserPasswordInput): CommandResponse
   "Adds the role to the user"
   addUserRole(userId: ID, input: RoleInput): CommandResponse
   "Removes the role from the user"
   removeUserRole(userId: ID, input: RoleInput): CommandResponse
-  "Updates the user state"
-  updateUserState(userId: ID, state: Boolean!): CommandResponse
 }
 
 type Subscription {

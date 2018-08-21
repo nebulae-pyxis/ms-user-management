@@ -134,7 +134,7 @@ class GraphQlService {
       },
       {
         aggregateType: "User",
-        messageType: "gateway.graphql.mutation.changeUserPassword",
+        messageType: "gateway.graphql.mutation.resetUserPassword",
         onErrorHandler,
         onCompleteHandler
       },
@@ -182,8 +182,8 @@ class GraphQlService {
         fn: user.updateUserState$,
         obj: user
       },
-      'gateway.graphql.mutation.changeUserPassword': {
-        fn: user.changeUserPassword$,
+      'gateway.graphql.mutation.resetUserPassword': {
+        fn: user.resetUserPassword$,
         obj: user
       },
       'gateway.graphql.mutation.changeUserRole': {

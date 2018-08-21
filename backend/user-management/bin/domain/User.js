@@ -11,7 +11,7 @@ const MATERIALIZED_VIEW_TOPIC = "materialized-view-updates";
 const { CustomError, DefaultError } = require("../tools/customError");
 const {
   USER_MISSING_DATA_ERROR_CODE,
-  USER_NAME_EXISTS_ERROR_CODE,
+  USER_NAME_OR_EMAIL_EXISTS_ERROR_CODE,
   PERMISSION_DENIED_ERROR_CODE
 } = require("../tools/ErrorCodes");
 
@@ -70,7 +70,11 @@ class User {
       ["business-admin"]
     )
       .mergeMap(val => {
-        return UserKeycloakDA.getUser$(args.username, authToken.businessId);
+        return UserKeycloakDA.getUser$(
+          args.username,
+          null,
+          authToken.businessId
+        );
       })
       .mergeMap(rawResponse => this.buildSuccessResponse$(rawResponse))
       .catch(err => {
@@ -104,6 +108,7 @@ class User {
    * @param {string} authToken JWT token
    */
   createUser$(data, authToken) {
+    console.log("33 Create user ==> ", data);
     const user = !data.args ? undefined : data.args.input;
     if (!user) {
       return Rx.Observable.throw(
@@ -116,27 +121,30 @@ class User {
       );
     }
 
-    user.generalInfo.name = user.generalInfo.name.trim();
-    user._id = uuidv4();
+    user.username = user.username.trim();
+    user.businessId = authToken.businessId;
     return RoleValidator.checkPermissions$(
       authToken.realm_access.roles,
       "UserManagement",
       "createUser$()",
       PERMISSION_DENIED_ERROR_CODE,
-      "Permission denied"
+      "Permission denied",
+      ["business-admin"]
     )
       .mergeMap(val => {
-        return UserKeycloakDA.getUser$(
-          null,
-          user.generalInfo.name
-        ).mergeMap(count => {
-          if (count > 0) {
+        return Rx.Observable.forkJoin(
+          UserKeycloakDA.getUser$(user.username, null, null),
+          UserKeycloakDA.getUser$(null, user.email, null)
+        ).mergeMap(([userUsernameFound, userEmailFound]) => {
+          //console.log('EXISTED =================== > ', val);
+          console.log("22 User exists: ", userUsernameFound, userEmailFound);
+          if (userUsernameFound || userEmailFound) {
             return Rx.Observable.throw(
               new CustomError(
                 "UserManagement",
                 "createUser$()",
-                USER_NAME_EXISTS_ERROR_CODE,
-                "User name exists",
+                USER_NAME_OR_EMAIL_EXISTS_ERROR_CODE,
+                "User name or email exists",
                 ["business-admin"]
               )
             );
@@ -147,8 +155,8 @@ class User {
               eventType: "UserCreated",
               eventTypeVersion: 1,
               aggregateType: "User",
-              aggregateId: user._id,
-              data: user,
+              aggregateId: user.id,
+              data: user.username,
               user: authToken.preferred_username
             })
           );
@@ -157,7 +165,7 @@ class User {
       .map(result => {
         return {
           code: 200,
-          message: `User with id: ${user._id} has been created`
+          message: `User with id: ${user.username} has been created`
         };
       })
       .mergeMap(rawResponse => this.buildSuccessResponse$(rawResponse))
@@ -171,15 +179,21 @@ class User {
    * @param {string} jwt JWT token
    */
   updateUserGeneralInfo$(data, authToken) {
-    const id = !data.args ? undefined : data.args.id;
+    console.log("11 Updating user ==> ", data);
+    const userId = !data.args ? undefined : data.args.userId;
     const generalInfo = !data.args ? undefined : data.args.input;
-
+    const user = {
+      generalInfo: generalInfo,
+      businessId: authToken.businessId,
+      id: userId
+    };
+    
     if (
-      !id ||
+      !userId ||
       !generalInfo ||
-      !generalInfo.userId ||
+      !generalInfo.username ||
       !generalInfo.name ||
-      !generalInfo.type
+      !generalInfo.lastname
     ) {
       return Rx.Observable.throw(
         new CustomError(
@@ -201,36 +215,80 @@ class User {
       ["business-admin"]
     )
       .mergeMap(val => {
-        return UserKeycloakDA.findUserName$(id, generalInfo.name).mergeMap(
-          count => {
-            if (count > 0) {
-              return Rx.Observable.throw(
-                new CustomError(
-                  "UserManagement",
-                  "updateUserGeneralInfo$()",
-                  USER_NAME_EXISTS_ERROR_CODE,
-                  "User name exists"
-                )
-              );
-            }
-
-            return eventSourcing.eventStore.emitEvent$(
-              new Event({
-                eventType: "UserGeneralInfoUpdated",
-                eventTypeVersion: 1,
-                aggregateType: "User",
-                aggregateId: id,
-                data: generalInfo,
-                user: authToken.preferred_username
-              })
-            );
-          }
+        return eventSourcing.eventStore.emitEvent$(
+          new Event({
+            eventType: "UserGeneralInfoUpdated",
+            eventTypeVersion: 1,
+            aggregateType: "User",
+            aggregateId: generalInfo.username,
+            data: user,
+            user: authToken.preferred_username
+          })
         );
       })
       .map(result => {
         return {
           code: 200,
-          message: `User general info with id: ${id} has been updated`
+          message: `User general info with id: ${generalInfo.username} has been updated`
+        };
+      })
+      .mergeMap(rawResponse => this.buildSuccessResponse$(rawResponse))
+      .catch(err => this.handleError$(err));
+  }
+
+
+  /**
+   * Updates the user state
+   *
+   * @param {*} data args that contain the user ID and the new state
+   * @param {string} authToken JWT token
+   */
+  updateUserState$(data, authToken) {
+    const id = !data.args ? undefined : data.args.userId;
+    const username = !data.args ? undefined : data.args.username;
+    const newState = !data.args ? undefined : data.args.state;
+    if (!id || username == null || newState == null) {
+      return Rx.Observable.throw(
+        new CustomError(
+          "UserManagement",
+          "updateUserState$()",
+          USER_MISSING_DATA_ERROR_CODE,
+          "User missing data"
+        )
+      );
+    }
+
+    const user = {
+      id: id,
+      username: username,
+      state: newState
+    };
+    console.log('User state == ', user);
+
+    return RoleValidator.checkPermissions$(
+      authToken.realm_access.roles,
+      "UserManagement",
+      "updateUserState$()",
+      PERMISSION_DENIED_ERROR_CODE,
+      "Permission denied",
+      ["business-admin"]
+    )
+      .mergeMap(val => {
+        return eventSourcing.eventStore.emitEvent$(
+          new Event({
+            eventType: newState ? "UserActivated" : "UserDeactivated",
+            eventTypeVersion: 1,
+            aggregateType: "User",
+            aggregateId: username,
+            data: user,
+            user: authToken.preferred_username
+          })
+        );
+      })
+      .map(result => {
+        return {
+          code: 200,
+          message: `User status with username: ${username} has been updated`
         };
       })
       .mergeMap(rawResponse => this.buildSuccessResponse$(rawResponse))
@@ -243,21 +301,15 @@ class User {
    * @param {*} data args that contain the user ID
    * @param {string} jwt JWT token
    */
-  changeUserPassword$(data, authToken) {
+  resetUserPassword$(data, authToken) {
     const id = !data.args ? undefined : data.args.id;
-    const generalInfo = !data.args ? undefined : data.args.input;
+    const userPassword = !data.args ? undefined : data.args.input;
 
-    if (
-      !id ||
-      !generalInfo ||
-      !generalInfo.userId ||
-      !generalInfo.name ||
-      !generalInfo.type
-    ) {
+    if (!id || !userPassword) {
       return Rx.Observable.throw(
         new CustomError(
           "UserManagement",
-          "updateUserGeneralInfo$()",
+          "resetUserPassword$()",
           USER_MISSING_DATA_ERROR_CODE,
           "User missing data"
         )
@@ -268,49 +320,25 @@ class User {
     return RoleValidator.checkPermissions$(
       authToken.realm_access.roles,
       "UserManagement",
-      "updateUserGeneralInfo$()",
+      "resetUserPassword$()",
       PERMISSION_DENIED_ERROR_CODE,
       "Permission denied",
       ["business-admin"]
     )
       .mergeMap(val => {
-        return UserKeycloakDA.findUserName$(id, generalInfo.name).mergeMap(
-          count => {
-            if (count > 0) {
-              return Rx.Observable.throw(
-                new CustomError(
-                  "UserManagement",
-                  "createUser$()",
-                  USER_NAME_EXISTS_ERROR_CODE,
-                  "User name exists"
-                )
-              );
-            }
-
-            return eventSourcing.eventStore.emitEvent$(
-              new Event({
-                eventType: "UserGeneralInfoUpdated",
-                eventTypeVersion: 1,
-                aggregateType: "User",
-                aggregateId: id,
-                data: generalInfo,
-                user: authToken.preferred_username
-              })
-            );
-          }
-        );
+        return UserKeycloakDA.resetUserPassword$(id, userPassword);
       })
       .map(result => {
         return {
           code: 200,
-          message: `User general info with id: ${id} has been updated`
+          message: `Password of the user with id: ${id} has been changed`
         };
       })
       .mergeMap(rawResponse => this.buildSuccessResponse$(rawResponse))
       .catch(err => this.handleError$(err));
   }
 
-  /**
+    /**
    * Updates the user general info
    *
    * @param {*} data args that contain the user ID
@@ -354,7 +382,7 @@ class User {
                 new CustomError(
                   "UserManagement",
                   "createUser$()",
-                  USER_NAME_EXISTS_ERROR_CODE,
+                  USER_NAME_OR_EMAIL_EXISTS_ERROR_CODE,
                   "User name exists"
                 )
               );
@@ -383,56 +411,6 @@ class User {
       .catch(err => this.handleError$(err));
   }
 
-  /**
-   * Updates the user state
-   *
-   * @param {*} data args that contain the user ID and the new state
-   * @param {string} authToken JWT token
-   */
-  updateUserState$(data, authToken) {
-    const id = !data.args ? undefined : data.args.id;
-    const newState = !data.args ? undefined : data.args.state;
-    if (!id || newState == null) {
-      return Rx.Observable.throw(
-        new CustomError(
-          "UserManagement",
-          "changeUserState$()",
-          USER_MISSING_DATA_ERROR_CODE,
-          "User missing data"
-        )
-      );
-    }
-
-    return RoleValidator.checkPermissions$(
-      authToken.realm_access.roles,
-      "UserManagement",
-      "changeUserState$()",
-      PERMISSION_DENIED_ERROR_CODE,
-      "Permission denied",
-      ["business-admin"]
-    )
-      .mergeMap(val => {
-        return eventSourcing.eventStore.emitEvent$(
-          new Event({
-            eventType: newState ? "UserActivated" : "UserDeactivated",
-            eventTypeVersion: 1,
-            aggregateType: "User",
-            aggregateId: id,
-            data: newState,
-            user: authToken.preferred_username
-          })
-        );
-      })
-      .map(result => {
-        return {
-          code: 200,
-          message: `User status with id: ${id} has been updated`
-        };
-      })
-      .mergeMap(rawResponse => this.buildSuccessResponse$(rawResponse))
-      .catch(err => this.handleError$(err));
-  }
-
   //#region  mappers for API responses
 
   handleError$(err) {
@@ -440,7 +418,7 @@ class User {
       const exception = { data: null, result: {} };
       const isCustomError = err instanceof CustomError;
       if (!isCustomError) {
-        console.log('ERROR HANDLE ==> ',err);
+        console.log("ERROR HANDLE ==> ", err);
         err = new DefaultError(err);
       }
       exception.result = {

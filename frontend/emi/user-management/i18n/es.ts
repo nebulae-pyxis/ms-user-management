@@ -31,7 +31,17 @@ export const locale = {
       USER_ENABLED: 'Usuario habilitado',
       USER_DISABLED: 'Usuario inhabilitado',
       SAVE: 'Guardar',
-      CREATE: 'Crear'
+      CREATE: 'Crear',
+      NEW_PASSWORD: 'Nueva contraseña',
+      PASSWORD_CONFIRMATION: 'Confirmar nueva contraseña',
+      TEMPORARY: 'Temporal',
+      RESET_CREDENTIALS: 'Cambiar contraseña'
+    },
+    ERRORS: {
+      16001: 'Error interno de servidor',
+      16002: 'Permiso denegado.',
+      16010: 'Datos faltantes del usuario',
+      16011: 'Nombre de usuario o email ya existente'
     }
   }
 };
