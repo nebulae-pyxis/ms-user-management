@@ -162,11 +162,21 @@
 
         <mat-tab label="{{'USER.ROLES' | translate}}" *ngIf="user.id">
           <div class="tab-content p-24" fusePerfectScrollbar>
-            <!--app-device-network deviceValue="{{deviceVal}}"></app-device-network-->
+            
+            <mat-list>
+              <h3 mat-subheader>{{'USER.ROLES' | translate}}</h3>
+              <mat-list-item *ngFor="let role of roles">
+                <p mat-line> {{role.name}} </p>
+              </mat-list-item>
+            </mat-list>
+            <button mat-raised-button 
+            *ngIf="user.id" (click)="addRoleToUser()">{{'USER.ADD_ROLE'
+              | translate}}</button>
+
           </div>
         </mat-tab>
 
-        <mat-tab label="{{'USER.SESSIONS' | translate}}" *ngIf="user.id">
+        <mat-tab label="{{'USER.SESSIONS' | translate}}" *ngIf="!user.id">
           <div class="tab-content p-24" fusePerfectScrollbar>
             <!--app-device-network deviceValue="{{deviceVal}}"></app-device-network-->
           </div>
