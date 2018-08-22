@@ -78,9 +78,6 @@ export class UserManagementComponent implements OnInit, OnDestroy {
 
 
   ngOnInit() {
-    // this.helloWorldLabelQuery$ = this.UserManagementervice.getHelloWorld$();
-    // this.helloWorldLabelSubscription$ = this.UserManagementervice.getEventSourcingMonitorHelloWorldSubscription$();
-
     // Refresh the users table
     this.refreshDataTable(
       this.page,
@@ -89,10 +86,10 @@ export class UserManagementComponent implements OnInit, OnDestroy {
     );
   }
 
-    /**
+  /**
    * Finds the users and updates the table data
    * @param page page number
-   * @param count Limits the number of documents in the result set
+   * @param count Max amount of users that will be return.
    * @param searchFilter Search filter
    */
   refreshDataTable(page, count, searchFilter) {
