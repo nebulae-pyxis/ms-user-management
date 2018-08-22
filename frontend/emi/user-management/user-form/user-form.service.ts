@@ -132,11 +132,10 @@ export class UserFormService {
       });
   }
 
-    /**
+  /**
    * Resets the user password
    */
-  resetUserPassword$(userId, userPassword): Observable<any> {
-    
+  resetUserPassword$(userId, userPassword): Observable<any> {    
     const userPasswordInput = {
       password: userPassword.password,
       temporary: userPassword.temporary

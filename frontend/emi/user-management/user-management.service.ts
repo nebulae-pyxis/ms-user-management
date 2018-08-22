@@ -16,10 +16,10 @@ export class UserManagementService {
   }
 
 /**
- * Gets the users
- * @param pageValue
- * @param countValue
- * @param searchFilter
+ * Gets the users filtered by page, count and a search filter.
+ * @param pageValue Page number of the user table that you want to recover.
+ * @param countValue Max amount of user that will be return
+ * @param searchFilter Search filter (Username, name, email)
  */
   getUsers$(pageValue, countValue, searchFilter){
     return this.gateway.apollo
@@ -34,16 +34,5 @@ export class UserManagementService {
       errorPolicy: 'all'
     });
   }
-
-//   /**
-//   * Hello World subscription sample, please remove
-//   */
-//  getEventSourcingMonitorHelloWorldSubscription$(): Observable<any> {
-//   return this.gateway.apollo
-//     .subscribe({
-//       query: UserManagementHelloWorldSubscription
-//     })
-//     .map(resp => resp.data.EventSourcingMonitorHelloWorldSubscription.sn);
-// }
 
 }

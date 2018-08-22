@@ -29,8 +29,6 @@ class User {
    * @param {*} args args that contain the user filters
    */
   getUsers$({ args }, authToken) {
-    // const requestedFields = this.getProjection(fieldASTs);
-    //console.log("AuthToken ==> ", authToken);
     return RoleValidator.checkPermissions$(
       authToken.realm_access.roles,
       "UserManagement",

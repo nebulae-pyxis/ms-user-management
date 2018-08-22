@@ -49,7 +49,6 @@ export class UserFormComponent implements OnInit {
     this.userCredentialsForm = this.createUserCredentialsForm();
     this.userStateForm = this.createUserStateForm();
     this.userRolesForm = this.createUserRolesForm();
-    console.log('User page ==> ', this.user);
   }
 
   /**
@@ -100,6 +99,11 @@ export class UserFormComponent implements OnInit {
     });
   }
 
+  /**
+   * Checks if the passwords match, otherwise the form will be invalid.
+   * @param passwordKey new Password
+   * @param passwordConfirmationKey Confirmation of the new password
+   */
   checkIfMatchingPasswords(passwordKey: string, passwordConfirmationKey: string) {
     return (group: FormGroup) => {
       let passwordInput = group.controls[passwordKey],
@@ -160,7 +164,8 @@ export class UserFormComponent implements OnInit {
   }
 
   /**
-   * Fires when the state of the user is changed.
+   * Detects when the user state has changed and send a command to persist the new state.
+   * This method only works with users that are registered.
    * 
    * @param $event 
    */
