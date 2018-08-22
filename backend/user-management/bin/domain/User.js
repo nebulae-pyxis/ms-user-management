@@ -80,6 +80,33 @@ class User {
       });
   }
 
+    /**
+   * Gets roles from Keycloak
+   *
+   * @param {*} args args that contain the username of the user to query
+   * @param {string} jwt JWT token
+   * @param {string} fieldASTs indicates the user attributes that will be returned
+   */
+  getRoles$({ args, jwt, fieldASTs }, authToken) {
+    return RoleValidator.checkPermissions$(
+      authToken.realm_access.roles,
+      "UserManagement",
+      "getUser$()",
+      PERMISSION_DENIED_ERROR_CODE,
+      "Permission denied",
+      ["business-admin"]
+    )
+      .mergeMap(val => {
+        return UserKeycloakDA.getRoles$(
+          args.userRole
+        );
+      })
+      .mergeMap(rawResponse => this.buildSuccessResponse$(rawResponse))
+      .catch(err => {
+        return this.handleError$(err);
+      });
+  }
+
   /**
    * Get the amount of rows from the user collection
    */

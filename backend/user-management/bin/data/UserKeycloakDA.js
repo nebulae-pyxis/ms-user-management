@@ -4,18 +4,17 @@ const Rx = require("rxjs");
 const KeycloakDA = require("./KeycloakDA").singleton();
 
 class UserKeycloakDA {
-
- /**
+  /**
    * Creates a new user
    * @param {*} user user to create
    */
   static createUser$(user) {
-    console.log('Creating user DA ==> ', user);
+    console.log("Creating user DA ==> ", user);
     const attributes = {};
-    attributes['documentType'] = user.documentType;
-    attributes['documentId'] = user.documentId;
-    attributes['phone'] = user.phone;
-    attributes['businessId'] = user.businessId;
+    attributes["documentType"] = user.documentType;
+    attributes["documentId"] = user.documentId;
+    attributes["phone"] = user.phone;
+    attributes["businessId"] = user.businessId;
 
     const userKeycloak = {
       username: user.username,
@@ -28,27 +27,26 @@ class UserKeycloakDA {
     };
 
     return Rx.Observable.defer(() =>
-        KeycloakDA.keycloakClient.users.create(
-          process.env.KEYCLOAK_USERS_REALM_NAME,
-          userKeycloak
-        )
+      KeycloakDA.keycloakClient.users.create(
+        process.env.KEYCLOAK_USERS_REALM_NAME,
+        userKeycloak
+      )
     );
   }
 
-   /**
+  /**
    * Updates the user
    * @param {*} userId User ID
    * @param {*} user user to updated
    */
   static updateUserGeneralInfo$(userId, user) {
-    console.log('Updating user DA ==> ', user);
-
+    console.log("Updating user DA ==> ", user);
 
     const attributes = {};
-    attributes['documentType'] = user.generalInfo.documentType;
-    attributes['documentId'] = user.generalInfo.documentId;
-    attributes['phone'] = user.generalInfo.phone;
-    attributes['businessId'] = user.businessId;    
+    attributes["documentType"] = user.generalInfo.documentType;
+    attributes["documentId"] = user.generalInfo.documentId;
+    attributes["phone"] = user.generalInfo.phone;
+    attributes["businessId"] = user.businessId;
 
     const userKeycloak = {
       id: userId,
@@ -56,14 +54,14 @@ class UserKeycloakDA {
       firstName: user.generalInfo.name,
       lastName: user.generalInfo.lastname,
       attributes: attributes,
-      email: user.generalInfo.email,
+      email: user.generalInfo.email
     };
 
     return Rx.Observable.defer(() =>
-        KeycloakDA.keycloakClient.users.update(
-          process.env.KEYCLOAK_USERS_REALM_NAME,
-          userKeycloak
-        )
+      KeycloakDA.keycloakClient.users.update(
+        process.env.KEYCLOAK_USERS_REALM_NAME,
+        userKeycloak
+      )
     );
   }
 
@@ -74,7 +72,7 @@ class UserKeycloakDA {
    * @param {*} newUserState boolean that indicates the new user state
    */
   static updateUserState$(userId, username, newUserState) {
-    console.log('Updating user state ==> ', userId, username, newUserState);
+    console.log("Updating user state ==> ", userId, username, newUserState);
 
     const userKeycloak = {
       id: userId,
@@ -83,28 +81,27 @@ class UserKeycloakDA {
     };
 
     return Rx.Observable.defer(() =>
-        KeycloakDA.keycloakClient.users.update(
-          process.env.KEYCLOAK_USERS_REALM_NAME,
-          userKeycloak
-        )
+      KeycloakDA.keycloakClient.users.update(
+        process.env.KEYCLOAK_USERS_REALM_NAME,
+        userKeycloak
+      )
     );
   }
 
   /**
    * Resets the user password
-   * @param {*} userId 
-   * @param {*} userPassword 
+   * @param {*} userId
+   * @param {*} userPassword
    */
   static resetUserPassword$(userId, userPassword) {
-    console.log('Reset user password ==> ', userId, userPassword);
-
+    console.log("Reset user password ==> ", userId, userPassword);
 
     return Rx.Observable.defer(() =>
-        KeycloakDA.keycloakClient.users.resetPassword(
-          process.env.KEYCLOAK_USERS_REALM_NAME,
-          userId,
-          userPassword
-        )
+      KeycloakDA.keycloakClient.users.resetPassword(
+        process.env.KEYCLOAK_USERS_REALM_NAME,
+        userId,
+        userPassword
+      )
     );
   }
 
@@ -117,7 +114,14 @@ class UserKeycloakDA {
    * @param {*} username
    * @param {*} email
    */
-  static getUsers$(page, paginationCount, searchFilter, businessId, username, email) {
+  static getUsers$(
+    page,
+    paginationCount,
+    searchFilter,
+    businessId,
+    username,
+    email
+  ) {
     //Gets the amount of user registered on Keycloak
     return (
       Rx.Observable.defer(() =>
@@ -147,10 +151,10 @@ class UserKeycloakDA {
         // We can only return the users belonging to the same business of the user that is making the query.
         .filter(
           user =>
-            businessId == null ||  
+            businessId == null ||
             (user.attributes &&
-            user.attributes.businessId &&
-            user.attributes.businessId[0] == businessId)
+              user.attributes.businessId &&
+              user.attributes.businessId[0] == businessId)
         )
         .map(result => {
           const attributes = result.attributes;
@@ -160,10 +164,19 @@ class UserKeycloakDA {
             generalInfo: {
               name: result.firstName ? result.firstName : "",
               lastname: result.lastName ? result.lastName : "",
-              documentType: !attributes || !attributes.documentType? undefined: attributes.documentType[0],
-              documentId: !attributes || !attributes.documentId ? undefined : attributes.documentId[0],
+              documentType:
+                !attributes || !attributes.documentType
+                  ? undefined
+                  : attributes.documentType[0],
+              documentId:
+                !attributes || !attributes.documentId
+                  ? undefined
+                  : attributes.documentId[0],
               email: result.email,
-              phone: !attributes || !attributes.phone ? undefined: attributes.phone[0]
+              phone:
+                !attributes || !attributes.phone
+                  ? undefined
+                  : attributes.phone[0]
             },
             state: result.enabled
           };
@@ -179,17 +192,96 @@ class UserKeycloakDA {
    * Gets an user by its username
    */
   static getUser$(username, email, businessId) {
-    return this.getUsers$(0, 1, undefined, businessId, username, email)
-    .map(users => {
-      if(!users || users.length == 0){        
-        return null;
+    return this.getUsers$(0, 1, undefined, businessId, username, email).map(
+      users => {
+        if (!users || users.length == 0) {
+          return null;
+        }
+        return users[0];
       }
-      return users[0];
-    });
+    );
   }
 
- 
+  /**
+   * Gets the roles of the specified user.
+   * @param {*} userId ID of the user to be query
+   * @param {*} userRolesRequester Roles of the user that is requesting the user info
+   */
+  static getUserRoleMapping$(userId, userRolesRequester) {
+    const USER_ROLES_ALLOW_TO_ASSIGN = process.env.USER_ROLES_ALLOW_TO_ASSIGN;
 
+    const userRolesAllowed = [];
+    if(userRolesRequester && USER_ROLES_ALLOW_TO_ASSIGN){
+      userRolesRequester.forEach(role => {
+        const data = USER_ROLES_ALLOW_TO_ASSIGN[role];
+        if(data){
+          userRolesAllowed.concat(data);
+        }
+      });
+    }
+
+    //Gets the role mapping of the specified user
+    return (
+      Rx.Observable.defer(() =>
+        KeycloakDA.keycloakClient.users.roleMappings.find(
+          process.env.KEYCLOAK_USERS_REALM_NAME,
+          userId
+        )
+      )
+        .map(roleMapping => {
+          return roleMapping.realmMappings;
+        })
+        .mergeMap(userRoleMapping => Rx.Observable.from(userRoleMapping))
+        // We can only return the user roles that the petitioner user is allowed to assign to other users
+        .filter(role => userRolesAllowed.includes(role.name))
+        .map(result => {
+          const role = {
+            id: result.id,
+            name: result.name
+          };
+          return role;
+        })
+        .toArray()
+    );
+  }
+
+  /**
+   * Gets the roles that the user can assign to another users.
+   * @param {*} userRolesRequester Array of roles of the user that perform the request
+   */
+  static getRoles$(userRolesRequester) {
+    const USER_ROLES_ALLOW_TO_ASSIGN = process.env.USER_ROLES_ALLOW_TO_ASSIGN;
+
+    const userRolesAllowed = [];
+    if(userRolesRequester && USER_ROLES_ALLOW_TO_ASSIGN){
+      userRolesRequester.forEach(role => {
+        const data = USER_ROLES_ALLOW_TO_ASSIGN[role];
+        if(data){
+          userRolesAllowed.concat(data);
+        }
+      });
+    }
+
+    //Gets all of the user roles registered on the Keycloak realm
+    return (
+      Rx.Observable.defer(() =>
+        KeycloakDA.keycloakClient.realms.roles.find(
+          process.env.KEYCLOAK_USERS_REALM_NAME
+        )
+      )
+        .mergeMap(userRoles => Rx.Observable.from(userRoles))
+        // We can only return the user roles that the petitioner user is allowed to assign to other users
+        .filter(role => userRolesAllowed.includes(role.name))
+        .map(result => {
+          const role = {
+            id: result.id,
+            name: result.name
+          };
+          return role;
+        })
+        .toArray()
+    );
+  }
 }
 
 module.exports = UserKeycloakDA;

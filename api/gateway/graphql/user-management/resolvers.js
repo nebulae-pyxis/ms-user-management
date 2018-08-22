@@ -95,7 +95,49 @@ module.exports = {
         .catch(err => handleError$(err, "getUser"))
         .mergeMap(response => getResponseFromBackEnd$(response))
         .toPromise();
-    }
+    },
+    getUserRoleMapping(root, args, context) {
+      return RoleValidator.checkPermissions$(
+        context.authToken.realm_access.roles,
+        contextName,
+        "getUserRoleMapping",
+        USERS_PERMISSION_DENIED_ERROR_CODE,
+        "Permission denied",
+        []
+      )
+        .mergeMap(response => {
+          return broker.forwardAndGetReply$(
+            "User",
+            "gateway.graphql.query.getUserRoleMapping",
+            { root, args, jwt: context.encodedToken },
+            2000
+          );
+        })
+        .catch(err => handleError$(err, "getUserRoleMapping"))
+        .mergeMap(response => getResponseFromBackEnd$(response))
+        .toPromise();
+    },
+    getRoles(root, args, context) {
+      return RoleValidator.checkPermissions$(
+        context.authToken.realm_access.roles,
+        contextName,
+        "getRoles",
+        USERS_PERMISSION_DENIED_ERROR_CODE,
+        "Permission denied",
+        []
+      )
+        .mergeMap(response => {
+          return broker.forwardAndGetReply$(
+            "User",
+            "gateway.graphql.query.getRoles",
+            { root, args, jwt: context.encodedToken },
+            2000
+          );
+        })
+        .catch(err => handleError$(err, "getRoles"))
+        .mergeMap(response => getResponseFromBackEnd$(response))
+        .toPromise();
+    },
   },
 
   //// MUTATIONS ///////

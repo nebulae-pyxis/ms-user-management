@@ -32,6 +32,11 @@ type UserGeneralInfo {
   phone: String
 }
 
+type UserRole {
+  id: ID!
+  name: String!  
+}
+
 type Role {
   "Role ID"
   id: String!
@@ -66,6 +71,7 @@ input UserPasswordInput {
 }
 
 input RoleInput {
+  id: ID!
   "Role Name"
   name: String!
 }
@@ -82,8 +88,10 @@ type Query {
   getUsers(page: Int!, count: Int!, searchFilter: String): [User]
   "Gets a user by its username"
   getUser(username: String!): User
-  "Gets the user roles"
-  getUserRoles(username: String!): Role
+  "Gets user role mapping"
+  getUserRoleMapping(userId: String!): [UserRole]
+  "Gets roles that the petitioner can assign to another users according to its role"
+  getRoles: [Role]
 }
 
 type Mutation {
@@ -94,7 +102,7 @@ type Mutation {
   "Updates the user state"
   updateUserState(userId: ID!, username: String!, state: Boolean!): CommandResponse
   "Changes user password"
-  resetUserPassword(userId: ID!, input: UserPasswordInput): CommandResponse
+  resetUserPassword(userId: ID!, input: UserPasswordInput): CommandResponse  
   "Adds the role to the user"
   addUserRole(userId: ID, input: RoleInput): CommandResponse
   "Removes the role from the user"
