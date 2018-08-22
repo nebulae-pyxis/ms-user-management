@@ -131,7 +131,7 @@
               </div>
 
               <mat-form-field class="w-100-p">
-                <input matInput name="newPassword" formControlName="newPassword" placeholder="{{'USER.NEW_PASSWORD' | translate}}" type="password">
+                <input matInput name="password" formControlName="password" placeholder="{{'USER.NEW_PASSWORD' | translate}}" type="password">
                 <mat-error *ngIf="userCredentialsForm.hasError('required', 'newPassword')">
                   {{'USER.NEW_PASSWORD_REQUIRED' | translate}}
                 </mat-error>

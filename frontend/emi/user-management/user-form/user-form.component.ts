@@ -86,10 +86,13 @@ export class UserFormComponent implements OnInit {
    */
   createUserCredentialsForm(){
     return this.formBuilder.group({
-      newPassword: ['', Validators.required],
+      password: ['', Validators.compose([
+        Validators.required,
+        Validators.pattern('^(?=[a-zA-Z0-9.]{8,}$)(?=.*?[a-z])(?=.*?[0-9]).*')
+     ])],
       passwordConfirmation: ['', Validators.required],
-      temporary: [true, Validators.required]
-    }, {validator: this.checkIfMatchingPasswords('newPassword', 'passwordConfirmation')});
+      temporary: [false, Validators.required]
+    }, {validator: this.checkIfMatchingPasswords('password', 'passwordConfirmation')});
   }
 
   /**
@@ -191,7 +194,7 @@ export class UserFormComponent implements OnInit {
   resetUserPassword(){
     const data = this.userCredentialsForm.getRawValue(); 
 
-    console.log('reset user password ... ', data);
+    console.log('reset user password ...', data);
     this.userFormService.resetUserPassword$(this.user.id, data)
     .pipe(
       mergeMap(resp => this.graphQlAlarmsErrorHandler$(resp)),
@@ -200,9 +203,14 @@ export class UserFormComponent implements OnInit {
       this.snackBar.open("El usuario ha sido actualizado", "Cerrar", {
         duration: 2000
       });
+      this.userCredentialsForm.reset();
     },
     error => {
-      console.log('Error updating user general info ==> ', error);
+      console.log('Error resetting user password ==> ', error);
+      this.snackBar.open("Error reseteando contraseña del usuario", "Cerrar", {
+        duration: 2000
+      });
+      this.userCredentialsForm.reset();
     });
   }
 

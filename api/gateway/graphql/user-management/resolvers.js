@@ -175,12 +175,12 @@ module.exports = {
         .mergeMap(response => {
           return context.broker.forwardAndGetReply$(
             "User",
-            "gateway.graphql.mutation.resetUserState",
+            "gateway.graphql.mutation.resetUserPassword",
             { root, args, jwt: context.encodedToken },
             2000
           );
         })
-        .catch(err => handleError$(err, " resetUserState"))
+        .catch(err => handleError$(err, " resetUserPassword"))
         .mergeMap(response => getResponseFromBackEnd$(response))
         .toPromise();
     },

@@ -70,7 +70,7 @@ export const updateUserState = gql`
 
 export const resetUserPassword = gql`
   mutation resetUserPassword($userId: ID!, $input: UserPasswordInput) {
-    resetUserPassword(userId: $userId, input: $userPasswordInput) {
+    resetUserPassword(userId: $userId, input: $input) {
       code
       message
     }

@@ -302,10 +302,17 @@ class User {
    * @param {string} jwt JWT token
    */
   resetUserPassword$(data, authToken) {
-    const id = !data.args ? undefined : data.args.id;
+    const id = !data.args ? undefined : data.args.userId;
     const userPassword = !data.args ? undefined : data.args.input;
 
-    if (!id || !userPassword) {
+    const password = {
+      temporary: userPassword.temporary || false,
+      value: userPassword.password
+    };
+
+    console.log('Resetting password => ', password);
+
+    if (!id || !userPassword || !userPassword.password) {
       return Rx.Observable.throw(
         new CustomError(
           "UserManagement",
@@ -326,7 +333,7 @@ class User {
       ["business-admin"]
     )
       .mergeMap(val => {
-        return UserKeycloakDA.resetUserPassword$(id, userPassword);
+        return UserKeycloakDA.resetUserPassword$(id, password);
       })
       .map(result => {
         return {

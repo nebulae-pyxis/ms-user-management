@@ -28,8 +28,8 @@ class CustomError extends Error {
     constructor(anyError){
       super(anyError ? anyError.message: 'Unknown')
       this.code = INTERNAL_SERVER_ERROR_CODE;
-      this.name = anyError.name;
-      this.msg = anyError.message;
+      this.name = anyError ? anyError.name : 'Internal server error';
+      this.msg = anyError ? anyError.message : '';
       // this.stack = anyError.stack;
     }
 
