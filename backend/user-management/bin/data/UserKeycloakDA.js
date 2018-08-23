@@ -208,14 +208,14 @@ class UserKeycloakDA {
    * @param {*} userRolesRequester Roles of the user that is requesting the user info
    */
   static getUserRoleMapping$(userId, userRolesRequester) {
-    const USER_ROLES_ALLOW_TO_ASSIGN = process.env.USER_ROLES_ALLOW_TO_ASSIGN;
+    const USER_ROLES_ALLOW_TO_ASSIGN = JSON.parse(process.env.USER_ROLES_ALLOW_TO_ASSIGN);
 
-    const userRolesAllowed = [];
+    let userRolesAllowed = [];
     if(userRolesRequester && USER_ROLES_ALLOW_TO_ASSIGN){
       userRolesRequester.forEach(role => {
         const data = USER_ROLES_ALLOW_TO_ASSIGN[role];
         if(data){
-          userRolesAllowed.concat(data);
+          userRolesAllowed = userRolesAllowed.concat(data);
         }
       });
     }
@@ -250,17 +250,21 @@ class UserKeycloakDA {
    * @param {*} userRolesRequester Array of roles of the user that perform the request
    */
   static getRoles$(userRolesRequester) {
-    const USER_ROLES_ALLOW_TO_ASSIGN = process.env.USER_ROLES_ALLOW_TO_ASSIGN;
+    const USER_ROLES_ALLOW_TO_ASSIGN = JSON.parse(process.env.USER_ROLES_ALLOW_TO_ASSIGN);
 
-    const userRolesAllowed = [];
+    console.log('userRolesRequester => ', userRolesRequester, USER_ROLES_ALLOW_TO_ASSIGN);
+    let userRolesAllowed = [];
     if(userRolesRequester && USER_ROLES_ALLOW_TO_ASSIGN){
-      userRolesRequester.forEach(role => {
+      userRolesRequester.forEach(role => {        
         const data = USER_ROLES_ALLOW_TO_ASSIGN[role];
+        
         if(data){
-          userRolesAllowed.concat(data);
+          userRolesAllowed = userRolesAllowed.concat(data);
         }
       });
     }
+
+    console.log('userRolesAllowed => ', userRolesAllowed);
 
     //Gets all of the user roles registered on the Keycloak realm
     return (

@@ -103,7 +103,7 @@ module.exports = {
         "getUserRoleMapping",
         USERS_PERMISSION_DENIED_ERROR_CODE,
         "Permission denied",
-        []
+        ["business-admin"]
       )
         .mergeMap(response => {
           return broker.forwardAndGetReply$(
@@ -124,7 +124,7 @@ module.exports = {
         "getRoles",
         USERS_PERMISSION_DENIED_ERROR_CODE,
         "Permission denied",
-        []
+        ["business-admin"]
       )
         .mergeMap(response => {
           return broker.forwardAndGetReply$(

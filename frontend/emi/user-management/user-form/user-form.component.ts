@@ -29,6 +29,8 @@ export class UserFormComponent implements OnInit {
   userCredentialsForm: FormGroup;
   userRolesForm: FormGroup;
   userStateForm: FormGroup;
+  selectedRole: any;
+  roles = [];
 
   constructor(
     private translationLoader: FuseTranslationLoaderService,
@@ -49,6 +51,7 @@ export class UserFormComponent implements OnInit {
     this.userCredentialsForm = this.createUserCredentialsForm();
     this.userStateForm = this.createUserStateForm();
     this.userRolesForm = this.createUserRolesForm();
+    this.loadRoles();
   }
 
   /**
@@ -164,6 +167,22 @@ export class UserFormComponent implements OnInit {
     error => {
       console.log('Error updating user general info ==> ', error);
     });
+  }
+
+  /**
+   * Loads the roles that the petitioner user can assign to other users
+   */
+  loadRoles() {
+    this.userFormService
+      .getRoles$()
+      .pipe(
+        mergeMap(resp => this.graphQlAlarmsErrorHandler$(resp)),
+        filter((resp: any) => !resp.errors || resp.errors.length === 0),
+      ).subscribe(roles => {
+        console.log('Roles ==> ', roles);
+
+        this.roles = roles.data.getRoles;
+      });
   }
 
   /**

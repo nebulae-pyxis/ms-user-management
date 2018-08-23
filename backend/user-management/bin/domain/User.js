@@ -81,13 +81,12 @@ class User {
   }
 
     /**
-   * Gets roles from Keycloak
+   * Gets roles that the petitioner user can assign to other users
    *
-   * @param {*} args args that contain the username of the user to query
-   * @param {string} jwt JWT token
-   * @param {string} fieldASTs indicates the user attributes that will be returned
+   * @param {*} args args
+   * @param {*} authToken Token of the user that perform the request 
    */
-  getRoles$({ args, jwt, fieldASTs }, authToken) {
+  getRoles$({ args }, authToken) {
     return RoleValidator.checkPermissions$(
       authToken.realm_access.roles,
       "UserManagement",
@@ -98,7 +97,35 @@ class User {
     )
       .mergeMap(val => {
         return UserKeycloakDA.getRoles$(
-          args.userRole
+          authToken.realm_access.roles
+        );
+      })
+      .mergeMap(rawResponse => this.buildSuccessResponse$(rawResponse))
+      .catch(err => {
+        return this.handleError$(err);
+      });
+  }
+
+  /**
+   * Gets the role mapping of the indicated user
+   *
+   * @param {*} args args
+   * @param {*} authToken Token of the user that perform the request 
+   */
+  getUserRoleMapping$({ args }, authToken) {
+    const userId = !data.args ? undefined : data.args.userId;
+    return RoleValidator.checkPermissions$(
+      authToken.realm_access.roles,
+      "UserManagement",
+      "getUser$()",
+      PERMISSION_DENIED_ERROR_CODE,
+      "Permission denied",
+      ["business-admin"]
+    )
+      .mergeMap(val => {
+        return UserKeycloakDA.getUserRoleMapping$(
+          userId,
+          authToken.realm_access.roles
         );
       })
       .mergeMap(rawResponse => this.buildSuccessResponse$(rawResponse))

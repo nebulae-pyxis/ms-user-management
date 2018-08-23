@@ -162,6 +162,18 @@ class GraphQlService {
         onErrorHandler,
         onCompleteHandler
       },
+      {
+        aggregateType: "User",
+        messageType: "gateway.graphql.query.getRoles",
+        onErrorHandler,
+        onCompleteHandler
+      },
+      {
+        aggregateType: "User",
+        messageType: "gateway.graphql.query.getUserRoleMapping",
+        onErrorHandler,
+        onCompleteHandler
+      },
     ];
   }
 
@@ -200,6 +212,14 @@ class GraphQlService {
       },
       'gateway.graphql.query.getUser': {
         fn: user.getUser$,
+        obj: user
+      },
+      'gateway.graphql.query.getRoles': {
+        fn: user.getRoles$,
+        obj: user
+      },
+      'gateway.graphql.query.getUserRoleMapping': {
+        fn: user.getUserRoleMapping$,
         obj: user
       }
     };

@@ -162,16 +162,30 @@
 
         <mat-tab label="{{'USER.ROLES' | translate}}" *ngIf="user.id">
           <div class="tab-content p-24" fusePerfectScrollbar>
-            
-            <mat-list>
-              <h3 mat-subheader>{{'USER.ROLES' | translate}}</h3>
-              <mat-list-item *ngFor="let role of roles">
-                <p mat-line> {{role.name}} </p>
-              </mat-list-item>
-            </mat-list>
+
+            <mat-selection-list #list [(ngModel)]="selectedRole">
+                <h3 mat-subheader>{{'USER.ROLES' | translate}}</h3>
+              <mat-list-option *ngFor="let role of roles" [value]="role.name">
+                  {{role.name}}
+              </mat-list-option>
+          </mat-selection-list>
+
+
             <button mat-raised-button 
-            *ngIf="user.id" (click)="addRoleToUser()">{{'USER.ADD_ROLE'
+            *ngIf="user.id" (click)="addRolesToUser()">{{'USER.ADD_ROLES'
               | translate}}</button>
+
+              <mat-selection-list #list [(ngModel)]="selectedRole">
+                  <h3 mat-subheader>{{'USER.ROLES' | translate}}</h3>
+                <mat-list-option *ngFor="let role of roles" [value]="role.name">
+                    {{role.name}}
+                </mat-list-option>
+            </mat-selection-list>
+  
+  
+              <button mat-raised-button 
+              *ngIf="user.id" (click)="removeRolesFromUser()">{{'USER.REMOVE_ROLES'
+                | translate}}</button>
 
           </div>
         </mat-tab>

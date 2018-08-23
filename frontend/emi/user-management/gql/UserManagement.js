@@ -40,6 +40,16 @@ export const getUser = gql`
   }
 `;
 
+//Gets the roles that the petitioner user can assign to other users
+export const getRoles = gql`
+  query getRoles{
+    getRoles{
+      id
+      name
+    }
+  }
+`;
+
 // MUTATIONS
 export const createUser = gql`
   mutation createUser($input: UserInput) {

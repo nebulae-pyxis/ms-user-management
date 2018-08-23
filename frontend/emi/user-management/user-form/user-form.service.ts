@@ -7,6 +7,7 @@ import { Observable } from 'rxjs/Observable';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import {
   getUser,
+  getRoles,
   createUser,
   updateUserGeneralInfo,
   updateUserState,
@@ -54,6 +55,19 @@ export class UserFormService {
       variables: {
         username: username
       },
+      fetchPolicy: 'network-only',
+      errorPolicy: 'all'
+    });
+  }
+
+  /**
+   * Gets the roles that the petitioner user can assign to other users.
+   * @param username
+   */
+  getRoles$() {
+    return this.gateway.apollo
+    .query<any>({
+      query: getRoles,
       fetchPolicy: 'network-only',
       errorPolicy: 'all'
     });
