@@ -86,14 +86,16 @@ class UserEventConsumer {
   }
 
 
-  /**
-   * updates the user role on the materialized view according to the received data from the event store.
-   * @param {*} userRoleChanged events that indicates the new state of the user
-   */
-  handleUserRoleChanged$(userStateEvent) {
-    return UserKeycloakDA.changeUserRole$(
-      userStateEvent.aid,
-      userStateEvent.data
+/**
+ * Adds the specified roles to the user
+ * @param {*} userRolesAddedEvent 
+ */
+  handleUserRolesAdded$(userRolesAddedEvent) {
+    console.log('userRolesAddedEvent ==> ', userRolesAddedEvent);
+    const data = userRolesAddedEvent.data;
+    return UserKeycloakDA.addRolesToTheUser$(
+      data.userId,
+      data.userRoles.roles
     ).mergeMap(result => {
       return broker.send$(
         MATERIALIZED_VIEW_TOPIC,
@@ -102,6 +104,25 @@ class UserEventConsumer {
       );
     });
   }
+
+/**
+ * Removes the specified roles to the user
+ * @param {*} userRolesAddedEvent 
+ */
+handleUserRolesRemoved$(userRolesRemovedEvent) {
+  console.log('userRolesRemovedEvent ==> ', userRolesRemovedEvent);
+  const data = userRolesRemovedEvent.data;
+  return UserKeycloakDA.removeRolesFromUser$(
+    data.userId,
+    data.userRoles.roles
+  ).mergeMap(result => {
+    return broker.send$(
+      MATERIALIZED_VIEW_TOPIC,
+      `UserUpdatedSubscription`,
+      result
+    );
+  });
+}
 
   
 }

@@ -131,14 +131,14 @@ class EventStoreService {
         fn: userEventConsumer.handleUserState$,
         obj: userEventConsumer 
       },
-      // UserPasswordChanged:{
-      //   fn: userEventConsumer.handleUserPasswordChanged$,
-      //   obj: userEventConsumer 
-      // },
-      // UserRoleChanged:{
-      //   fn: userEventConsumer.handleUserRoleChanged$,
-      //   obj: userEventConsumer 
-      // },
+      UserRolesAdded:{
+        fn: userEventConsumer.handleUserRolesAdded$,
+        obj: userEventConsumer 
+      },
+      UserRolesRemoved:{
+        fn: userEventConsumer.handleUserRolesRemoved$,
+        obj: userEventConsumer 
+      },
     };
   }
 
@@ -162,8 +162,15 @@ class EventStoreService {
       {
         aggregateType: "User",
         eventType: "UserDeactivated"
-      }
-
+      },
+      {
+        aggregateType: "User",
+        eventType: "UserRolesAdded"
+      },
+      {
+        aggregateType: "User",
+        eventType: "UserRolesRemoved"
+      },
 
       // {
       //   aggregateType: "User",

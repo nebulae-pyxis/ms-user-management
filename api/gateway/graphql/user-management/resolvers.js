@@ -226,6 +226,48 @@ module.exports = {
         .mergeMap(response => getResponseFromBackEnd$(response))
         .toPromise();
     },
+    addRolesToTheUser(root, args, context) {
+      return RoleValidator.checkPermissions$(
+        context.authToken.realm_access.roles,
+        contextName,
+        "addRolesToTheUser",
+        USERS_PERMISSION_DENIED_ERROR_CODE,
+        "Permission denied",
+        ["business-admin"]
+      )
+        .mergeMap(response => {
+          return context.broker.forwardAndGetReply$(
+            "User",
+            "gateway.graphql.mutation.addRolesToTheUser",
+            { root, args, jwt: context.encodedToken },
+            2000
+          );
+        })
+        .catch(err => handleError$(err, "addRolesToTheUser"))
+        .mergeMap(response => getResponseFromBackEnd$(response))
+        .toPromise();
+    },
+    removeRolesFromUser(root, args, context) {
+      return RoleValidator.checkPermissions$(
+        context.authToken.realm_access.roles,
+        contextName,
+        "removeRolesFromUser",
+        USERS_PERMISSION_DENIED_ERROR_CODE,
+        "Permission denied",
+        ["business-admin"]
+      )
+        .mergeMap(response => {
+          return context.broker.forwardAndGetReply$(
+            "User",
+            "gateway.graphql.mutation.removeRolesFromUser",
+            { root, args, jwt: context.encodedToken },
+            2000
+          );
+        })
+        .catch(err => handleError$(err, "removeRolesFromUser"))
+        .mergeMap(response => getResponseFromBackEnd$(response))
+        .toPromise();
+    },
   },
 
   //// SUBSCRIPTIONS ///////

@@ -154,6 +154,120 @@ class User {
   }
 
   /**
+   * Adds roles to the user
+   * @param data {args}
+   * @param args.userId Id of the user which the roles will be added
+   * @param args.input Array of roles
+   * @param args.input.id Id of the roles to be added
+   * @param args.input.name Name of the role to be added 
+   * @param {*} authToken Token
+   */
+  addRolesToTheUser$(data, authToken) {
+    console.log(" addRolesToTheUser ==> ", data);
+    const userId = !data.args ? undefined : data.args.userId;
+    const rolesInput = !data.args ? undefined : data.args.input;
+    if (!userId || !rolesInput) {
+      return Rx.Observable.throw(
+        new CustomError(
+          "UserManagement",
+          "addRolesToTheUser$()",
+          USER_MISSING_DATA_ERROR_CODE,
+          "Missing data"
+        )
+      );
+    }
+    const dataUser = {
+      userId: userId,
+      userRoles: rolesInput
+    };
+    return RoleValidator.checkPermissions$(
+      authToken.realm_access.roles,
+      "UserManagement",
+      "addRolesToTheUser$()",
+      PERMISSION_DENIED_ERROR_CODE,
+      "Permission denied",
+      ["business-admin"]
+    )
+      .mergeMap(val => {
+        return eventSourcing.eventStore.emitEvent$(
+          new Event({
+            eventType: "UserRolesAdded",
+            eventTypeVersion: 1,
+            aggregateType: "User",
+            aggregateId: dataUser.userId,
+            data: dataUser,
+            user: authToken.preferred_username
+          })
+        );
+      })
+      .map(result => {
+        return {
+          code: 200,
+          message: `User roles: ${rolesInput} had been added to the user with username: ${dataUser.userId}`
+        };
+      })
+      .mergeMap(rawResponse => this.buildSuccessResponse$(rawResponse))
+      .catch(err => this.handleError$(err));
+  }
+
+  /**
+   * Removes roles from the user
+   * @param data {args}
+   * @param args.userId Id of the user which the roles will be added
+   * @param args.input Array of roles
+   * @param args.input.id Id of the roles to be added
+   * @param args.input.name Name of the role to be added 
+   * @param {*} authToken Token
+   */
+  removeRolesFromUser$(data, authToken) {
+    console.log(" removeRolesFromUser ==> ", data);
+    const userId = !data.args ? undefined : data.args.userId;
+    const rolesInput = !data.args ? undefined : data.args.input;
+    if (!userId || !rolesInput) {
+      return Rx.Observable.throw(
+        new CustomError(
+          "UserManagement",
+          "removeRolesFromUser$()",
+          USER_MISSING_DATA_ERROR_CODE,
+          "Missing data"
+        )
+      );
+    }
+    const dataUser = {
+      userId: userId,
+      userRoles: rolesInput
+    };
+    return RoleValidator.checkPermissions$(
+      authToken.realm_access.roles,
+      "UserManagement",
+      "removeRolesFromUser$()",
+      PERMISSION_DENIED_ERROR_CODE,
+      "Permission denied",
+      ["business-admin"]
+    )
+      .mergeMap(val => {
+        return eventSourcing.eventStore.emitEvent$(
+          new Event({
+            eventType: "UserRolesRemoved",
+            eventTypeVersion: 1,
+            aggregateType: "User",
+            aggregateId: dataUser.userId,
+            data: dataUser,
+            user: authToken.preferred_username
+          })
+        );
+      })
+      .map(result => {
+        return {
+          code: 200,
+          message: `User roles: ${rolesInput} had been removed from the user with username: ${dataUser.userId}`
+        };
+      })
+      .mergeMap(rawResponse => this.buildSuccessResponse$(rawResponse))
+      .catch(err => this.handleError$(err));
+  }
+
+  /**
    * Creates a new user
    *
    * @param {*} data args that contain the user ID
@@ -207,8 +321,8 @@ class User {
               eventType: "UserCreated",
               eventTypeVersion: 1,
               aggregateType: "User",
-              aggregateId: user.id,
-              data: user.username,
+              aggregateId: user.username,
+              data: user,
               user: authToken.preferred_username
             })
           );
@@ -391,79 +505,6 @@ class User {
         return {
           code: 200,
           message: `Password of the user with id: ${id} has been changed`
-        };
-      })
-      .mergeMap(rawResponse => this.buildSuccessResponse$(rawResponse))
-      .catch(err => this.handleError$(err));
-  }
-
-    /**
-   * Updates the user general info
-   *
-   * @param {*} data args that contain the user ID
-   * @param {string} jwt JWT token
-   */
-  changeUserRole$(data, authToken) {
-    const id = !data.args ? undefined : data.args.id;
-    const generalInfo = !data.args ? undefined : data.args.input;
-
-    if (
-      !id ||
-      !generalInfo ||
-      !generalInfo.userId ||
-      !generalInfo.name ||
-      !generalInfo.type
-    ) {
-      return Rx.Observable.throw(
-        new CustomError(
-          "UserManagement",
-          "updateUserGeneralInfo$()",
-          USER_MISSING_DATA_ERROR_CODE,
-          "User missing data"
-        )
-      );
-    }
-
-    //Checks if the user that is performing this actions has the needed role to execute the operation.
-    return RoleValidator.checkPermissions$(
-      authToken.realm_access.roles,
-      "UserManagement",
-      "updateUserGeneralInfo$()",
-      PERMISSION_DENIED_ERROR_CODE,
-      "Permission denied",
-      ["business-admin"]
-    )
-      .mergeMap(val => {
-        return UserKeycloakDA.findUserName$(id, generalInfo.name).mergeMap(
-          count => {
-            if (count > 0) {
-              return Rx.Observable.throw(
-                new CustomError(
-                  "UserManagement",
-                  "createUser$()",
-                  USER_NAME_OR_EMAIL_EXISTS_ERROR_CODE,
-                  "User name exists"
-                )
-              );
-            }
-
-            return eventSourcing.eventStore.emitEvent$(
-              new Event({
-                eventType: "UserGeneralInfoUpdated",
-                eventTypeVersion: 1,
-                aggregateType: "User",
-                aggregateId: id,
-                data: generalInfo,
-                user: authToken.preferred_username
-              })
-            );
-          }
-        );
-      })
-      .map(result => {
-        return {
-          code: 200,
-          message: `User general info with id: ${id} has been updated`
         };
       })
       .mergeMap(rawResponse => this.buildSuccessResponse$(rawResponse))

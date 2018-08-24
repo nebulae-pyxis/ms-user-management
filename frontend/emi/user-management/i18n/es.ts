@@ -35,7 +35,9 @@ export const locale = {
       NEW_PASSWORD: 'Nueva contraseña',
       PASSWORD_CONFIRMATION: 'Confirmar nueva contraseña',
       TEMPORARY: 'Temporal',
-      RESET_CREDENTIALS: 'Cambiar contraseña'
+      RESET_CREDENTIALS: 'Cambiar contraseña',
+      ADD_ROLES: 'Agregar roles',
+      REMOVE_ROLES: 'Eliminar roles'
     },
     ERRORS: {
       16001: 'Error interno de servidor',

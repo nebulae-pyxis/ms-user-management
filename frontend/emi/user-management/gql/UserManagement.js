@@ -51,6 +51,24 @@ export const getRoles = gql`
 `;
 
 // MUTATIONS
+export const addRolesToTheUser = gql`
+  mutation addRolesToTheUser($userId: ID, $input: RolesInput) {
+    addRolesToTheUser(userId: $userId, input: $input) {
+      code
+      message
+    }
+  }
+`;
+
+export const removeRolesFromUser = gql`
+  mutation removeRolesFromUser($userId: ID, $input: RolesInput) {
+    removeRolesFromUser(userId: $userId, input: $input) {
+      code
+      message
+    }
+  }
+`;
+
 export const createUser = gql`
   mutation createUser($input: UserInput) {
     createUser(input: $input) {

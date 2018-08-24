@@ -140,7 +140,13 @@ class GraphQlService {
       },
       {
         aggregateType: "User",
-        messageType: "gateway.graphql.mutation.changeUserRole",
+        messageType: "gateway.graphql.mutation.addRolesToTheUser",
+        onErrorHandler,
+        onCompleteHandler
+      },
+      {
+        aggregateType: "User",
+        messageType: "gateway.graphql.mutation.removeRolesFromUser",
         onErrorHandler,
         onCompleteHandler
       },
@@ -198,8 +204,12 @@ class GraphQlService {
         fn: user.resetUserPassword$,
         obj: user
       },
-      'gateway.graphql.mutation.changeUserRole': {
-        fn: user.changeUserRole$,
+      'gateway.graphql.mutation.addRolesToTheUser': {
+        fn: user.addRolesToTheUser$,
+        obj: user
+      },
+      'gateway.graphql.mutation.removeRolesFromUser': {
+        fn: user.removeRolesFromUser$,
         obj: user
       },
       'gateway.graphql.query.getUserCount': {

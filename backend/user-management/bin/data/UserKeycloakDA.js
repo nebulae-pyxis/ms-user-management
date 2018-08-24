@@ -4,6 +4,40 @@ const Rx = require("rxjs");
 const KeycloakDA = require("./KeycloakDA").singleton();
 
 class UserKeycloakDA {
+
+
+   /**
+    * Adds the specified roles to the user
+    * @param {*} userId Id of the user 
+    * @param {*} arrayRoles Roles to be added to the user
+    */
+  static addRolesToTheUser$(userId, arrayRoles) {
+
+    return Rx.Observable.defer(() =>
+      KeycloakDA.keycloakClient.realms.maps.map(
+        process.env.KEYCLOAK_USERS_REALM_NAME,
+        userId,
+        arrayRoles
+      )
+    );
+  }
+
+    /**
+    * Removes the specified roles to the user
+    * @param {*} userId Id of the user 
+    * @param {*} arrayRoles Roles to be removed from the user
+    */
+   static removeRolesFromUser$(userId, arrayRoles) {
+
+    return Rx.Observable.defer(() =>
+      KeycloakDA.keycloakClient.realms.maps.unmap(
+        process.env.KEYCLOAK_USERS_REALM_NAME,
+        userId,
+        arrayRoles
+      )
+    );
+  }
+
   /**
    * Creates a new user
    * @param {*} user user to create

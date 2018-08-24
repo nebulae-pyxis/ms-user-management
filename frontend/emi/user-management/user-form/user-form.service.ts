@@ -11,7 +11,9 @@ import {
   createUser,
   updateUserGeneralInfo,
   updateUserState,
-  resetUserPassword
+  resetUserPassword,
+  addRolesToTheUser,
+  removeRolesFromUser
 } from '../gql/UserManagement';
 
 @Injectable()
@@ -71,6 +73,48 @@ export class UserFormService {
       fetchPolicy: 'network-only',
       errorPolicy: 'all'
     });
+  }
+
+  /**
+   * Adds roles to the specified user
+   * @param userId Id of the user to which the roles will be added
+   * @param roles Roles to be added
+   */
+  addRolesToTheUser$(userId, roles): Observable<any> {
+    const rolesInput = {
+      roles: roles
+    };
+
+    return this.gateway.apollo
+      .mutate<any>({
+        mutation: addRolesToTheUser,
+        variables: {
+          userId: userId,
+          input: rolesInput
+        },
+        errorPolicy: 'all'
+      });
+  }
+
+  /**
+   * Removes roles to the specified user
+   * @param userId Id of the user to which the roles will be removed
+   * @param roles Roles to be removed
+   */
+  removeRolesFromUser$(userId, roles): Observable<any> {
+    const rolesInput = {
+      roles: roles
+    };
+
+    return this.gateway.apollo
+      .mutate<any>({
+        mutation: removeRolesFromUser,
+        variables: {
+          userId: userId,
+          input: rolesInput
+        },
+        errorPolicy: 'all'
+      });
   }
 
   /**

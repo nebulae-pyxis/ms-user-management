@@ -76,6 +76,10 @@ input RoleInput {
   name: String!
 }
 
+input RolesInput {
+  roles: [RoleInput]
+}
+
 type CommandResponse {
   "Response code"
   code: Int
@@ -103,10 +107,10 @@ type Mutation {
   updateUserState(userId: ID!, username: String!, state: Boolean!): CommandResponse
   "Changes user password"
   resetUserPassword(userId: ID!, input: UserPasswordInput): CommandResponse  
-  "Adds the role to the user"
-  addUserRole(userId: ID, input: RoleInput): CommandResponse
-  "Removes the role from the user"
-  removeUserRole(userId: ID, input: RoleInput): CommandResponse
+  "Adds the roles to the user"
+  addRolesToTheUser(userId: ID, input: RolesInput): CommandResponse
+  "Removes the roles from the user"
+  removeRolesFromUser(userId: ID, input: RolesInput): CommandResponse
 }
 
 type Subscription {

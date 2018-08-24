@@ -30,7 +30,9 @@ export class UserFormComponent implements OnInit {
   userRolesForm: FormGroup;
   userStateForm: FormGroup;
   selectedRole: any;
+  selectedUserRole: any;
   roles = [];
+  userRoles = [];
 
   constructor(
     private translationLoader: FuseTranslationLoaderService,
@@ -183,6 +185,46 @@ export class UserFormComponent implements OnInit {
 
         this.roles = roles.data.getRoles;
       });
+  }
+
+  /**
+   * Adds the selected roles to the selected user
+   */
+  addRolesToUser(){      
+
+    console.log('Adding roles to the user ... ', this.selectedRole);
+    this.userFormService.addRolesToTheUser$(this.user.id, this.selectedRole)
+    .pipe(
+      mergeMap(resp => this.graphQlAlarmsErrorHandler$(resp)),
+      filter((resp: any) => !resp.errors || resp.errors.length === 0),
+    ).subscribe(model => {
+      this.snackBar.open("Se han agregado nuevos roles al usuario", "Cerrar", {
+        duration: 2000
+      });
+    },
+    error => {
+      console.log('Error adding roles to the user ==> ', error);
+    });
+  }
+
+    /**
+   * Adds the selected roles to the selected user
+   */
+  removeRolesFromUser(){      
+
+    console.log('Removing roles to the user ... ', this.selectedRole);
+    this.userFormService.removeRolesFromUser$(this.user.id, this.selectedUserRole)
+    .pipe(
+      mergeMap(resp => this.graphQlAlarmsErrorHandler$(resp)),
+      filter((resp: any) => !resp.errors || resp.errors.length === 0),
+    ).subscribe(model => {
+      this.snackBar.open("Se han eliminado roles de usuario", "Cerrar", {
+        duration: 2000
+      });
+    },
+    error => {
+      console.log('Error removing roles from the user ==> ', error);
+    });
   }
 
   /**
