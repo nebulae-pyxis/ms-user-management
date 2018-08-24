@@ -8,6 +8,7 @@ import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import {
   getUser,
   getRoles,
+  getUserRoleMapping,
   createUser,
   updateUserGeneralInfo,
   updateUserState,
@@ -70,6 +71,22 @@ export class UserFormService {
     return this.gateway.apollo
     .query<any>({
       query: getRoles,
+      fetchPolicy: 'network-only',
+      errorPolicy: 'all'
+    });
+  }
+
+  /**
+   * Gets the roles of the indicated user.
+   * @param userId Id of the user to query
+   */
+  getUserRoleMapping$(userId) {
+    return this.gateway.apollo
+    .query<any>({
+      query: getUserRoleMapping,
+      variables: {
+        userId: userId
+      },
       fetchPolicy: 'network-only',
       errorPolicy: 'all'
     });

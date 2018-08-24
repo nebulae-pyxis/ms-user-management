@@ -44,8 +44,6 @@
 
           <div class="tab-content p-24" fxLayout="column" fusePerfectScrollbar>
 
-
-
             <form name="userGeneralInfoForm" [formGroup]="userGeneralInfoForm" class="user w-100-p" fxLayout="column" class="mat-white-bg mat-elevation-z4 p-24 mr-24 mb-24">
 
               <div fxLayout="row">
@@ -168,26 +166,35 @@
                   <div fxLayout="row">
 
                       <div fxLayoutAlign="center start" fxFlex="30" style="margin:7px;">                        
-                        <mat-selection-list #list [(ngModel)]="selectedRole" fxFlex="100" style="min-height: 200px;">                          
-                          <h3 mat-subheader>{{'USER.ROLES' | translate}}</h3>
+                        <mat-selection-list #list [(ngModel)]="selectedRoles" fxFlex="100" style="min-height: 200px;">                          
+                          <div fxLayout="row" fxLayoutAlign="start center">
+                            <h3 mat-subheader>{{'USER.SYSTEM_ROLES' | translate}}</h3>
+                            <button mat-icon-button *ngIf="user.id" (click)="addRolesToUser()">
+                              <mat-icon aria-label="Example icon-button with a heart icon">library_add</mat-icon>
+                            </button>
+                          </div>
+                          
                           <mat-list-option *ngFor="let role of roles" [value]="{id: role.id, name: role.name}" >
                             {{role.name}}
                           </mat-list-option>
-                          <button mat-raised-button *ngIf="user.id" (click)="addRolesToUser()">{{'USER.ADD_ROLES' | translate}}</button>
+                          
                         </mat-selection-list>
                       </div>
                       
                       <mat-divider [vertical]="true" ></mat-divider>
 
                       <div fxLayoutAlign="center start" fxFlex="30" style="margin:7px;">
-                        <mat-selection-list #list [(ngModel)]="selectedUserRole" fxFlex="100">
-                            <h3 mat-subheader>{{'USER.USER_ROLES_ASSIGNED' | translate}}</h3>
+                        <mat-selection-list #list [(ngModel)]="selectedUserRoles" fxFlex="100">
+                            <div fxLayout="row" fxLayoutAlign="start center">
+                                <h3 mat-subheader>{{'USER.USER_ROLES_ASSIGNED' | translate}}</h3>
+                                <button mat-icon-button *ngIf="user.id" (click)="removeRolesFromUser()">
+                                  <mat-icon aria-label="Example icon-button with a heart icon">delete</mat-icon>
+                                </button>
+                              </div>                          
                           <mat-list-option *ngFor="let userRole of userRoles" [value]="{id: userRole.id, name: userRole.name}">
                             {{userRole.name}}
                           </mat-list-option>
-                          <button mat-raised-button *ngIf="user.id" (click)="removeRolesFromUser()">{{'USER.REMOVE_ROLES' | translate}}</button>
                         </mat-selection-list>
-                        
                       </div>
                     </div>
               </div>

@@ -9,8 +9,8 @@ class KeycloakDA {
    * initialize and configure keycloak admin client
    * @param { { url, dbName } } ops
    */
-  constructor({ baseUrl, username, password, grant_type, client_id }) {
-    this.settings = {baseUrl, username, password, grant_type, client_id};
+  constructor({realmName, baseUrl, username, password, grant_type, client_id }) {
+    this.settings = {realmName, baseUrl, username, password, grant_type, client_id};
     this.keycloakAdmin = new KeycloakAdminClient(this.settings);
 
     // const settings = {
@@ -23,19 +23,37 @@ class KeycloakDA {
   }
 
   /**
-   * Starts DB connections
-   * @returns {Rx.Observable} Obserable that resolve to the DB client
+   * Starts Keycloak connections
+   * @returns {Rx.Observable} Observable that resolve to the Keycloak client
    */
   start$() {
     console.log("KeycloakDA.start$()... ");
     return this.keycloakAdmin.start$().map(
         client => {
-          console.log(this.url);
           this.keycloakClient = client;        
           return `Keycloak admin client started= ${this.settings.baseUrl}`;
         }
       );
   }
+
+  /**
+   * Starts Keycloak connections and execute the token refresher ()
+   * @returns {Rx.Observable} Observable that resolve to the Keycloak client
+   */
+  startAndExecuteTokenRefresher$() {
+    return this.start$()
+    .mergeMap(res => {
+      return this.keycloakAdmin.startTokenRefresher$()
+      .map(
+          client => {
+            this.keycloakClient = client;        
+            return `Keycloak admin client token refresher started= ${this.settings.baseUrl}`;
+          }
+      );
+    })
+    
+  }
+
 
   /**
    * Stops DB connections
@@ -55,6 +73,7 @@ module.exports = {
   singleton() {
     if (!instance) {        
       instance = new KeycloakDA({ 
+        realmName: process.env.KEYCLOAK_USERS_REALM_NAME,
         baseUrl: process.env.KEYCLOAK_BASE_URL,
         username: process.env.KEYCLOAK_USERNAME, 
         password: process.env.KEYCLOAK_PASSWORD,

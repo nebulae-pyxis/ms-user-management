@@ -37,7 +37,9 @@ export const locale = {
       TEMPORARY: 'Temporal',
       RESET_CREDENTIALS: 'Cambiar contraseña',
       ADD_ROLES: 'Agregar roles',
-      REMOVE_ROLES: 'Eliminar roles'
+      REMOVE_ROLES: 'Eliminar roles',
+      SYSTEM_ROLES: 'Roles del sistema',
+      USER_ROLES_ASSIGNED: 'Roles asignados al usuario'
     },
     ERRORS: {
       16001: 'Error interno de servidor',

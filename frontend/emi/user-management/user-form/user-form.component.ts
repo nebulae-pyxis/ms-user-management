@@ -1,3 +1,4 @@
+import { Observable } from 'rxjs/Observable';
 import { FuseTranslationLoaderService } from '../../../../core/services/translation-loader.service';
 import { TranslateService } from "@ngx-translate/core";
 import { Component, OnDestroy, OnInit, ViewEncapsulation } from '@angular/core';
@@ -12,7 +13,7 @@ import { UserFormService } from './user-form.service';
 ////////// RXJS ///////////
 // tslint:disable-next-line:import-blacklist
 import * as Rx from "rxjs/Rx";
-import { first, filter, tap, mergeMap } from "rxjs/operators";
+import { first, filter, tap, mergeMap, map, toArray } from "rxjs/operators";
 
 @Component({
   selector: 'app-user-form',
@@ -29,8 +30,8 @@ export class UserFormComponent implements OnInit {
   userCredentialsForm: FormGroup;
   userRolesForm: FormGroup;
   userStateForm: FormGroup;
-  selectedRole: any;
-  selectedUserRole: any;
+  selectedRoles: any;
+  selectedUserRoles: any;
   roles = [];
   userRoles = [];
 
@@ -53,7 +54,9 @@ export class UserFormComponent implements OnInit {
     this.userCredentialsForm = this.createUserCredentialsForm();
     this.userStateForm = this.createUserStateForm();
     this.userRolesForm = this.createUserRolesForm();
-    this.loadRoles();
+    // this.loadRoles();
+    // this.loadUserRoles();
+    this.refreshRoles();
   }
 
   /**
@@ -188,12 +191,81 @@ export class UserFormComponent implements OnInit {
   }
 
   /**
+   * Loads the roles of the selected user
+   */
+  loadUserRoles() {
+    this.userFormService
+      .getUserRoleMapping$(this.user.id)
+      .pipe(
+        mergeMap(resp => this.graphQlAlarmsErrorHandler$(resp)),
+        filter((resp: any) => !resp.errors || resp.errors.length === 0),
+      ).subscribe(roles => {
+        console.log('User Roles ==> ', roles);
+
+        this.userRoles = roles.data.getUserRoles;
+
+      });
+  }
+
+  /**
+   * Refresh roles
+   */
+  refreshRoles(){
+    Rx.Observable.forkJoin(
+      this.userFormService.getRoles$().pipe(
+        mergeMap(roles => Rx.Observable.from(roles.data.getRoles)),
+        map(role => {
+          return {
+            id: role.id,
+            name: role.name
+          }
+        }),
+        toArray()
+      ),
+      this.userFormService.getUserRoleMapping$(this.user.id).pipe(
+        mergeMap(roles => Rx.Observable.from(roles.data.getUserRoleMapping)),
+        map(role => {
+          return {
+            id: role.id,
+            name: role.name
+          }
+        }),
+        toArray()
+      )
+    )
+    .subscribe(([rolesData, userRoleMappingData]) => {
+      console.log("DATA ROLES ==> ", rolesData, userRoleMappingData);
+      this.roles = [];
+      this.userRoles = [];
+      rolesData.forEach(role => {
+
+        if (!userRoleMappingData.some(roleMapping=> { return roleMapping.id == role.id})) {
+          this.roles.push(role);
+        }
+      });
+      this.userRoles = userRoleMappingData;
+    });
+  }
+
+  removeRoles(roles){
+    for (var i = 0; i < this.roles.length; i++) {
+      var obj = this.roles[i];
+  
+      if (roles.map(data=> {data.id}).indexOf(obj.id) !== -1) {
+        this.roles.splice(i, 1);
+      }
+    }
+
+
+  }
+
+  /**
    * Adds the selected roles to the selected user
    */
   addRolesToUser(){      
 
-    console.log('Adding roles to the user ... ', this.selectedRole);
-    this.userFormService.addRolesToTheUser$(this.user.id, this.selectedRole)
+    console.log('Adding roles to the user ... ', this.selectedRoles);
+    this.userFormService.addRolesToTheUser$(this.user.id, this.selectedRoles)
     .pipe(
       mergeMap(resp => this.graphQlAlarmsErrorHandler$(resp)),
       filter((resp: any) => !resp.errors || resp.errors.length === 0),
@@ -201,6 +273,16 @@ export class UserFormComponent implements OnInit {
       this.snackBar.open("Se han agregado nuevos roles al usuario", "Cerrar", {
         duration: 2000
       });
+      
+      for (var i = 0; i < this.roles.length; i++) {
+        var obj = this.roles[i];
+    
+        console.log('MAPA => ', this.selectedRoles.map(data=> data.id));
+        if (this.selectedRoles.map(data=> data.id).indexOf(obj.id) !== -1) {
+          this.roles.splice(i, 1);
+        }
+      }
+      this.userRoles = this.userRoles.concat(this.selectedRoles);
     },
     error => {
       console.log('Error adding roles to the user ==> ', error);
@@ -212,8 +294,8 @@ export class UserFormComponent implements OnInit {
    */
   removeRolesFromUser(){      
 
-    console.log('Removing roles to the user ... ', this.selectedRole);
-    this.userFormService.removeRolesFromUser$(this.user.id, this.selectedUserRole)
+    console.log('Removing roles to the user ... ', this.selectedRoles);
+    this.userFormService.removeRolesFromUser$(this.user.id, this.selectedUserRoles)
     .pipe(
       mergeMap(resp => this.graphQlAlarmsErrorHandler$(resp)),
       filter((resp: any) => !resp.errors || resp.errors.length === 0),
@@ -221,9 +303,20 @@ export class UserFormComponent implements OnInit {
       this.snackBar.open("Se han eliminado roles de usuario", "Cerrar", {
         duration: 2000
       });
+      
+      for (var i = 0; i < this.userRoles.length; i++) {
+        var obj = this.userRoles[i];
+    
+        console.log('MAPA => ', this.selectedUserRoles.map(data=> data.id));
+        if (this.selectedUserRoles.map(data=> data.id).indexOf(obj.id) !== -1) {
+          this.userRoles.splice(i, 1);
+        }
+      }
+      this.roles = this.roles.concat(this.selectedUserRoles);
     },
     error => {
       console.log('Error removing roles from the user ==> ', error);
+      this.refreshRoles();
     });
   }
 

@@ -17,11 +17,11 @@ const start = () => {
         eventSourcing.eventStore.start$(),
         eventStoreService.start$(),
         mongoDB.start$(),
-        KeycloakDA.start$(),
-        graphQlService.start$()
+        graphQlService.start$(),
+        KeycloakDA.startAndExecuteTokenRefresher$()
     ).subscribe(
         (evt) => {
-            // console.log(evt)
+            //console.log('Subscribe   ===========>' , evt)
         },
         (error) => {
             console.error('Failed to start', error);

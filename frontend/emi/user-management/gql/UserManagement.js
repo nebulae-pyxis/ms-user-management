@@ -50,6 +50,16 @@ export const getRoles = gql`
   }
 `;
 
+//Gets the role mapping of an user
+export const getUserRoleMapping = gql`
+  query getUserRoleMapping($userId: ID!){
+    getUserRoleMapping(userId: $userId){
+      id
+      name
+    }
+  }
+`;
+
 // MUTATIONS
 export const addRolesToTheUser = gql`
   mutation addRolesToTheUser($userId: ID, $input: RolesInput) {

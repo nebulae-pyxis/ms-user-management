@@ -93,7 +93,7 @@ type Query {
   "Gets a user by its username"
   getUser(username: String!): User
   "Gets user role mapping"
-  getUserRoleMapping(userId: String!): [UserRole]
+  getUserRoleMapping(userId: ID!): [UserRole]
   "Gets roles that the petitioner can assign to another users according to its role"
   getRoles: [Role]
 }

@@ -5,6 +5,7 @@ const UserKeycloakDA = require("../data/UserKeycloakDA");
 const broker = require("../tools/broker/BrokerFactory")();
 const eventSourcing = require("../tools/EventSourcing")();
 const RoleValidator = require("../tools/RoleValidator");
+const UserValidatorHelper = require("./UserValidatorHelper");
 const Event = require("@nebulae/event-store").Event;
 const uuidv4 = require("uuid/v4");
 const MATERIALIZED_VIEW_TOPIC = "materialized-view-updates";
@@ -113,7 +114,7 @@ class User {
    * @param {*} authToken Token of the user that perform the request 
    */
   getUserRoleMapping$({ args }, authToken) {
-    const userId = !data.args ? undefined : data.args.userId;
+    const userId = !args ? undefined : args.userId;
     return RoleValidator.checkPermissions$(
       authToken.realm_access.roles,
       "UserManagement",
@@ -166,7 +167,7 @@ class User {
     console.log(" addRolesToTheUser ==> ", data);
     const userId = !data.args ? undefined : data.args.userId;
     const rolesInput = !data.args ? undefined : data.args.input;
-    if (!userId || !rolesInput) {
+    if (!userId || !rolesInput || !rolesInput.roles || rolesInput.roles.length == 0) {
       return Rx.Observable.throw(
         new CustomError(
           "UserManagement",
@@ -274,59 +275,18 @@ class User {
    * @param {string} authToken JWT token
    */
   createUser$(data, authToken) {
-    console.log("33 Create user ==> ", data);
-    const user = !data.args ? undefined : data.args.input;
-    if (!user) {
-      return Rx.Observable.throw(
-        new CustomError(
-          "UserManagement",
-          "createUser$()",
-          USER_MISSING_DATA_ERROR_CODE,
-          "User missing data"
-        )
-      );
-    }
-
-    user.username = user.username.trim();
-    user.businessId = authToken.businessId;
-    return RoleValidator.checkPermissions$(
-      authToken.realm_access.roles,
-      "UserManagement",
-      "createUser$()",
-      PERMISSION_DENIED_ERROR_CODE,
-      "Permission denied",
-      ["business-admin"]
-    )
-      .mergeMap(val => {
-        return Rx.Observable.forkJoin(
-          UserKeycloakDA.getUser$(user.username, null, null),
-          UserKeycloakDA.getUser$(null, user.email, null)
-        ).mergeMap(([userUsernameFound, userEmailFound]) => {
-          //console.log('EXISTED =================== > ', val);
-          console.log("22 User exists: ", userUsernameFound, userEmailFound);
-          if (userUsernameFound || userEmailFound) {
-            return Rx.Observable.throw(
-              new CustomError(
-                "UserManagement",
-                "createUser$()",
-                USER_NAME_OR_EMAIL_EXISTS_ERROR_CODE,
-                "User name or email exists",
-                ["business-admin"]
-              )
-            );
-          }
-
-          return eventSourcing.eventStore.emitEvent$(
-            new Event({
-              eventType: "UserCreated",
-              eventTypeVersion: 1,
-              aggregateType: "User",
-              aggregateId: user.username,
-              data: user,
-              user: authToken.preferred_username
-            })
-          );
-        });
+    return UserValidatorHelper.validateUserCreation$(data)
+      .mergeMap(result => {
+        return eventSourcing.eventStore.emitEvent$(
+          new Event({
+            eventType: "UserCreated",
+            eventTypeVersion: 1,
+            aggregateType: "User",
+            aggregateId: user.username,
+            data: user,
+            user: authToken.preferred_username
+          })
+        );
       })
       .map(result => {
         return {
@@ -357,7 +317,6 @@ class User {
     if (
       !userId ||
       !generalInfo ||
-      !generalInfo.username ||
       !generalInfo.name ||
       !generalInfo.lastname
     ) {
@@ -386,7 +345,7 @@ class User {
             eventType: "UserGeneralInfoUpdated",
             eventTypeVersion: 1,
             aggregateType: "User",
-            aggregateId: generalInfo.username,
+            aggregateId: userId,
             data: user,
             user: authToken.preferred_username
           })
@@ -395,7 +354,7 @@ class User {
       .map(result => {
         return {
           code: 200,
-          message: `User general info with id: ${generalInfo.username} has been updated`
+          message: `User general info with id: ${userId} has been updated`
         };
       })
       .mergeMap(rawResponse => this.buildSuccessResponse$(rawResponse))
@@ -445,7 +404,7 @@ class User {
             eventType: newState ? "UserActivated" : "UserDeactivated",
             eventTypeVersion: 1,
             aggregateType: "User",
-            aggregateId: username,
+            aggregateId: id,
             data: user,
             user: authToken.preferred_username
           })
@@ -475,8 +434,6 @@ class User {
       temporary: userPassword.temporary || false,
       value: userPassword.password
     };
-
-    console.log('Resetting password => ', password);
 
     if (!id || !userPassword || !userPassword.password) {
       return Rx.Observable.throw(
@@ -518,7 +475,6 @@ class User {
       const exception = { data: null, result: {} };
       const isCustomError = err instanceof CustomError;
       if (!isCustomError) {
-        console.log("ERROR HANDLE ==> ", err);
         err = new DefaultError(err);
       }
       exception.result = {
