@@ -67,7 +67,7 @@ spec:
               name: keycloak
               key: keycloak_backend_password
         - name: USER_ROLES_ALLOW_TO_ASSIGN
-          value: "{'business-admin': ['business-admin']}"
+          value: '{"business-owner": ["business-owner"]}'
         - name: KEYCLOAK_BACKEND_CLIENT_ID
           value: "admin-cli"
         - name: KEYCLOAK_BACKEND_REALM_NAME

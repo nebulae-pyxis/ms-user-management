@@ -272,6 +272,7 @@ class UserKeycloakDA {
    * Gets an user by its username
    */
   static getUser$(username, email, businessId) {
+    console.log('getUsers1111');
     return this.getUsers$(0, 1, undefined, businessId, username, email).map(
       users => {
         if (!users || users.length == 0) {
@@ -330,9 +331,10 @@ class UserKeycloakDA {
    * @param {*} userRolesRequester Array of roles of the user that perform the request
    */
   static getRoles$(userRolesRequester) {
+    console.log('userRolesRequester1 => ',  process.env.USER_ROLES_ALLOW_TO_ASSIGN);
     const USER_ROLES_ALLOW_TO_ASSIGN = JSON.parse(process.env.USER_ROLES_ALLOW_TO_ASSIGN);
 
-    console.log('userRolesRequester => ', userRolesRequester, USER_ROLES_ALLOW_TO_ASSIGN);
+    console.log('userRolesRequester2 => ', userRolesRequester, USER_ROLES_ALLOW_TO_ASSIGN);
     let userRolesAllowed = [];
     if(userRolesRequester && USER_ROLES_ALLOW_TO_ASSIGN){
       userRolesRequester.forEach(role => {        
