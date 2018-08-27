@@ -60,24 +60,24 @@
 
               <mat-form-field class="w-100-p">
                 <input matInput name="username" formControlName="username" placeholder="{{'USER.USERNAME' | translate}}">
-                <mat-error *ngIf="userGeneralInfoForm.hasError('required', 'username')">
+                <mat-error *ngIf="userGeneralInfoForm.hasError('required', ['username'])">
                   {{'USER.USERNAME_REQUIRED' | translate}}
                 </mat-error>
-                <mat-error *ngIf="userGeneralInfoForm.hasError('pattern', 'username')">
+                <mat-error *ngIf="userGeneralInfoForm.hasError('pattern', ['username'])">
                   {{'USER.INVALID_USERNAME_FORMAT' | translate}}
                 </mat-error>
               </mat-form-field>
 
               <mat-form-field class="w-100-p">
                 <input matInput name="name" formControlName="name" placeholder="{{'USER.NAME' | translate}}">
-                <mat-error *ngIf="userGeneralInfoForm.hasError('required', 'name')">
+                <mat-error *ngIf="userGeneralInfoForm.hasError('required', ['name'])">
                   {{'USER.NAME_REQUIRED' | translate}}
                 </mat-error>
               </mat-form-field>
 
               <mat-form-field class="w-100-p">
                 <input matInput name="lastname" formControlName="lastname" placeholder="{{'USER.LASTNAME' | translate}}">
-                <mat-error *ngIf="userGeneralInfoForm.hasError('required', 'lastname')">
+                <mat-error *ngIf="userGeneralInfoForm.hasError('required', ['lastname'])">
                   {{'USER.LASTNAME_REQUIRED' | translate}}
                 </mat-error>
               </mat-form-field>
@@ -88,21 +88,21 @@
                   <mat-option value="FOREIGNER_ID">{{ 'USER.FOREIGNER_ID' | translate }}</mat-option>
                   <mat-option value="PASSPORT">{{ 'USER.PASSPORT' | translate }}</mat-option>
                 </mat-select>
-                <mat-error *ngIf="userGeneralInfoForm.hasError('required', 'documentType')">
+                <mat-error *ngIf="userGeneralInfoForm.hasError('required', ['documentType'])">
                   {{'USER.DOCUMENT_TYPE_REQUIRED' | translate}}
                 </mat-error>
               </mat-form-field>
 
               <mat-form-field class="w-100-p">
                 <input matInput name="documentId" formControlName="documentId" placeholder="{{'USER.DOCUMENT_ID' | translate}}">
-                <mat-error *ngIf="userGeneralInfoForm.hasError('required', 'documentId')">
+                <mat-error *ngIf="userGeneralInfoForm.hasError('required', ['documentId'])">
                   {{'USER.DOCUMENT_ID_REQUIRED' | translate}}
                 </mat-error>
               </mat-form-field>
 
               <mat-form-field class="w-100-p">
                 <input matInput name="email" formControlName="email" placeholder="{{'USER.EMAIL' | translate}}">
-                <mat-error *ngIf="userGeneralInfoForm.hasError('required', 'documentType')">
+                <mat-error *ngIf="userGeneralInfoForm.hasError('required', ['documentType'])">
                   {{'USER.DOCUMENT_TYPE_REQUIRED' | translate}}
                 </mat-error>
               </mat-form-field>
