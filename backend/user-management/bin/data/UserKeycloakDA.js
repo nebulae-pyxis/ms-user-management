@@ -15,7 +15,7 @@ class UserKeycloakDA {
 
     return Rx.Observable.defer(() =>
       KeycloakDA.keycloakClient.realms.maps.map(
-        process.env.KEYCLOAK_USERS_REALM_NAME,
+        process.env.KEYCLOAK_BACKEND_REALM_NAME,
         userId,
         arrayRoles
       )
@@ -31,7 +31,7 @@ class UserKeycloakDA {
 
     return Rx.Observable.defer(() =>
       KeycloakDA.keycloakClient.realms.maps.unmap(
-        process.env.KEYCLOAK_USERS_REALM_NAME,
+        process.env.KEYCLOAK_BACKEND_REALM_NAME,
         userId,
         arrayRoles
       )
@@ -43,7 +43,6 @@ class UserKeycloakDA {
    * @param {*} user user to create
    */
   static createUser$(user) {
-    console.log("Creating user DA ==> ", user);
     const attributes = {};
     attributes["documentType"] = user.documentType;
     attributes["documentId"] = user.documentId;
@@ -62,7 +61,7 @@ class UserKeycloakDA {
 
     return Rx.Observable.defer(() =>
       KeycloakDA.keycloakClient.users.create(
-        process.env.KEYCLOAK_USERS_REALM_NAME,
+        process.env.KEYCLOAK_BACKEND_REALM_NAME,
         userKeycloak
       )
     );
@@ -93,7 +92,7 @@ class UserKeycloakDA {
 
     return Rx.Observable.defer(() =>
       KeycloakDA.keycloakClient.users.update(
-        process.env.KEYCLOAK_USERS_REALM_NAME,
+        process.env.KEYCLOAK_BACKEND_REALM_NAME,
         userKeycloak
       )
     );
@@ -116,7 +115,7 @@ class UserKeycloakDA {
 
     return Rx.Observable.defer(() =>
       KeycloakDA.keycloakClient.users.update(
-        process.env.KEYCLOAK_USERS_REALM_NAME,
+        process.env.KEYCLOAK_BACKEND_REALM_NAME,
         userKeycloak
       )
     );
@@ -132,10 +131,56 @@ class UserKeycloakDA {
 
     return Rx.Observable.defer(() =>
       KeycloakDA.keycloakClient.users.resetPassword(
-        process.env.KEYCLOAK_USERS_REALM_NAME,
+        process.env.KEYCLOAK_BACKEND_REALM_NAME,
         userId,
         userPassword
       )
+    );
+  }
+
+/**
+   * Gets the users by user ID
+   */
+  static getUserByUserId$(userId) {
+    //Gets the amount of user registered on Keycloak
+    return (
+      Rx.Observable.defer(() => {
+        const optionsFilter = {
+          userId: userId
+        };
+        return KeycloakDA.keycloakClient.users.find(
+          process.env.KEYCLOAK_BACKEND_REALM_NAME,
+          optionsFilter);
+      }).map(result => {
+        console.log('user result ==> ', result);
+          const attributes = result.attributes;
+          const user = {
+            id: result.id,
+            businessId: !attributes || !attributes.businessId
+            ? undefined
+            : attributes.businessId[0],
+            username: result.username,
+            generalInfo: {
+              name: result.firstName ? result.firstName : "",
+              lastname: result.lastName ? result.lastName : "",
+              documentType:
+                !attributes || !attributes.documentType
+                  ? undefined
+                  : attributes.documentType[0],
+              documentId:
+                !attributes || !attributes.documentId
+                  ? undefined
+                  : attributes.documentId[0],
+              email: result.email,
+              phone:
+                !attributes || !attributes.phone
+                  ? undefined
+                  : attributes.phone[0]
+            },
+            state: result.enabled
+          };
+          return user;
+        })
     );
   }
 
@@ -147,6 +192,7 @@ class UserKeycloakDA {
    * @param {*} businessId
    * @param {*} username
    * @param {*} email
+   * @param {*} userId
    */
   static getUsers$(
     page,
@@ -154,13 +200,13 @@ class UserKeycloakDA {
     searchFilter,
     businessId,
     username,
-    email
+    email,
   ) {
     //Gets the amount of user registered on Keycloak
     return (
       Rx.Observable.defer(() =>
         KeycloakDA.keycloakClient.users.count(
-          process.env.KEYCLOAK_USERS_REALM_NAME
+          process.env.KEYCLOAK_BACKEND_REALM_NAME
         )
       )
         //According to the amount of user, it generates ranges which will help us to get the users by batches
@@ -177,11 +223,13 @@ class UserKeycloakDA {
             email: email
           };
           return KeycloakDA.keycloakClient.users.find(
-            process.env.KEYCLOAK_USERS_REALM_NAME,
+            process.env.KEYCLOAK_BACKEND_REALM_NAME,
             optionsFilter
           );
         })
-        .mergeMap(users => Rx.Observable.from(users))
+        .mergeMap(users => {
+          return Rx.Observable.from(users)
+        })
         // We can only return the users belonging to the same business of the user that is making the query.
         .filter(
           user =>
@@ -258,7 +306,7 @@ class UserKeycloakDA {
     return (
       Rx.Observable.defer(() =>
         KeycloakDA.keycloakClient.users.roleMappings.find(
-          process.env.KEYCLOAK_USERS_REALM_NAME,
+          process.env.KEYCLOAK_BACKEND_REALM_NAME,
           userId
         )
       )
@@ -304,7 +352,7 @@ class UserKeycloakDA {
     return (
       Rx.Observable.defer(() =>
         KeycloakDA.keycloakClient.realms.roles.find(
-          process.env.KEYCLOAK_USERS_REALM_NAME
+          process.env.KEYCLOAK_BACKEND_REALM_NAME
         )
       )
         .mergeMap(userRoles => Rx.Observable.from(userRoles))

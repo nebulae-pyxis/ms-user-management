@@ -89,7 +89,7 @@ export const createUser = gql`
 `;
 
 export const updateUserGeneralInfo = gql`
-  mutation updateUserGeneralInfo($userId: ID,$input: UserInput) {
+  mutation updateUserGeneralInfo($userId: ID!,$input: UserInput) {
     updateUserGeneralInfo(userId: $userId, input: $input) {
       code
       message

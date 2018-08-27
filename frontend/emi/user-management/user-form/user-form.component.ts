@@ -64,10 +64,10 @@ export class UserFormComponent implements OnInit {
    */
   createUserGeneralInfoForm(){
     return this.formBuilder.group({
-      username: [{
-        value: this.user.username,
-        disabled: this.pageType != 'new'
-      }, Validators.required],
+      username:[{value: this.user.username, disabled: this.pageType != 'new'}, Validators.compose([
+        Validators.required,
+        Validators.pattern('^(?=[a-zA-Z0-9.]{8,}$)(?=.*?[a-z])(?=.*?[0-9]).*')
+     ])],
       name: [(this.user.generalInfo ? this.user.generalInfo.name : ''), Validators.required],
       lastname: [(this.user.generalInfo ? this.user.generalInfo.lastname : ''), Validators.required],
       documentType: [(this.user.generalInfo ? this.user.generalInfo.documentType : ''),Validators.required],
@@ -211,10 +211,13 @@ export class UserFormComponent implements OnInit {
    * Refresh roles
    */
   refreshRoles(){
+    if(this.pageType == 'new'){
+      return;
+    }
     Rx.Observable.forkJoin(
       this.userFormService.getRoles$().pipe(
         mergeMap(roles => Rx.Observable.from(roles.data.getRoles)),
-        map(role => {
+        map((role: {id, name}) => {
           return {
             id: role.id,
             name: role.name
@@ -224,10 +227,10 @@ export class UserFormComponent implements OnInit {
       ),
       this.userFormService.getUserRoleMapping$(this.user.id).pipe(
         mergeMap(roles => Rx.Observable.from(roles.data.getUserRoleMapping)),
-        map(role => {
+        map((roleR: {id, name} | any) => {
           return {
-            id: role.id,
-            name: role.name
+            id: roleR.id,
+            name: roleR.name
           }
         }),
         toArray()

@@ -1,16 +1,22 @@
 //Every single error code
 // please use the prefix assigned to this microservice
-const INTERNAL_SERVER_ERROR_CODE = 16001;
-const PERMISSION_DENIED_ERROR_CODE = 16002;
-const USER_MISSING_DATA_ERROR_CODE = 16010;
-const USER_NAME_OR_EMAIL_EXISTS_ERROR_CODE = 16011;
-const INVALID_USER_NAME_ERROR_CODE = 16012;
+const INTERNAL_SERVER_ERROR_CODE = {code: 16001, description: 'Internal server error'};
+const PERMISSION_DENIED_ERROR_CODE = {code: 16002, description: 'Permission denied'};
+const USER_MISSING_DATA_ERROR_CODE = {code: 16010, description: 'User missing data'};
+const USER_NAME_ALREADY_USED_CODE = {code: 16011, description: 'Username already used'};
+const INVALID_USERNAME_FORMAT_ERROR_CODE = {code: 16012, description: 'Invalid username format'};
+const EMAIL_ALREADY_USED_ERROR_CODE = {code: 16014, description: 'Email already used'};
+const USER_UPDATE_OWN_INFO_ERROR_CODE = {code: 16015, description: 'You cannot update your own info'};
+const USER_BELONG_TO_OTHER_BUSINESS_ERROR_CODE = {code: 16016, description: 'User belongs to other business'};
 
 
 module.exports =  { 
     USER_MISSING_DATA_ERROR_CODE,
-    USER_NAME_OR_EMAIL_EXISTS_ERROR_CODE,
+    USER_NAME_ALREADY_USED_CODE,
+    EMAIL_ALREADY_USED_ERROR_CODE,
     PERMISSION_DENIED_ERROR_CODE,
     INTERNAL_SERVER_ERROR_CODE,
-    INVALID_USER_NAME_ERROR_CODE
+    INVALID_USERNAME_FORMAT_ERROR_CODE,
+    USER_UPDATE_OWN_INFO_ERROR_CODE,
+    USER_BELONG_TO_OTHER_BUSINESS_ERROR_CODE
 } 

@@ -73,12 +73,12 @@ module.exports = {
   singleton() {
     if (!instance) {        
       instance = new KeycloakDA({ 
-        realmName: process.env.KEYCLOAK_USERS_REALM_NAME,
-        baseUrl: process.env.KEYCLOAK_BASE_URL,
-        username: process.env.KEYCLOAK_USERNAME, 
-        password: process.env.KEYCLOAK_PASSWORD,
+        realmName: process.env.KEYCLOAK_BACKEND_REALM_NAME,
+        baseUrl: process.env.KEYCLOAK_BACKEND_BASE_URL,
+        username: process.env.KEYCLOAK_BACKEND_USER, 
+        password: process.env.KEYCLOAK_BACKEND_PASSWORD,
         grant_type: 'password',
-        client_id: process.env.KEYCLOAK_CLIENT_ID,
+        client_id: process.env.KEYCLOAK_BACKEND_CLIENT_ID,
     });
       console.log(`KeycloakDA instance created`);
     }

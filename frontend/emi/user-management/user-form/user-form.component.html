@@ -63,6 +63,9 @@
                 <mat-error *ngIf="userGeneralInfoForm.hasError('required', 'username')">
                   {{'USER.USERNAME_REQUIRED' | translate}}
                 </mat-error>
+                <mat-error *ngIf="userGeneralInfoForm.hasError('pattern', 'username')">
+                  {{'USER.INVALID_USERNAME_FORMAT' | translate}}
+                </mat-error>
               </mat-form-field>
 
               <mat-form-field class="w-100-p">

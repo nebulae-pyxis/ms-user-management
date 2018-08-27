@@ -4,29 +4,29 @@
         "src": "frontend/emi/user-management",
         "groups": [
             {
-              "id": "GROUP_NAME",
-              "icon": "location_searching",
+              "id": "User",
+              "icon": "assignment_turned_in",
               "translate": {
-                "en": "Group Name",
-                "es": "Nombre de Grupo"
+                "en": "Users",
+                "es": "Usuarios"
               },
               "priority": 1000
             }
           ],
         "contents": [
             {
-                "groupId": "GROUP_NAME",
+                "groupId": "User",
                 "id": "user-management",
-                "icon": "dashboard",
+                "icon": "face",
                 "translate": {
-                    "en": "user-management_en",
-                    "es": "user-management_es"
+                    "en": "User management",
+                    "es": "Gestión de usuarios"
                 },
                 "navURL": "/user-management",
                 "path": "user-management",
                 "loadChildren": "./main/content/user-management/user-management.module#UserManagementModule",
                 "priority": 1000,
-                "roles" : ["developer"],
+                "roles" : ["business-owner"],
                 "default" : false
             }            
         ],

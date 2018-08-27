@@ -36,7 +36,7 @@ class User {
       "getUsers$()",
       PERMISSION_DENIED_ERROR_CODE,
       "Permission denied",
-      ["business-admin"]
+      ["business-owner"]
     )
       .mergeMap(val => {
         return UserKeycloakDA.getUsers$(
@@ -66,7 +66,7 @@ class User {
       "getUser$()",
       PERMISSION_DENIED_ERROR_CODE,
       "Permission denied",
-      ["business-admin"]
+      ["business-owner"]
     )
       .mergeMap(val => {
         return UserKeycloakDA.getUser$(
@@ -94,7 +94,7 @@ class User {
       "getUser$()",
       PERMISSION_DENIED_ERROR_CODE,
       "Permission denied",
-      ["business-admin"]
+      ["business-owner"]
     )
       .mergeMap(val => {
         return UserKeycloakDA.getRoles$(
@@ -121,7 +121,7 @@ class User {
       "getUser$()",
       PERMISSION_DENIED_ERROR_CODE,
       "Permission denied",
-      ["business-admin"]
+      ["business-owner"]
     )
       .mergeMap(val => {
         return UserKeycloakDA.getUserRoleMapping$(
@@ -145,7 +145,7 @@ class User {
       "changeUserState$()",
       PERMISSION_DENIED_ERROR_CODE,
       "Permission denied",
-      ["business-admin"]
+      ["business-owner"]
     )
       .mergeMap(val => {
         return UserKeycloakDA.getUserCount$();
@@ -164,39 +164,15 @@ class User {
    * @param {*} authToken Token
    */
   addRolesToTheUser$(data, authToken) {
-    console.log(" addRolesToTheUser ==> ", data);
-    const userId = !data.args ? undefined : data.args.userId;
-    const rolesInput = !data.args ? undefined : data.args.input;
-    if (!userId || !rolesInput || !rolesInput.roles || rolesInput.roles.length == 0) {
-      return Rx.Observable.throw(
-        new CustomError(
-          "UserManagement",
-          "addRolesToTheUser$()",
-          USER_MISSING_DATA_ERROR_CODE,
-          "Missing data"
-        )
-      );
-    }
-    const dataUser = {
-      userId: userId,
-      userRoles: rolesInput
-    };
-    return RoleValidator.checkPermissions$(
-      authToken.realm_access.roles,
-      "UserManagement",
-      "addRolesToTheUser$()",
-      PERMISSION_DENIED_ERROR_CODE,
-      "Permission denied",
-      ["business-admin"]
-    )
-      .mergeMap(val => {
+    return UserValidatorHelper.validateUserRoles$(data, authToken)
+      .mergeMap(user => {
         return eventSourcing.eventStore.emitEvent$(
           new Event({
             eventType: "UserRolesAdded",
             eventTypeVersion: 1,
             aggregateType: "User",
-            aggregateId: dataUser.userId,
-            data: dataUser,
+            aggregateId: user.id,
+            data: user,
             user: authToken.preferred_username
           })
         );
@@ -204,7 +180,7 @@ class User {
       .map(result => {
         return {
           code: 200,
-          message: `User roles: ${rolesInput} had been added to the user with username: ${dataUser.userId}`
+          message: `User roles: ${data.args.input} had been added to the user with id: ${data.args.userId}`
         };
       })
       .mergeMap(rawResponse => this.buildSuccessResponse$(rawResponse))
@@ -221,39 +197,15 @@ class User {
    * @param {*} authToken Token
    */
   removeRolesFromUser$(data, authToken) {
-    console.log(" removeRolesFromUser ==> ", data);
-    const userId = !data.args ? undefined : data.args.userId;
-    const rolesInput = !data.args ? undefined : data.args.input;
-    if (!userId || !rolesInput) {
-      return Rx.Observable.throw(
-        new CustomError(
-          "UserManagement",
-          "removeRolesFromUser$()",
-          USER_MISSING_DATA_ERROR_CODE,
-          "Missing data"
-        )
-      );
-    }
-    const dataUser = {
-      userId: userId,
-      userRoles: rolesInput
-    };
-    return RoleValidator.checkPermissions$(
-      authToken.realm_access.roles,
-      "UserManagement",
-      "removeRolesFromUser$()",
-      PERMISSION_DENIED_ERROR_CODE,
-      "Permission denied",
-      ["business-admin"]
-    )
-      .mergeMap(val => {
+    return UserValidatorHelper.validateUserRoles$(data, authToken)
+      .mergeMap(user => {
         return eventSourcing.eventStore.emitEvent$(
           new Event({
             eventType: "UserRolesRemoved",
             eventTypeVersion: 1,
             aggregateType: "User",
-            aggregateId: dataUser.userId,
-            data: dataUser,
+            aggregateId: user.id,
+            data: user,
             user: authToken.preferred_username
           })
         );
@@ -261,7 +213,7 @@ class User {
       .map(result => {
         return {
           code: 200,
-          message: `User roles: ${rolesInput} had been removed from the user with username: ${dataUser.userId}`
+          message: `User roles: ${data.args.input} had been removed from the user with id: ${data.args.userId}`
         };
       })
       .mergeMap(rawResponse => this.buildSuccessResponse$(rawResponse))
@@ -275,8 +227,9 @@ class User {
    * @param {string} authToken JWT token
    */
   createUser$(data, authToken) {
-    return UserValidatorHelper.validateUserCreation$(data)
-      .mergeMap(result => {
+    //Verify if all of the info that was enter is valid
+    return UserValidatorHelper.validateUserCreation$(data, authToken)
+      .mergeMap(user => {
         return eventSourcing.eventStore.emitEvent$(
           new Event({
             eventType: "UserCreated",
@@ -291,7 +244,7 @@ class User {
       .map(result => {
         return {
           code: 200,
-          message: `User with id: ${user.username} has been created`
+          message: `User with id: ${data.args.username} has been created`
         };
       })
       .mergeMap(rawResponse => this.buildSuccessResponse$(rawResponse))
@@ -305,47 +258,15 @@ class User {
    * @param {string} jwt JWT token
    */
   updateUserGeneralInfo$(data, authToken) {
-    console.log("11 Updating user ==> ", data);
-    const userId = !data.args ? undefined : data.args.userId;
-    const generalInfo = !data.args ? undefined : data.args.input;
-    const user = {
-      generalInfo: generalInfo,
-      businessId: authToken.businessId,
-      id: userId
-    };
-    
-    if (
-      !userId ||
-      !generalInfo ||
-      !generalInfo.name ||
-      !generalInfo.lastname
-    ) {
-      return Rx.Observable.throw(
-        new CustomError(
-          "UserManagement",
-          "updateUserGeneralInfo$()",
-          USER_MISSING_DATA_ERROR_CODE,
-          "User missing data"
-        )
-      );
-    }
-
-    //Checks if the user that is performing this actions has the needed role to execute the operation.
-    return RoleValidator.checkPermissions$(
-      authToken.realm_access.roles,
-      "UserManagement",
-      "updateUserGeneralInfo$()",
-      PERMISSION_DENIED_ERROR_CODE,
-      "Permission denied",
-      ["business-admin"]
-    )
-      .mergeMap(val => {
+    //Verify if all of the info that was enter is valid
+    return UserValidatorHelper.validateUpdateUser$(data, authToken)
+      .mergeMap(user => {
         return eventSourcing.eventStore.emitEvent$(
           new Event({
             eventType: "UserGeneralInfoUpdated",
             eventTypeVersion: 1,
             aggregateType: "User",
-            aggregateId: userId,
+            aggregateId: user.id,
             data: user,
             user: authToken.preferred_username
           })
@@ -354,7 +275,7 @@ class User {
       .map(result => {
         return {
           code: 200,
-          message: `User general info with id: ${userId} has been updated`
+          message: `User general info with id: ${data.args.userId} has been updated`
         };
       })
       .mergeMap(rawResponse => this.buildSuccessResponse$(rawResponse))
@@ -369,42 +290,14 @@ class User {
    * @param {string} authToken JWT token
    */
   updateUserState$(data, authToken) {
-    const id = !data.args ? undefined : data.args.userId;
-    const username = !data.args ? undefined : data.args.username;
-    const newState = !data.args ? undefined : data.args.state;
-    if (!id || username == null || newState == null) {
-      return Rx.Observable.throw(
-        new CustomError(
-          "UserManagement",
-          "updateUserState$()",
-          USER_MISSING_DATA_ERROR_CODE,
-          "User missing data"
-        )
-      );
-    }
-
-    const user = {
-      id: id,
-      username: username,
-      state: newState
-    };
-    console.log('User state == ', user);
-
-    return RoleValidator.checkPermissions$(
-      authToken.realm_access.roles,
-      "UserManagement",
-      "updateUserState$()",
-      PERMISSION_DENIED_ERROR_CODE,
-      "Permission denied",
-      ["business-admin"]
-    )
-      .mergeMap(val => {
+    return UserValidatorHelper.validateUpdateUserState$(data, authToken)
+      .mergeMap(user => {
         return eventSourcing.eventStore.emitEvent$(
           new Event({
-            eventType: newState ? "UserActivated" : "UserDeactivated",
+            eventType: user.state ? "UserActivated" : "UserDeactivated",
             eventTypeVersion: 1,
             aggregateType: "User",
-            aggregateId: id,
+            aggregateId: user.id,
             data: user,
             user: authToken.preferred_username
           })
@@ -413,7 +306,7 @@ class User {
       .map(result => {
         return {
           code: 200,
-          message: `User status with username: ${username} has been updated`
+          message: `User status of the user with id: ${data.args.userId} has been updated`
         };
       })
       .mergeMap(rawResponse => this.buildSuccessResponse$(rawResponse))
@@ -427,41 +320,15 @@ class User {
    * @param {string} jwt JWT token
    */
   resetUserPassword$(data, authToken) {
-    const id = !data.args ? undefined : data.args.userId;
-    const userPassword = !data.args ? undefined : data.args.input;
-
-    const password = {
-      temporary: userPassword.temporary || false,
-      value: userPassword.password
-    };
-
-    if (!id || !userPassword || !userPassword.password) {
-      return Rx.Observable.throw(
-        new CustomError(
-          "UserManagement",
-          "resetUserPassword$()",
-          USER_MISSING_DATA_ERROR_CODE,
-          "User missing data"
-        )
-      );
-    }
-
     //Checks if the user that is performing this actions has the needed role to execute the operation.
-    return RoleValidator.checkPermissions$(
-      authToken.realm_access.roles,
-      "UserManagement",
-      "resetUserPassword$()",
-      PERMISSION_DENIED_ERROR_CODE,
-      "Permission denied",
-      ["business-admin"]
-    )
-      .mergeMap(val => {
-        return UserKeycloakDA.resetUserPassword$(id, password);
+    return UserValidatorHelper.validatePasswordReset$(data, authToken)
+      .mergeMap(user => {
+        return UserKeycloakDA.resetUserPassword$(user.id, user.password);
       })
       .map(result => {
         return {
           code: 200,
-          message: `Password of the user with id: ${id} has been changed`
+          message: `Password of the user with id: ${data.args.userId} has been changed`
         };
       })
       .mergeMap(rawResponse => this.buildSuccessResponse$(rawResponse))

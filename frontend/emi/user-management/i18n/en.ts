@@ -38,12 +38,22 @@ export const locale = {
       ADD_ROLES: 'Add roles',
       REMOVE_ROLES: 'Remove roles',
       SYSTEM_ROLES: 'System roles',
-      USER_ROLES_ASSIGNED: 'Assigned roles of the user'
+      USER_ROLES_ASSIGNED: 'Assigned roles of the user',
+      INVALID_USERNAME_FORMAT: 'The username must contain at least 8 characters and be composed of at least one (1) number and one (1) lowercase letter.',
+      USERNAME_REQUIRED: 'Username required',
+      NAME_REQUIRED: 'Name required',
+      LASTNAME_REQUIRED: 'Lastname required',
+      DOCUMENT_TYPE_REQUIRED: 'Document type required',
+      DOCUMENT_ID_REQUIRED: 'Document ID required'
   },
   ERRORS: {
-    15001: 'Internal server error',
-    15002: 'Permission denied',
-    15010: 'User missing data',
-    15011: 'User name or email already exists'
+    16001: 'Internal server error',
+    16002: 'Permission denied',
+    16010: 'User missing data',
+    16011: 'The username is already used',
+    16012: 'invalid username, the username must contain at least 8 characters and be composed of at least one (1) number and one (1) lowercase letter.',
+    16014: 'The email is already used',
+    16015: 'Permission denied, it is not possible to update your own users information',
+    16016: 'Usuario no encontrado'
   }
 };

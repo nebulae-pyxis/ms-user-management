@@ -39,13 +39,23 @@ export const locale = {
       ADD_ROLES: 'Agregar roles',
       REMOVE_ROLES: 'Eliminar roles',
       SYSTEM_ROLES: 'Roles del sistema',
-      USER_ROLES_ASSIGNED: 'Roles asignados al usuario'
+      USER_ROLES_ASSIGNED: 'Roles asignados al usuario',
+      INVALID_USERNAME_FORMAT: 'El nombre de usuario debe contener como mínimo 8 caracteres y estar compuesto por al menos un (1) número y una (1) letra minúscula.',
+      USERNAME_REQUIRED: 'Nombre de usuario requerido',
+      NAME_REQUIRED: 'Nombre requerido',
+      LASTNAME_REQUIRED: 'Apellido requerido',
+      DOCUMENT_TYPE_REQUIRED: 'Tipo de documento requerido',
+      DOCUMENT_ID_REQUIRED: 'ID documento requerido'
     },
     ERRORS: {
       16001: 'Error interno de servidor',
       16002: 'Permiso denegado.',
       16010: 'Datos faltantes del usuario',
-      16011: 'Nombre de usuario o email ya existente'
+      16011: 'El nombre de usuario ya está siendo usado',
+      16012: 'Nombre de usuario invalido, el nombre de usuario debe contener como mínimo 8 caracteres y estar compuesto por al menos un (1) número y una (1) letra minúscula.',
+      16014: 'El email ya está siendo usado',
+      16015: 'Permiso denegado, no es posible actualizar la información de su propio usuario',
+      16016: 'Usuario no encontrado'
     }
   }
 };
