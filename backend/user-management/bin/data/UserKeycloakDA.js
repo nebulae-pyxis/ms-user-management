@@ -99,15 +99,13 @@ class UserKeycloakDA {
   /**
    * Updates the user state
    * @param {*} userId User ID
-   * @param {*} username Username
    * @param {*} newUserState boolean that indicates the new user state
    */
-  static updateUserState$(userId, username, newUserState) {
-    console.log("Updating user state ==> ", userId, username, newUserState);
+  static updateUserState$(userId, newUserState) {
+    console.log("Updating user state ==> ", userId, newUserState);
 
     const userKeycloak = {
       id: userId,
-      username: username,
       enabled: newUserState
     };
 

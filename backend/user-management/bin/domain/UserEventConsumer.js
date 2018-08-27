@@ -56,15 +56,17 @@ class UserEventConsumer {
     const userState = userStateEvent.data;
     return UserKeycloakDA.updateUserState$(
       userState.id,
-      userState.username,
       userState.state
-    ).mergeMap(result => {
+    )
+    .mergeMap(result => {
+      console.log('handleUserState: ', result);
       return broker.send$(
         MATERIALIZED_VIEW_TOPIC,
         `UserUpdatedSubscription`,
         result
       );
-    });
+    })
+    ;
   }
 
   /**
