@@ -42,6 +42,16 @@ class GraphQlService {
           authToken: jsonwebtoken.verify(message.data.jwt, jwtPublicKey),
           message
         };
+      }).catch(err => {
+        return Rx.Observable.of(
+          {
+            response,
+            correlationId: message.id,
+            replyTo: message.attributes.replyTo 
+          }
+        )
+        .mergeMap(msg => this.sendResponseBack$(msg))
+
       })
       //ROUTE MESSAGE TO RESOLVER
       .mergeMap(({ authToken, message }) =>
@@ -53,18 +63,9 @@ class GraphQlService {
           };
         })
       )
-      //send response back if neccesary
-      .mergeMap(({ response, correlationId, replyTo }) => {
-        if (replyTo) {
-          return broker.send$(
-            replyTo,
-            "gateway.graphql.Query.response",
-            response,
-            { correlationId }
-          );
-        } else {
-          return Rx.Observable.of(undefined);
-        }
+      .mergeMap(msg => this.sendResponseBack$(msg))
+      .catch(error => {
+        return Rx.Observable.of(null)
       })
       .subscribe(
         msg => {
@@ -85,6 +86,23 @@ class GraphQlService {
       handlerName: `${handler.obj.name}.${handler.fn.name}`
     };
   }
+
+    // send response back if neccesary
+    sendResponseBack$(msg) {
+      return Rx.Observable.of(msg)
+        .mergeMap(({ response, correlationId, replyTo }) => {
+          if (replyTo) {
+            return broker.send$(
+              replyTo,
+              "gateway.graphql.Query.response",
+              response,
+              { correlationId }
+            );
+          } else {
+            return Rx.Observable.of(undefined);
+          }
+        })
+    }
 
   stop$() {
     Rx.Observable.from(this.subscriptions).map(subscription => {
