@@ -13,7 +13,7 @@ spec:
         app: user-management
     spec:      
       containers:
-      - image: nebulaepyxis/user-management.backend.user-management:0.0.4
+      - image: nebulaepyxis/user-management.backend.user-management:0.0.5
         name: user-management
         volumeMounts:
         - name: google-application-credentials
@@ -65,7 +65,7 @@ spec:
           valueFrom:
             secretKeyRef:
               name: keycloak
-              key: keycloak_backend_user
+              key: keycloak_backend_password
         - name: USER_ROLES_ALLOW_TO_ASSIGN
           value: "{'business-admin': ['business-admin']}"
         - name: KEYCLOAK_BACKEND_CLIENT_ID

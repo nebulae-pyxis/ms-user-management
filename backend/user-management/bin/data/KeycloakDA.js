@@ -12,14 +12,6 @@ class KeycloakDA {
   constructor({realmName, baseUrl, username, password, grant_type, client_id }) {
     this.settings = {realmName, baseUrl, username, password, grant_type, client_id};
     this.keycloakAdmin = new KeycloakAdminClient(this.settings);
-
-    // const settings = {
-    //   baseUrl: "http://127.0.0.1:8080/auth",
-    //   username: "keycloak",
-    //   password: "keycloak",
-    //   grant_type: "password",
-    //   client_id: "admin-cli"
-    // };
   }
 
   /**
