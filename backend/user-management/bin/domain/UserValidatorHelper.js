@@ -65,7 +65,6 @@ class UserValidatorHelper {
   //Validates if the user can be updated checking if the info
   // is valid and the username and email have not been used
   static validateUpdateUser$(data, authToken) {
-    console.log('Validate ==> ', authToken);
     const method = "updateUserGeneralInfo$() -> ";
     //Validate if the user that is performing the operation has the required role.
     return (
