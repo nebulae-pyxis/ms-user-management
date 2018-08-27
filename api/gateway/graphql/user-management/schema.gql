@@ -114,6 +114,6 @@ type Mutation {
 }
 
 type Subscription {
-  "This events is triggered when a user is created or updated"
+  "This events is triggered when a user is created, updated or deleted"
   UserUpdatedSubscription: User
 }
