@@ -73,8 +73,6 @@ class UserKeycloakDA {
    * @param {*} user user to updated
    */
   static updateUserGeneralInfo$(userId, user) {
-    console.log("Updating user DA ==> ", user);
-
     const attributes = {};
     attributes["documentType"] = user.generalInfo.documentType;
     attributes["documentId"] = user.generalInfo.documentId;
