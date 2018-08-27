@@ -18,8 +18,7 @@ class CustomError extends Error {
         name: this.name,
         code: this.code,
         msg: this.message,      
-        method: this.method,
-        // stack: this.stack
+        method: this.method
       }
     }
   };
