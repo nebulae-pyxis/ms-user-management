@@ -209,6 +209,7 @@ class UserKeycloakDA {
         .mergeMap(usersCount => Rx.Observable.range(0, Math.ceil(usersCount / paginationCount)))
         //Gets the users from Keycloak
         .concatMap(range => {
+          console.log('optionsFilter => ', optionsFilter);
           const optionsFilter = {
             first: 100 * range,
             max: 100,
