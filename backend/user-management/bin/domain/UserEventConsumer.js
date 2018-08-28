@@ -24,7 +24,7 @@ class UserEventConsumer {
       return broker.send$(
         MATERIALIZED_VIEW_TOPIC,
         `UserUpdatedSubscription`,
-        result
+        UserKeycloakDA.getUserByUserId$(user.id)
       );
     });
   }
@@ -43,7 +43,7 @@ class UserEventConsumer {
       return broker.send$(
         MATERIALIZED_VIEW_TOPIC,
         `UserUpdatedSubscription`,
-        result
+        UserKeycloakDA.getUserByUserId$(userGeneralInfo.id)
       );
     });
   }
@@ -63,7 +63,7 @@ class UserEventConsumer {
       return broker.send$(
         MATERIALIZED_VIEW_TOPIC,
         `UserUpdatedSubscription`,
-        result
+        UserKeycloakDA.getUserByUserId$(userState.id)
       );
     })
     ;
@@ -82,7 +82,7 @@ class UserEventConsumer {
       return broker.send$(
         MATERIALIZED_VIEW_TOPIC,
         `UserUpdatedSubscription`,
-        result
+        UserKeycloakDA.getUserByUserId$(userPasswordChangedEvent.aid)
       );
     });
   }
@@ -102,7 +102,7 @@ class UserEventConsumer {
       return broker.send$(
         MATERIALIZED_VIEW_TOPIC,
         `UserUpdatedSubscription`,
-        result
+        UserKeycloakDA.getUserByUserId$(data.userId)
       );
     });
   }
@@ -121,7 +121,7 @@ handleUserRolesRemoved$(userRolesRemovedEvent) {
     return broker.send$(
       MATERIALIZED_VIEW_TOPIC,
       `UserUpdatedSubscription`,
-      result
+      UserKeycloakDA.getUserByUserId$(data.userId)
     );
   });
 }
