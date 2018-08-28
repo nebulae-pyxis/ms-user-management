@@ -216,24 +216,17 @@ class UserKeycloakDA {
             username: username,
             email: email
           };
-          console.log('optionsFilter => ', optionsFilter);
           return KeycloakDA.keycloakClient.users.find(
             process.env.KEYCLOAK_BACKEND_REALM_NAME,
             optionsFilter
           );
         })
         .mergeMap(users => {
-          console.log('users length => ', users.length);
           return Rx.Observable.from(users)
         })
         // We can only return the users belonging to the same business of the user that is making the query.
         .filter(
           user => {
-
-            console.log('user filter => ', businessId, user, (businessId == null ||
-              (user.attributes &&
-                user.attributes.businessId &&
-                user.attributes.businessId[0] == businessId)));
             return businessId == null ||
             (user.attributes &&
               user.attributes.businessId &&
