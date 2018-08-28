@@ -223,6 +223,7 @@ class UserKeycloakDA {
           );
         })
         .mergeMap(users => {
+          console.log('users length => ', users.length);
           return Rx.Observable.from(users)
         })
         // We can only return the users belonging to the same business of the user that is making the query.

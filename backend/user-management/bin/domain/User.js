@@ -72,7 +72,7 @@ class User {
       .mergeMap(val => {
         return UserKeycloakDA.getUser$(
           args.username,
-          null,
+          undefined,
           authToken.businessId
         );
       })
