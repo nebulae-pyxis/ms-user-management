@@ -228,6 +228,11 @@ class UserKeycloakDA {
         // We can only return the users belonging to the same business of the user that is making the query.
         .filter(
           user => {
+
+            console.log('user filter => ', businessId, user, (businessId == null ||
+              (user.attributes &&
+                user.attributes.businessId &&
+                user.attributes.businessId[0] == businessId)));
             return businessId == null ||
             (user.attributes &&
               user.attributes.businessId &&
