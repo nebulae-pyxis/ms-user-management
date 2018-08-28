@@ -23,9 +23,9 @@ const routes: Routes = [
   {
     path: 'user/:username',
     component: UserFormComponent,
-    resolve: {
-      data: UserFormService
-    }
+    // resolve: {
+    //   data: UserFormService
+    // }
   }
 ];
 
@@ -43,7 +43,8 @@ const routes: Routes = [
     UserRoleComponent,
     UserSesionsComponent
   ],
-  providers: [ UserManagementService, DatePipe, UserFormService]
+  providers: [ UserManagementService, DatePipe, UserFormService,
+    { provide: MatPaginatorIntl, useClass: CustomTest }]
 })
 
 export class UserManagementModule {}

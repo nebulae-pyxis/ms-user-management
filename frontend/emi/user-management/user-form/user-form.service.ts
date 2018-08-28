@@ -35,18 +35,18 @@ export class UserFormService {
    * @param {RouterStateSnapshot} state
    * @returns {Observable<any> | Promise<any> | any}
    */
-  resolve(
-    route: ActivatedRouteSnapshot,
-    state: RouterStateSnapshot
-  ): Observable<any> | Promise<any> | any {
-    this.routeParams = route.params;
-    if (this.routeParams.id === "new") {
-      this.onUserChanged.next(false);
-      return Rx.Observable.of(undefined);
-    } else {
-      return this.getUser$(this.routeParams.username);
-    }
-  }
+  // resolve(
+  //   route: ActivatedRouteSnapshot,
+  //   state: RouterStateSnapshot
+  // ): Observable<any> | Promise<any> | any {
+  //   this.routeParams = route.params;
+  //   if (this.routeParams.id === "new") {
+  //     this.onUserChanged.next(false);
+  //     return Rx.Observable.of(undefined);
+  //   } else {
+  //     return this.getUser$(this.routeParams.username);
+  //   }
+  // }
 
   /**
    * Gets the users by its username

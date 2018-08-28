@@ -1,14 +1,14 @@
-import { Observable } from 'rxjs/Observable';
-import { FuseTranslationLoaderService } from '../../../../core/services/translation-loader.service';
+import { Observable } from "rxjs/Observable";
+import { FuseTranslationLoaderService } from "../../../../core/services/translation-loader.service";
 import { TranslateService } from "@ngx-translate/core";
-import { Component, OnDestroy, OnInit, ViewEncapsulation } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
-import { locale as english } from '../i18n/en';
-import { locale as spanish } from '../i18n/es';
-import { MatSnackBar } from '@angular/material';
-import { User } from './../model/user.model';
-import { UserFormService } from './user-form.service';
+import { Component, OnDestroy, OnInit, ViewEncapsulation } from "@angular/core";
+import { FormBuilder, FormGroup, Validators } from "@angular/forms";
+import { ActivatedRoute } from "@angular/router";
+import { locale as english } from "../i18n/en";
+import { locale as spanish } from "../i18n/es";
+import { MatSnackBar } from "@angular/material";
+import { User } from "./../model/user.model";
+import { UserFormService } from "./user-form.service";
 
 ////////// RXJS ///////////
 // tslint:disable-next-line:import-blacklist
@@ -16,13 +16,11 @@ import * as Rx from "rxjs/Rx";
 import { first, filter, tap, mergeMap, map, toArray } from "rxjs/operators";
 
 @Component({
-  selector: 'app-user-form',
-  templateUrl: './user-form.component.html',
-  styleUrls: ['./user-form.component.scss']
+  selector: "app-user-form",
+  templateUrl: "./user-form.component.html",
+  styleUrls: ["./user-form.component.scss"]
 })
 export class UserFormComponent implements OnInit {
-
-
   // User data
   user = new User();
   pageType: string;
@@ -44,70 +42,127 @@ export class UserFormComponent implements OnInit {
     private router: ActivatedRoute
   ) {
     this.translationLoader.loadTranslations(english, spanish);
-   }
+  }
 
   ngOnInit() {
-    this.user = new User(this.router.snapshot.data.data ? this.router.snapshot.data.data.data.getUser : undefined);
+    // this.user = new User(this.router.snapshot.data.data ? this.router.snapshot.data.data.data.getUser : undefined);
     this.pageType = this.user.id ? 'edit' : 'new';
-
     this.userGeneralInfoForm = this.createUserGeneralInfoForm();
     this.userCredentialsForm = this.createUserCredentialsForm();
     this.userStateForm = this.createUserStateForm();
     this.userRolesForm = this.createUserRolesForm();
-    // this.loadRoles();
-    // this.loadUserRoles();
     this.refreshRoles();
+    this.findUser();
+  }
+
+  findUser() {
+    this.router.params
+      .pipe(
+        mergeMap(params => {
+          if(params.username === "new"){
+            return Rx.Observable.of(undefined);
+          }else{
+            return this.userFormService.getUser$(params.username);
+          }          
+        })
+      )
+      .subscribe(userData => {
+        this.user = new User(
+          userData
+            ? userData.data.getUser
+            : undefined
+        );
+        this.pageType = this.user.id ? "edit" : "new";
+
+        this.userGeneralInfoForm = this.createUserGeneralInfoForm();
+        this.userCredentialsForm = this.createUserCredentialsForm();
+        this.userStateForm = this.createUserStateForm();
+        this.userRolesForm = this.createUserRolesForm();
+        this.refreshRoles();
+      });
   }
 
   /**
    * Creates the user general info reactive form
    */
-  createUserGeneralInfoForm(){
+  createUserGeneralInfoForm() {
     return this.formBuilder.group({
-      username:[{value: this.user.username, disabled: this.pageType != 'new'}, Validators.compose([
-        Validators.required,
-        Validators.pattern('^(?=[a-zA-Z0-9.]{8,}$)(?=.*?[a-z])(?=.*?[0-9]).*')
-     ])],
-      name: [(this.user.generalInfo ? this.user.generalInfo.name : ''), Validators.required],
-      lastname: [(this.user.generalInfo ? this.user.generalInfo.lastname : ''), Validators.required],
-      documentType: [(this.user.generalInfo ? this.user.generalInfo.documentType : ''),Validators.required],
-      documentId: [(this.user.generalInfo ? this.user.generalInfo.documentId : ''), Validators.required],
-      email: [(this.user.generalInfo ? this.user.generalInfo.email : ''), Validators.email],
-      phone: [this.user.generalInfo ? this.user.generalInfo.phone : '']      
+      username: [
+        { value: this.user.username, disabled: this.pageType != "new" },
+        Validators.compose([
+          Validators.required,
+          Validators.pattern("^(?=[a-zA-Z0-9.]{8,}$)(?=.*?[a-z])(?=.*?[0-9]).*")
+        ])
+      ],
+      name: [
+        this.user.generalInfo ? this.user.generalInfo.name : "",
+        Validators.required
+      ],
+      lastname: [
+        this.user.generalInfo ? this.user.generalInfo.lastname : "",
+        Validators.required
+      ],
+      documentType: [
+        this.user.generalInfo ? this.user.generalInfo.documentType : "",
+        Validators.required
+      ],
+      documentId: [
+        this.user.generalInfo ? this.user.generalInfo.documentId : "",
+        Validators.required
+      ],
+      email: [
+        this.user.generalInfo ? this.user.generalInfo.email : "",
+        Validators.email
+      ],
+      phone: [this.user.generalInfo ? this.user.generalInfo.phone : ""]
     });
   }
 
   /**
    * Creates the user state reactive form
    */
-  createUserStateForm(){
+  createUserStateForm() {
     return this.formBuilder.group({
-      state: [{
-        value: this.user.state,
-      }],
+      state: [
+        {
+          value: this.user.state
+        }
+      ]
     });
   }
 
   /**
    * Creates the user credentials reactive form
    */
-  createUserCredentialsForm(){
-    return this.formBuilder.group({
-      password: ['', Validators.compose([
-        Validators.required,
-        Validators.pattern('^(?=[a-zA-Z0-9.]{8,}$)(?=.*?[a-z])(?=.*?[0-9]).*')
-     ])],
-      passwordConfirmation: ['', Validators.required],
-      temporary: [false, Validators.required]
-    }, {validator: this.checkIfMatchingPasswords('password', 'passwordConfirmation')});
+  createUserCredentialsForm() {
+    return this.formBuilder.group(
+      {
+        password: [
+          "",
+          Validators.compose([
+            Validators.required,
+            Validators.pattern(
+              "^(?=[a-zA-Z0-9.]{8,}$)(?=.*?[a-z])(?=.*?[0-9]).*"
+            )
+          ])
+        ],
+        passwordConfirmation: ["", Validators.required],
+        temporary: [false, Validators.required]
+      },
+      {
+        validator: this.checkIfMatchingPasswords(
+          "password",
+          "passwordConfirmation"
+        )
+      }
+    );
   }
 
   /**
    * Creates the user roles reactive form
    */
-  createUserRolesForm(){
-    return this.formBuilder.group({      
-    });
+  createUserRolesForm() {
+    return this.formBuilder.group({});
   }
 
   /**
@@ -115,63 +170,73 @@ export class UserFormComponent implements OnInit {
    * @param passwordKey new Password
    * @param passwordConfirmationKey Confirmation of the new password
    */
-  checkIfMatchingPasswords(passwordKey: string, passwordConfirmationKey: string) {
+  checkIfMatchingPasswords(
+    passwordKey: string,
+    passwordConfirmationKey: string
+  ) {
     return (group: FormGroup) => {
       let passwordInput = group.controls[passwordKey],
-          passwordConfirmationInput = group.controls[passwordConfirmationKey];
+        passwordConfirmationInput = group.controls[passwordConfirmationKey];
       if (passwordInput.value !== passwordConfirmationInput.value) {
-        return passwordConfirmationInput.setErrors({notEquivalent: true})
+        return passwordConfirmationInput.setErrors({ notEquivalent: true });
+      } else {
+        return passwordConfirmationInput.setErrors(null);
       }
-      else {
-          return passwordConfirmationInput.setErrors(null);
-      }
-    }
+    };
   }
 
   /**
    * Creates a new user according to the info entered into the form
    */
-  createUser(){
-    const data = this.userGeneralInfoForm.getRawValue();        
+  createUser() {
+    const data = this.userGeneralInfoForm.getRawValue();
     data.username = data.username.trim();
     data.state = this.userStateForm.getRawValue().state;
 
-    console.log('Creating user ... ', data);
-    this.userFormService.createUser$(data)
-    .pipe(
-      mergeMap(resp => this.graphQlAlarmsErrorHandler$(resp)),
-      filter((resp: any) => !resp.errors || resp.errors.length === 0),
-    ).subscribe(model => {
-      this.snackBar.open("El usuario ha sido creada", "Cerrar", {
-        duration: 2000
-      });
+    console.log("Creating user ... ", data);
+    this.userFormService
+      .createUser$(data)
+      .pipe(
+        mergeMap(resp => this.graphQlAlarmsErrorHandler$(resp)),
+        filter((resp: any) => !resp.errors || resp.errors.length === 0)
+      )
+      .subscribe(
+        model => {
+          this.snackBar.open("El usuario ha sido creada", "Cerrar", {
+            duration: 2000
+          });
 
-      //this.businessCreated.emit(this.selectedBusiness);
-    },
-    error => {
-      console.log('Error creando usuario ==> ', error);
-    });
+          //this.businessCreated.emit(this.selectedBusiness);
+        },
+        error => {
+          console.log("Error creando usuario ==> ", error);
+        }
+      );
   }
 
   /**
    * Updates the user general info according to the info entered into the form
    */
-  updateUserGeneralInfo(){
-    const data = this.userGeneralInfoForm.getRawValue();        
+  updateUserGeneralInfo() {
+    const data = this.userGeneralInfoForm.getRawValue();
 
-    console.log('Updating user general info ... ', data);
-    this.userFormService.updateUser$(this.user.id, data)
-    .pipe(
-      mergeMap(resp => this.graphQlAlarmsErrorHandler$(resp)),
-      filter((resp: any) => !resp.errors || resp.errors.length === 0),
-    ).subscribe(model => {
-      this.snackBar.open("El usuario ha sido actualizado", "Cerrar", {
-        duration: 2000
-      });
-    },
-    error => {
-      console.log('Error updating user general info ==> ', error);
-    });
+    console.log("Updating user general info ... ", data);
+    this.userFormService
+      .updateUser$(this.user.id, data)
+      .pipe(
+        mergeMap(resp => this.graphQlAlarmsErrorHandler$(resp)),
+        filter((resp: any) => !resp.errors || resp.errors.length === 0)
+      )
+      .subscribe(
+        model => {
+          this.snackBar.open("El usuario ha sido actualizado", "Cerrar", {
+            duration: 2000
+          });
+        },
+        error => {
+          console.log("Error updating user general info ==> ", error);
+        }
+      );
   }
 
   /**
@@ -182,9 +247,10 @@ export class UserFormComponent implements OnInit {
       .getRoles$()
       .pipe(
         mergeMap(resp => this.graphQlAlarmsErrorHandler$(resp)),
-        filter((resp: any) => !resp.errors || resp.errors.length === 0),
-      ).subscribe(roles => {
-        console.log('Roles ==> ', roles);
+        filter((resp: any) => !resp.errors || resp.errors.length === 0)
+      )
+      .subscribe(roles => {
+        console.log("Roles ==> ", roles);
 
         this.roles = roles.data.getRoles;
       });
@@ -198,51 +264,53 @@ export class UserFormComponent implements OnInit {
       .getUserRoleMapping$(this.user.id)
       .pipe(
         mergeMap(resp => this.graphQlAlarmsErrorHandler$(resp)),
-        filter((resp: any) => !resp.errors || resp.errors.length === 0),
-      ).subscribe(roles => {
-        console.log('User Roles ==> ', roles);
+        filter((resp: any) => !resp.errors || resp.errors.length === 0)
+      )
+      .subscribe(roles => {
+        console.log("User Roles ==> ", roles);
 
         this.userRoles = roles.data.getUserRoles;
-
       });
   }
 
   /**
    * Refresh roles
    */
-  refreshRoles(){
-    if(this.pageType == 'new'){
+  refreshRoles() {
+    if (this.pageType == "new") {
       return;
     }
     Rx.Observable.forkJoin(
       this.userFormService.getRoles$().pipe(
         mergeMap(roles => Rx.Observable.from(roles.data.getRoles)),
-        map((role: {id, name}) => {
+        map((role: { id; name }) => {
           return {
             id: role.id,
             name: role.name
-          }
+          };
         }),
         toArray()
       ),
       this.userFormService.getUserRoleMapping$(this.user.id).pipe(
         mergeMap(roles => Rx.Observable.from(roles.data.getUserRoleMapping)),
-        map((roleR: {id, name} | any) => {
+        map((roleR: { id; name } | any) => {
           return {
             id: roleR.id,
             name: roleR.name
-          }
+          };
         }),
         toArray()
       )
-    )
-    .subscribe(([rolesData, userRoleMappingData]) => {
+    ).subscribe(([rolesData, userRoleMappingData]) => {
       console.log("DATA ROLES ==> ", rolesData, userRoleMappingData);
       this.roles = [];
       this.userRoles = [];
       rolesData.forEach(role => {
-
-        if (!userRoleMappingData.some(roleMapping=> { return roleMapping.id == role.id})) {
+        if (
+          !userRoleMappingData.some(roleMapping => {
+            return roleMapping.id == role.id;
+          })
+        ) {
           this.roles.push(role);
         }
       });
@@ -250,135 +318,171 @@ export class UserFormComponent implements OnInit {
     });
   }
 
-  removeRoles(roles){
+  removeRoles(roles) {
     for (var i = 0; i < this.roles.length; i++) {
       var obj = this.roles[i];
-  
-      if (roles.map(data=> {data.id}).indexOf(obj.id) !== -1) {
+
+      if (
+        roles
+          .map(data => {
+            data.id;
+          })
+          .indexOf(obj.id) !== -1
+      ) {
         this.roles.splice(i, 1);
       }
     }
-
-
   }
 
   /**
    * Adds the selected roles to the selected user
    */
-  addRolesToUser(){      
+  addRolesToUser() {
+    console.log("Adding roles to the user ... ", this.selectedRoles);
+    this.userFormService
+      .addRolesToTheUser$(this.user.id, this.selectedRoles)
+      .pipe(
+        mergeMap(resp => this.graphQlAlarmsErrorHandler$(resp)),
+        filter((resp: any) => !resp.errors || resp.errors.length === 0)
+      )
+      .subscribe(
+        model => {
+          this.snackBar.open(
+            "Se han agregado nuevos roles al usuario",
+            "Cerrar",
+            {
+              duration: 2000
+            }
+          );
 
-    console.log('Adding roles to the user ... ', this.selectedRoles);
-    this.userFormService.addRolesToTheUser$(this.user.id, this.selectedRoles)
-    .pipe(
-      mergeMap(resp => this.graphQlAlarmsErrorHandler$(resp)),
-      filter((resp: any) => !resp.errors || resp.errors.length === 0),
-    ).subscribe(model => {
-      this.snackBar.open("Se han agregado nuevos roles al usuario", "Cerrar", {
-        duration: 2000
-      });
-      
-      for (var i = 0; i < this.roles.length; i++) {
-        var obj = this.roles[i];
-    
-        console.log('MAPA => ', this.selectedRoles.map(data=> data.id));
-        if (this.selectedRoles.map(data=> data.id).indexOf(obj.id) !== -1) {
-          this.roles.splice(i, 1);
+          for (var i = 0; i < this.roles.length; i++) {
+            var obj = this.roles[i];
+
+            console.log("MAPA => ", this.selectedRoles.map(data => data.id));
+            if (
+              this.selectedRoles.map(data => data.id).indexOf(obj.id) !== -1
+            ) {
+              this.roles.splice(i, 1);
+            }
+          }
+          this.userRoles = this.userRoles.concat(this.selectedRoles);
+        },
+        error => {
+          console.log("Error adding roles to the user ==> ", error);
         }
-      }
-      this.userRoles = this.userRoles.concat(this.selectedRoles);
-    },
-    error => {
-      console.log('Error adding roles to the user ==> ', error);
-    });
+      );
   }
 
-    /**
+  /**
    * Adds the selected roles to the selected user
    */
-  removeRolesFromUser(){      
+  removeRolesFromUser() {
+    console.log("Removing roles to the user ... ", this.selectedRoles);
+    this.userFormService
+      .removeRolesFromUser$(this.user.id, this.selectedUserRoles)
+      .pipe(
+        mergeMap(resp => this.graphQlAlarmsErrorHandler$(resp)),
+        filter((resp: any) => !resp.errors || resp.errors.length === 0)
+      )
+      .subscribe(
+        model => {
+          this.snackBar.open("Se han eliminado roles de usuario", "Cerrar", {
+            duration: 2000
+          });
 
-    console.log('Removing roles to the user ... ', this.selectedRoles);
-    this.userFormService.removeRolesFromUser$(this.user.id, this.selectedUserRoles)
-    .pipe(
-      mergeMap(resp => this.graphQlAlarmsErrorHandler$(resp)),
-      filter((resp: any) => !resp.errors || resp.errors.length === 0),
-    ).subscribe(model => {
-      this.snackBar.open("Se han eliminado roles de usuario", "Cerrar", {
-        duration: 2000
-      });
-      
-      for (var i = 0; i < this.userRoles.length; i++) {
-        var obj = this.userRoles[i];
-    
-        console.log('MAPA => ', this.selectedUserRoles.map(data=> data.id));
-        if (this.selectedUserRoles.map(data=> data.id).indexOf(obj.id) !== -1) {
-          this.userRoles.splice(i, 1);
+          for (var i = 0; i < this.userRoles.length; i++) {
+            var obj = this.userRoles[i];
+
+            console.log(
+              "MAPA => ",
+              this.selectedUserRoles.map(data => data.id)
+            );
+            if (
+              this.selectedUserRoles.map(data => data.id).indexOf(obj.id) !== -1
+            ) {
+              this.userRoles.splice(i, 1);
+            }
+          }
+          this.roles = this.roles.concat(this.selectedUserRoles);
+        },
+        error => {
+          console.log("Error removing roles from the user ==> ", error);
+          this.refreshRoles();
         }
-      }
-      this.roles = this.roles.concat(this.selectedUserRoles);
-    },
-    error => {
-      console.log('Error removing roles from the user ==> ', error);
-      this.refreshRoles();
-    });
+      );
   }
 
   /**
    * Detects when the user state has changed and send a command to persist the new state.
    * This method only works with users that are registered.
-   * 
-   * @param $event 
+   *
+   * @param $event
    */
-  onUserStateChange($event){
-    if (this.pageType == 'new'){
+  onUserStateChange($event) {
+    if (this.pageType == "new") {
       return;
     }
-    
-    console.log('onUserStateChange ==> ', $event);
 
-    this.userFormService.updateUserState$(this.user.id, this.user.username, $event.checked)
-    .pipe(
-      mergeMap(resp => this.graphQlAlarmsErrorHandler$(resp)),
-      filter((resp: any) => !resp.errors || resp.errors.length === 0),
-    ).subscribe(model => {
-      this.snackBar.open("El estado del usuario ha sido actualizado", "Cerrar", {
-        duration: 2000
-      });
-    },
-    error => {
-      console.log('Error updating user state ==> ', error);
-    });
+    console.log("onUserStateChange ==> ", $event);
+
+    this.userFormService
+      .updateUserState$(this.user.id, this.user.username, $event.checked)
+      .pipe(
+        mergeMap(resp => this.graphQlAlarmsErrorHandler$(resp)),
+        filter((resp: any) => !resp.errors || resp.errors.length === 0)
+      )
+      .subscribe(
+        model => {
+          this.snackBar.open(
+            "El estado del usuario ha sido actualizado",
+            "Cerrar",
+            {
+              duration: 2000
+            }
+          );
+        },
+        error => {
+          console.log("Error updating user state ==> ", error);
+        }
+      );
   }
 
   /**
    * Reset the user password
    */
-  resetUserPassword(){
-    const data = this.userCredentialsForm.getRawValue(); 
+  resetUserPassword() {
+    const data = this.userCredentialsForm.getRawValue();
 
-    console.log('reset user password ...', data);
-    this.userFormService.resetUserPassword$(this.user.id, data)
-    .pipe(
-      mergeMap(resp => this.graphQlAlarmsErrorHandler$(resp)),
-      filter((resp: any) => !resp.errors || resp.errors.length === 0),
-    ).subscribe(model => {
-      this.snackBar.open("El usuario ha sido actualizado", "Cerrar", {
-        duration: 2000
-      });
-      this.userCredentialsForm.reset();
-    },
-    error => {
-      console.log('Error resetting user password ==> ', error);
-      this.snackBar.open("Error reseteando contraseña del usuario", "Cerrar", {
-        duration: 2000
-      });
-      this.userCredentialsForm.reset();
-    });
+    console.log("reset user password ...", data);
+    this.userFormService
+      .resetUserPassword$(this.user.id, data)
+      .pipe(
+        mergeMap(resp => this.graphQlAlarmsErrorHandler$(resp)),
+        filter((resp: any) => !resp.errors || resp.errors.length === 0)
+      )
+      .subscribe(
+        model => {
+          this.snackBar.open("El usuario ha sido actualizado", "Cerrar", {
+            duration: 2000
+          });
+          this.userCredentialsForm.reset();
+        },
+        error => {
+          console.log("Error resetting user password ==> ", error);
+          this.snackBar.open(
+            "Error reseteando contraseña del usuario",
+            "Cerrar",
+            {
+              duration: 2000
+            }
+          );
+          this.userCredentialsForm.reset();
+        }
+      );
   }
 
-  graphQlAlarmsErrorHandler$(response){
-    return Rx.Observable.of(JSON.parse(JSON.stringify(response)))
-    .pipe(
+  graphQlAlarmsErrorHandler$(response) {
+    return Rx.Observable.of(JSON.parse(JSON.stringify(response))).pipe(
       tap((resp: any) => {
         this.showSnackBarError(resp);
 
@@ -391,18 +495,17 @@ export class UserFormComponent implements OnInit {
    * Shows an error snackbar
    * @param response
    */
-  showSnackBarError(response){
-    if (response.errors){
-
+  showSnackBarError(response) {
+    if (response.errors) {
       if (Array.isArray(response.errors)) {
         response.errors.forEach(error => {
           if (Array.isArray(error)) {
             error.forEach(errorDetail => {
-              this.showMessageSnackbar('ERRORS.' + errorDetail.message.code);
+              this.showMessageSnackbar("ERRORS." + errorDetail.message.code);
             });
-          }else{
+          } else {
             response.errors.forEach(error => {
-              this.showMessageSnackbar('ERRORS.' + error.message.code);
+              this.showMessageSnackbar("ERRORS." + error.message.code);
             });
           }
         });
@@ -415,26 +518,24 @@ export class UserFormComponent implements OnInit {
    * @param messageKey Key of the message to i18n
    * @param detailMessageKey Key of the detail message to i18n
    */
-  showMessageSnackbar(messageKey, detailMessageKey?){
+  showMessageSnackbar(messageKey, detailMessageKey?) {
     let translationData = [];
-    if(messageKey){
+    if (messageKey) {
       translationData.push(messageKey);
     }
 
-    if(detailMessageKey){
+    if (detailMessageKey) {
       translationData.push(detailMessageKey);
     }
 
-    this.translate.get(translationData)
-    .subscribe(data => {
+    this.translate.get(translationData).subscribe(data => {
       this.snackBar.open(
-        messageKey ? data[messageKey]: '',
-        detailMessageKey ? data[detailMessageKey]: '',
+        messageKey ? data[messageKey] : "",
+        detailMessageKey ? data[detailMessageKey] : "",
         {
           duration: 2000
         }
       );
     });
   }
-
 }

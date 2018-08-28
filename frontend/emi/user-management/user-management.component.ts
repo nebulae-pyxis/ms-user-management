@@ -84,6 +84,42 @@ export class UserManagementComponent implements OnInit, OnDestroy {
       this.count,
       this.searchFilter
     );
+
+    //Creates an observable for the filter in the table
+    this.subscriptions.push(
+      fromEvent(this.filter.nativeElement, "keyup")
+        .pipe(
+          debounceTime(150),
+          distinctUntilChanged()
+        )
+        .subscribe(() => {
+
+          if (this.filter.nativeElement) {
+            let filterValue = this.filter.nativeElement.value;
+            console.log('FilterValue ===> ', filterValue);
+            filterValue = filterValue.trim();
+            this.searchFilter = filterValue;
+            this.refreshDataTable(
+              this.page,
+              this.count,
+              this.searchFilter
+            );
+          }
+        }));
+
+
+    // Creates an observable for listen the events when the paginator of the table is modified
+    this.subscriptions.push(
+      this.paginator.page.subscribe(pageChanged => {
+        this.page = pageChanged.pageIndex;
+        this.count = pageChanged.pageSize;
+        this.refreshDataTable(
+          pageChanged.pageIndex,
+          pageChanged.pageSize,
+          this.searchFilter
+        );
+      })
+    );
   }
 
   /**
@@ -167,6 +203,13 @@ export class UserManagementComponent implements OnInit, OnDestroy {
         }
       );
     });
+  }
+
+  getNext(event) {
+    console.log('getNext ', event);
+    const offset = event.pageSize * event.pageIndex
+    
+    // call your api function here with the offset
   }
 
   ngOnDestroy() {
