@@ -207,13 +207,17 @@ class UserKeycloakDA {
       )
         //According to the amount of user, it generates ranges which will help us to get the users by batches
         .mergeMap(usersCount =>
-          Rx.Observable.range(0, Math.ceil(usersCount / paginationCount))
+          {
+            console.log('range => ', Math.ceil(usersCount / paginationCount));
+            return Rx.Observable.range(0, Math.ceil(usersCount / paginationCount));
+          }
         )
         //Gets the users from Keycloak
         .concatMap(page => {
+          console.log('PAGE ==> ', page);
           const optionsFilter = {
             first: 100 * page,
-            max: paginationCount,
+            max: 100,
             search: searchFilter,
             username: username,
             email: email
@@ -224,15 +228,19 @@ class UserKeycloakDA {
           );
         })
         .mergeMap(users => {
+          console.log('users ==> ', users.length, (paginationCount * page));
           return Rx.Observable.from(users)
         })
         // We can only return the users belonging to the same business of the user that is making the query.
         .filter(
-          user =>
-            businessId == null ||
+          user => {
+            
+
+            return businessId == null ||
             (user.attributes &&
               user.attributes.businessId &&
-              user.attributes.businessId[0] == businessId)
+              user.attributes.businessId[0] == businessId);
+          }
         )
         .map(result => {
           const attributes = result.attributes;

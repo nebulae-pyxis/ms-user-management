@@ -30,6 +30,7 @@ class User {
    * @param {*} args args that contain the user filters
    */
   getUsers$({ args }, authToken) {
+    console.log('getUsers ----- >');
     return RoleValidator.checkPermissions$(
       authToken.realm_access.roles,
       "UserManagement",
