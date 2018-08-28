@@ -208,8 +208,7 @@ class UserKeycloakDA {
         //According to the amount of user, it generates ranges which will help us to get the users by batches
         .mergeMap(usersCount => Rx.Observable.range(0, Math.ceil(usersCount / paginationCount)))
         //Gets the users from Keycloak
-        .concatMap(range => {
-          console.log('optionsFilter => ', optionsFilter);
+        .concatMap(range => {          
           const optionsFilter = {
             first: 100 * range,
             max: 100,
@@ -217,6 +216,7 @@ class UserKeycloakDA {
             username: username,
             email: email
           };
+          console.log('optionsFilter => ', optionsFilter);
           return KeycloakDA.keycloakClient.users.find(
             process.env.KEYCLOAK_BACKEND_REALM_NAME,
             optionsFilter
