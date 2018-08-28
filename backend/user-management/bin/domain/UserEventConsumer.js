@@ -93,7 +93,7 @@ class UserEventConsumer {
  * @param {*} userRolesAddedEvent 
  */
   handleUserRolesAdded$(userRolesAddedEvent) {
-    console.log('userRolesAddedEvent ==> ', userRolesAddedEvent);
+    console.log('userRolesAddedEvent ==>' , userRolesAddedEvent);
     const data = userRolesAddedEvent.data;
     return UserKeycloakDA.addRolesToTheUser$(
       data.userId,
