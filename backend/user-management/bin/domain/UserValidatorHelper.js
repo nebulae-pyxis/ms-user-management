@@ -172,7 +172,7 @@ class UserValidatorHelper {
         .mergeMap(user => this.checkIfUserIsTheSameUserLogged$(user, authToken))
         //Checks if the user that is being updated exists on the same business of the user that is performing the operation
         .mergeMap(user => {
-          return this.checkIfUserBelongsToTheSameBusiness$(user.id, authToken, method);
+          return this.checkIfUserBelongsToTheSameBusiness$(user, authToken, method);
         })
     );
   }
