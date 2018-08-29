@@ -20,7 +20,6 @@ class UserEventConsumer {
   handleUserCreated$(userCreatedEvent) {
     const user = userCreatedEvent.data;
     return UserKeycloakDA.createUser$(user).mergeMap(result => {
-      console.log('Handle user created: ', result);
       return broker.send$(
         MATERIALIZED_VIEW_TOPIC,
         `UserUpdatedSubscription`,
@@ -34,7 +33,6 @@ class UserEventConsumer {
    * @param {*} userAttributesUpdatedEvent user general info updated event
    */
   handleUserGeneralInfoUpdated$(userGeneralInfoUpdatedEvent) {
-    console.log('userGeneralInfoUpdatedEvent ==> ', userGeneralInfoUpdatedEvent);
     const userGeneralInfo = userGeneralInfoUpdatedEvent.data;
     return UserKeycloakDA.updateUserGeneralInfo$(
       userGeneralInfo.id,
@@ -59,7 +57,6 @@ class UserEventConsumer {
       userState.state
     )
     .mergeMap(result => {
-      console.log('handleUserState: ', result);
       return broker.send$(
         MATERIALIZED_VIEW_TOPIC,
         `UserUpdatedSubscription`,

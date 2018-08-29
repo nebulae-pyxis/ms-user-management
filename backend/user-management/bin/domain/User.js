@@ -60,7 +60,6 @@ class User {
    * @param {string} fieldASTs indicates the user attributes that will be returned
    */
   getUser$({ args, jwt, fieldASTs }, authToken) {
-    console.log('getUsers');
     return RoleValidator.checkPermissions$(
       authToken.realm_access.roles,
       "UserManagement",
@@ -339,7 +338,6 @@ class User {
   //#region  mappers for API responses
 
   handleError$(err) {
-    console.log('handleError => ', err);
     return Rx.Observable.of(err).map(err => {
       const exception = { data: null, result: {} };
       const isCustomError = err instanceof CustomError;

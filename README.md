@@ -1,6 +1,8 @@
 ![NebulaE](docs/images/nebula.png "Nebula Engineering SAS")
 
 # UserManagement
+User management allows you to create, update and query users on the system using Keycloak as the access management solution to manage all of the information of the users registered on the platform.
+
 The general porpouse of this service is to ...
 
 _This MicroService is built on top of NebulaE MicroService Framework.  Please see the [FrameWork project](https://github.com/NebulaEngineering/nebulae) to understand the full concept_**.

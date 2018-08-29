@@ -12,7 +12,7 @@ import { UserCredentialsComponent } from './user-form/user-credentials/user-cred
 import { UserGeneralInfoComponent } from './user-form/user-general-info/user-general-info.component';
 import { UserRoleComponent } from './user-form/user-role/user-role.component';
 import { UserSesionsComponent } from './user-form/user-sesions/user-sesions.component';
-import { CustomTest } from './utils/custom-test';
+import { CustomPaginator } from './utils/custom-paginator';
 import { UserFormService } from './user-form/user-form.service';
 
 const routes: Routes = [
@@ -44,7 +44,7 @@ const routes: Routes = [
     UserSesionsComponent
   ],
   providers: [ UserManagementService, DatePipe, UserFormService,
-    { provide: MatPaginatorIntl, useClass: CustomTest }]
+    { provide: MatPaginatorIntl, useClass: CustomPaginator }]
 })
 
 export class UserManagementModule {}
