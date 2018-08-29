@@ -102,8 +102,6 @@ class UserKeycloakDA {
    * @param {*} newUserState boolean that indicates the new user state
    */
   static updateUserState$(userId, newUserState) {
-    console.log("Updating user state ==> ", userId, newUserState);
-
     const userKeycloak = {
       id: userId,
       enabled: newUserState
@@ -123,8 +121,6 @@ class UserKeycloakDA {
    * @param {*} userPassword
    */
   static resetUserPassword$(userId, userPassword) {
-    console.log("Reset user password ==> ", userId, userPassword);
-
     return Rx.Observable.defer(() =>
       KeycloakDA.keycloakClient.users.resetPassword(
         process.env.KEYCLOAK_BACKEND_REALM_NAME,
@@ -148,7 +144,6 @@ class UserKeycloakDA {
           process.env.KEYCLOAK_BACKEND_REALM_NAME,
           optionsFilter);
       }).map(result => {
-        console.log('user result ==> ', result);
           const attributes = result.attributes;
           const user = {
             id: result.id,
@@ -327,10 +322,7 @@ class UserKeycloakDA {
    * @param {*} userRolesRequester Array of roles of the user that perform the request
    */
   static getRoles$(userRolesRequester) {
-    console.log('userRolesRequester1 => ',  process.env.USER_ROLES_ALLOW_TO_ASSIGN);
     const USER_ROLES_ALLOW_TO_ASSIGN = JSON.parse(process.env.USER_ROLES_ALLOW_TO_ASSIGN);
-
-    console.log('userRolesRequester2 => ', userRolesRequester, USER_ROLES_ALLOW_TO_ASSIGN);
     let userRolesAllowed = [];
     if(userRolesRequester && USER_ROLES_ALLOW_TO_ASSIGN){
       userRolesRequester.forEach(role => {        
@@ -341,8 +333,6 @@ class UserKeycloakDA {
         }
       });
     }
-
-    console.log('userRolesAllowed => ', userRolesAllowed);
 
     //Gets all of the user roles registered on the Keycloak realm
     return (

@@ -1,9 +1,8 @@
-import { Observable } from "rxjs/Observable";
 import { FuseTranslationLoaderService } from "../../../../core/services/translation-loader.service";
 import { TranslateService } from "@ngx-translate/core";
 import { Component, OnDestroy, OnInit, ViewEncapsulation } from "@angular/core";
 import { FormBuilder, FormGroup, Validators } from "@angular/forms";
-import { ActivatedRoute } from "@angular/router";
+import { Router, ActivatedRoute } from "@angular/router";
 import { locale as english } from "../i18n/en";
 import { locale as spanish } from "../i18n/es";
 import { MatSnackBar } from "@angular/material";
@@ -39,7 +38,8 @@ export class UserFormComponent implements OnInit {
     private userFormService: UserFormService,
     private formBuilder: FormBuilder,
     public snackBar: MatSnackBar,
-    private router: ActivatedRoute
+    private router: Router,
+    private activatedRouter: ActivatedRoute
   ) {
     this.translationLoader.loadTranslations(english, spanish);
   }
@@ -56,7 +56,7 @@ export class UserFormComponent implements OnInit {
   }
 
   findUser() {
-    this.router.params
+    this.activatedRouter.params
       .pipe(
         mergeMap(params => {
           if(params.username === "new"){
@@ -165,6 +165,15 @@ export class UserFormComponent implements OnInit {
     return this.formBuilder.group({});
   }
 
+   /**
+   * Navigates to the user detail page of the selected user
+   */
+  goToUserDetail(username) {
+    if(username){
+      this.router.navigate(['user-management/'] , { queryParams: {}});
+    }
+  }
+
   /**
    * Checks if the passwords match, otherwise the form will be invalid.
    * @param passwordKey new Password
@@ -201,11 +210,11 @@ export class UserFormComponent implements OnInit {
         filter((resp: any) => !resp.errors || resp.errors.length === 0)
       )
       .subscribe(
-        model => {
+        model => {          
           this.snackBar.open("El usuario ha sido creada", "Cerrar", {
             duration: 2000
           });
-
+          this.goToUserDetail(data.username);
           //this.businessCreated.emit(this.selectedBusiness);
         },
         error => {
@@ -273,6 +282,7 @@ export class UserFormComponent implements OnInit {
       });
   }
 
+
   /**
    * Refresh roles
    */
@@ -280,42 +290,31 @@ export class UserFormComponent implements OnInit {
     if (this.pageType == "new") {
       return;
     }
-    Rx.Observable.forkJoin(
-      this.userFormService.getRoles$().pipe(
-        mergeMap(roles => Rx.Observable.from(roles.data.getRoles)),
-        map((role: { id; name }) => {
+    this.userFormService.getUserRoleMapping$(this.user.id).pipe(
+      mergeMap(userRolesData => Rx.Observable.from(userRolesData.data.getUserRoleMapping)),
+      map((role: { id, name } | any) => {
           return {
             id: role.id,
             name: role.name
           };
         }),
-        toArray()
-      ),
-      this.userFormService.getUserRoleMapping$(this.user.id).pipe(
-        mergeMap(roles => Rx.Observable.from(roles.data.getUserRoleMapping)),
-        map((roleR: { id; name } | any) => {
+      toArray(),
+      mergeMap((userRolesMap: any) => {
+        return this.userFormService.getRoles$().pipe(
+          mergeMap(rolesData => Rx.Observable.from(rolesData.data.getRoles)),
+          map((role: { id, name }) => {
           return {
-            id: roleR.id,
-            name: roleR.name
+            id: role.id,
+            name: role.name,
+            selected: userRolesMap.some(userRole => userRole.id == role.id)
           };
         }),
         toArray()
       )
-    ).subscribe(([rolesData, userRoleMappingData]) => {
-      console.log("DATA ROLES ==> ", rolesData, userRoleMappingData);
-      this.roles = [];
-      this.userRoles = [];
-      rolesData.forEach(role => {
-        if (
-          !userRoleMappingData.some(roleMapping => {
-            return roleMapping.id == role.id;
+      })
+    ).subscribe(result => {
+      this.userRoles = result;
           })
-        ) {
-          this.roles.push(role);
-        }
-      });
-      this.userRoles = userRoleMappingData;
-    });
   }
 
   removeRoles(roles) {
@@ -337,10 +336,10 @@ export class UserFormComponent implements OnInit {
   /**
    * Adds the selected roles to the selected user
    */
-  addRolesToUser() {
-    console.log("Adding roles to the user ... ", this.selectedRoles);
+  addRolesToUser(rolesToAdd) {
+    console.log("Adding roles to the user ... ", rolesToAdd);
     this.userFormService
-      .addRolesToTheUser$(this.user.id, this.selectedRoles)
+      .addRolesToTheUser$(this.user.id, rolesToAdd)
       .pipe(
         mergeMap(resp => this.graphQlAlarmsErrorHandler$(resp)),
         filter((resp: any) => !resp.errors || resp.errors.length === 0)
@@ -354,18 +353,6 @@ export class UserFormComponent implements OnInit {
               duration: 2000
             }
           );
-
-          for (var i = 0; i < this.roles.length; i++) {
-            var obj = this.roles[i];
-
-            console.log("MAPA => ", this.selectedRoles.map(data => data.id));
-            if (
-              this.selectedRoles.map(data => data.id).indexOf(obj.id) !== -1
-            ) {
-              this.roles.splice(i, 1);
-            }
-          }
-          this.userRoles = this.userRoles.concat(this.selectedRoles);
         },
         error => {
           console.log("Error adding roles to the user ==> ", error);
@@ -376,10 +363,10 @@ export class UserFormComponent implements OnInit {
   /**
    * Adds the selected roles to the selected user
    */
-  removeRolesFromUser() {
-    console.log("Removing roles to the user ... ", this.selectedRoles);
+  removeRolesFromUser(rolesToRemove) {
+    console.log("Removing roles to the user ... ", rolesToRemove);
     this.userFormService
-      .removeRolesFromUser$(this.user.id, this.selectedUserRoles)
+      .removeRolesFromUser$(this.user.id, rolesToRemove)
       .pipe(
         mergeMap(resp => this.graphQlAlarmsErrorHandler$(resp)),
         filter((resp: any) => !resp.errors || resp.errors.length === 0)
@@ -389,27 +376,30 @@ export class UserFormComponent implements OnInit {
           this.snackBar.open("Se han eliminado roles de usuario", "Cerrar", {
             duration: 2000
           });
-
-          for (var i = 0; i < this.userRoles.length; i++) {
-            var obj = this.userRoles[i];
-
-            console.log(
-              "MAPA => ",
-              this.selectedUserRoles.map(data => data.id)
-            );
-            if (
-              this.selectedUserRoles.map(data => data.id).indexOf(obj.id) !== -1
-            ) {
-              this.userRoles.splice(i, 1);
-            }
-          }
-          this.roles = this.roles.concat(this.selectedUserRoles);
         },
         error => {
           console.log("Error removing roles from the user ==> ", error);
           this.refreshRoles();
         }
       );
+  }
+
+  /**
+   * Detects when a roles has been added or deleted to a user
+   * @param $event 
+   */
+  onUserRolesChange(roleEvent) {
+    console.log("onUserRolesChange ==> ", roleEvent);
+
+    if(roleEvent.selected){
+      const rolesToAdd = [];
+      rolesToAdd.push({id: roleEvent.value.id, name: roleEvent.value.name});
+      this.addRolesToUser(rolesToAdd);
+    }else{
+      const rolesToRemove = [];
+      rolesToRemove.push({id: roleEvent.value.id, name: roleEvent.value.name});
+      this.removeRolesFromUser(rolesToRemove);
+    }
   }
 
   /**

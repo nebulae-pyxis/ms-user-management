@@ -188,7 +188,6 @@ export class UserFormService {
    * @param newState New state of the user
    */
   updateUserState$(userId, username, newState): Observable<any> {
-    console.log("UPDATE ==> ", userId, username, newState);
     return this.gateway.apollo.mutate<any>({
       mutation: updateUserState,
       variables: {
@@ -208,8 +207,6 @@ export class UserFormService {
       password: userPassword.password,
       temporary: userPassword.temporary
     };
-
-    console.log("userPasswordInput => ", userPasswordInput);
 
     return this.gateway.apollo.mutate<any>({
       mutation: resetUserPassword,

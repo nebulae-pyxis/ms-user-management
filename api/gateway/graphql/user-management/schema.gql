@@ -108,9 +108,9 @@ type Mutation {
   "Changes user password"
   resetUserPassword(userId: ID!, input: UserPasswordInput): CommandResponse  
   "Adds the roles to the user"
-  addRolesToTheUser(userId: ID, input: RolesInput): CommandResponse
+  addRolesToTheUser(userId: ID!, input: RolesInput): CommandResponse
   "Removes the roles from the user"
-  removeRolesFromUser(userId: ID, input: RolesInput): CommandResponse
+  removeRolesFromUser(userId: ID!, input: RolesInput): CommandResponse
 }
 
 type Subscription {

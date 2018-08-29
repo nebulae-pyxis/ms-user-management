@@ -62,7 +62,7 @@ export const getUserRoleMapping = gql`
 
 // MUTATIONS
 export const addRolesToTheUser = gql`
-  mutation addRolesToTheUser($userId: ID, $input: RolesInput) {
+  mutation addRolesToTheUser($userId: ID!, $input: RolesInput) {
     addRolesToTheUser(userId: $userId, input: $input) {
       code
       message
@@ -71,7 +71,7 @@ export const addRolesToTheUser = gql`
 `;
 
 export const removeRolesFromUser = gql`
-  mutation removeRolesFromUser($userId: ID, $input: RolesInput) {
+  mutation removeRolesFromUser($userId: ID!, $input: RolesInput) {
     removeRolesFromUser(userId: $userId, input: $input) {
       code
       message

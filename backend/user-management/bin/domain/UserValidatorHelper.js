@@ -53,11 +53,11 @@ class UserValidatorHelper {
         })
         //Checks if the username already was used
         .mergeMap(user => {
-          return this.checkUserExists$(user, user.username);
+          return this.checkUserExists$(user, user.username, method);
         })
         //Checks if the email already was used
         .mergeMap(user => {
-          return this.checkUserExists$(user, null, user.email);
+          return this.checkUserExists$(user, null, user.email, method);
         })
     );
   }
@@ -260,7 +260,7 @@ class UserValidatorHelper {
    * @param {*} username Username to check
    * @param {*} email Email to check
    */
-  static checkUserExists$(user, username, email) {
+  static checkUserExists$(user, username, email, method) {
     return UserKeycloakDA.getUser$(username, email, null).mergeMap(
       userUsernameFound => {
         if (userUsernameFound) {

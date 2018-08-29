@@ -93,16 +93,15 @@ class UserEventConsumer {
  * @param {*} userRolesAddedEvent 
  */
   handleUserRolesAdded$(userRolesAddedEvent) {
-    console.log('userRolesAddedEvent ==>' , userRolesAddedEvent);
     const data = userRolesAddedEvent.data;
     return UserKeycloakDA.addRolesToTheUser$(
-      data.userId,
+      userRolesAddedEvent.aid,
       data.userRoles.roles
     ).mergeMap(result => {
       return broker.send$(
         MATERIALIZED_VIEW_TOPIC,
         `UserUpdatedSubscription`,
-        UserKeycloakDA.getUserByUserId$(data.userId)
+        UserKeycloakDA.getUserByUserId$(userRolesAddedEvent.aid)
       );
     });
   }
@@ -112,16 +111,15 @@ class UserEventConsumer {
  * @param {*} userRolesAddedEvent 
  */
 handleUserRolesRemoved$(userRolesRemovedEvent) {
-  console.log('userRolesRemovedEvent ==> ', userRolesRemovedEvent);
   const data = userRolesRemovedEvent.data;
   return UserKeycloakDA.removeRolesFromUser$(
-    data.userId,
+    userRolesRemovedEvent.aid,
     data.userRoles.roles
   ).mergeMap(result => {
     return broker.send$(
       MATERIALIZED_VIEW_TOPIC,
       `UserUpdatedSubscription`,
-      UserKeycloakDA.getUserByUserId$(data.userId)
+      UserKeycloakDA.getUserByUserId$(userRolesRemovedEvent.aid)
     );
   });
 }

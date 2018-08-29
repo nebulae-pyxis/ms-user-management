@@ -96,7 +96,6 @@ export class UserManagementComponent implements OnInit, OnDestroy {
 
           if (this.filter.nativeElement) {
             let filterValue = this.filter.nativeElement.value;
-            console.log('FilterValue ===> ', filterValue);
             filterValue = filterValue.trim();
             this.searchFilter = filterValue;
             this.refreshDataTable(
@@ -135,8 +134,6 @@ export class UserManagementComponent implements OnInit, OnDestroy {
         mergeMap(resp => this.graphQlAlarmsErrorHandler$(resp)),
         filter((resp: any) => !resp.errors || resp.errors.length === 0),
       ).subscribe(model => {
-        console.log('Refresh table ==> ', model);
-
         this.dataSource.data = model.data.getUsers;
       });
   }
