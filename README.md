@@ -1,9 +1,7 @@
 ![NebulaE](docs/images/nebula.png "Nebula Engineering SAS")
 
 # UserManagement
-User management allows you to create, update and query users on the system using Keycloak as the access management solution to manage all of the information of the users registered on the platform.
-
-The general porpouse of this service is to ...
+User management microservice allows you to create, update and query users on the platform. This microservice uses Keycloak to manage the info of the users (User info, user state, roles, attributes) and control the access to the platform.
 
 _This MicroService is built on top of NebulaE MicroService Framework.  Please see the [FrameWork project](https://github.com/NebulaEngineering/nebulae) to understand the full concept_**.
 
@@ -19,16 +17,19 @@ _This MicroService is built on top of NebulaE MicroService Framework.  Please se
         * [Environment variables](#backend_user-management_env_vars)
         * [Event Sourcing](#backend_user-management_eventsourcing)
         * [CronJobs](#backend_user-management_cronjobs)
+  * [General config](#general_config)
+    * [Keycloak config](#keycloak_config)
+    * [Create the initial user of a business](#first_user_business)        
   * [Development environment](#dev_env)
 # Project structure <a name="structure"></a>
 
 ```
 ├── frontend                            => Micro-FrontEnd  
-│   └── emi                      => Micro-FrontEnd for [emi FrontEnd](https://github.com/nebulae-pyxis/emi)
+│   └── emi                             => Micro-FrontEnd for [emi FrontEnd](https://github.com/nebulae-pyxis/emi)
 ├── api                                 => Micro-APIs  
-│   └── gateway                           => Micro-API for [gateway API](https://github.com/nebulae-pyxis/gateway)  
+│   └── gateway                         => Micro-API for [gateway API](https://github.com/nebulae-pyxis/gateway)  
 ├── backend                             => Micro-BackEnds  
-│   ├── user-management                     => Micro-BackEnd responsible for ...
+│   ├── user-management                 => Micro-BackEnd responsible for ...
 ├── etc                                 => Micro-Service config Files.  
 ├── deployment                          => Automatic deployment strategies  
 │   ├── compose                         => Docker-Compose environment for local development  
@@ -42,8 +43,30 @@ _This MicroService is built on top of NebulaE MicroService Framework.  Please se
 ├── README.md                           => This doc
 ```
 # Frontend <a name="frontend"></a>
-...
 
+In the user management section you are going to be able to create, update, change password and assign roles to the users that belong to the same business of the logged in user. To enter to this section you have to have the "Business owner" role and belong to a business, otherwise you will not able to perform any of the operations previously mentioned.
+
+Note: (An user cannot be deleted, only can be deactivated)
+
+If you want to navigate to user management section, go to USERS > User management.
+
+![User management](docs/images/menu.png "user management")
+
+Once you enter to the section, you will see all of the users that were created on the platform and belong to the same business to which you belong.
+
+This section has a filter in which you can search the users by username, first or last name, or email. 
+
+![User table](docs/images/user_table.png "user table")
+
+If you click over an user of the table or click over the "Add user" button, you will redirect to a user form where you can create or update an user.
+
+User form when click over the "Add user" button:
+
+![New user form](docs/images/new_user_form.png "New user form")
+
+User form when click over an user of the table:
+
+![Edit user form](docs/images/edit_user_form.png "Edit user form")
 
 # API <a name="api"></a>
 Exposed interfaces to send Commands and Queries by the CQRS principles.
@@ -141,7 +164,26 @@ Each BackEnd has the following running commands:
 | BROKER_TYPE                              | enum   | Broker type to use for inter-process communication.                                          |       |     X     |
 |                                          | string | Ops: PUBSUB, MQTT                                                                            |       |           |
 +------------------------------------------+--------+----------------------------------------------------------------------------------------------+-------+-----------+
+| KEYCLOAK_BACKEND_BASE_URL                | enum   | Keycloak URL or connection string.                                                           |       |     X     |
+|                                          | string | Eg.: http://127.0.0.1:8080/auth                                                              |       |           |
++------------------------------------------+--------+----------------------------------------------------------------------------------------------+-------+-----------+
+| KEYCLOAK_BACKEND_USER                    | enum   | Keycloak user.                                                                               |       |     X     |
+|                                          | string | Eg.: admin                                                                                   |       |           |
++------------------------------------------+--------+----------------------------------------------------------------------------------------------+-------+-----------+
+| KEYCLOAK_BACKEND_PASSWORD                | enum   | Keycloak password                                                                            |       |     X     |
+|                                          | string | Eg.: password                                                                                |       |           |
++------------------------------------------+--------+----------------------------------------------------------------------------------------------+-------+-----------+
+| KEYCLOAK_BACKEND_BASE_URL                | enum   | Keycloak URL or connection string.                                                           |       |     X     |
+|                                          | string | Eg.: http://127.0.0.1:8080/auth                                                              |       |           |
++------------------------------------------+--------+----------------------------------------------------------------------------------------------+-------+-----------+
+| KEYCLOAK_BACKEND_BASE_URL                | enum   | Keycloak URL or connection string.                                                           |       |     X     |
+|                                          | string | Eg.: http://127.0.0.1:8080/auth                                                              |       |           |
++------------------------------------------+--------+----------------------------------------------------------------------------------------------+-------+-----------+
+
 ```
+
+
+KEYCLOAK_BACKEND_BASE_URL= http://127.0.0.1:8080/auth
 #### Notes: 
   * ENV VARS for development are [here](backend/user-management/.env)
   * ENV VARS for production are [here](deployment/gke/deployment-user-management.yaml)
@@ -157,10 +199,43 @@ Each BackEnd has the following running commands:
 ### CronJobs <a name="backend_user-management_cronjobs"></a>
 Time-based jobs that are configured and triggered by the [CronJob MicroService](https://github.com/nebulae-pyxis/ms-cronjob)
 
+# General Config <a name="general_config"></a>
+
+## Keycloak config <a name="keycloak_config"></a>
+
+To be able to perform all of the operations that the user management microservice provides, you have to do some configurations on Keycloak.
+
+1. Create "business-owner" role.
+
+![Business owner role](docs/images/createRole.png "Business_owner_role")
+
+2. Create a new token mapper (token mapper name: businessId) to the client of the platform, this new mapper should be configured as indicated on the picture:
+
+![Business token mapper](docs/images/business_token_mapper.png "Business_token_mapper")
+
+With this configuration, when an user logging in the platform, the token will contain the business ID to which the logged in user belongs (in case that this has been configured). This is useful to identify the business of the user logged in and so recover the users that belong to the same business, due that we cannot show users from other businesses.
+
+## Create the initial user of a business <a name="first_user_business"></a>
+
+The first user of a business has to be create manually through Keycloak
+
+1. Create and configure the information of the user on Keycloak. 
+
+2. Set a password to the user.
+
+3. Associate the "business-owner" to the user.
+
+![Assigned role](docs/images/assigned_roles.png "Assigned_role")
+
+4. Add the "businessId" attribute to the user according to the business to which he belongs:
+
+![Business user attribute](docs/images/business_user_attribute.png "Business_user_attribute")
+
+5. Once you did all of the steps, the user will be able to manage all of the users of its business.
+
+
 
 # Development environment <a name="dev_env"></a>
-
-
 
 ## Install requeriments
 * [node](https://nodejs.org/en/)

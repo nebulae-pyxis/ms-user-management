@@ -1,11 +1,12 @@
 export const locale = {
   lang: 'en',
   data: {
-    USER: 'Users',
+    USER: {
+      USER: 'Users',
       SEARCH: 'Search',
       USERNAME: 'Username',
       DOC_TYPE: 'Document type',
-      CC: 'Indetification card',
+      CC: 'Identification card',
       TI: 'Identity card',
       DOC_ID: 'Document ID',
       ACTIVE: 'Active',
@@ -18,7 +19,7 @@ export const locale = {
       FOREIGNER_ID: 'Foreigner ID',
       CITIZENSHIP_CARD: 'Citizenship card',
       PASSPORT: 'Passport',
-      NEW_USER: 'Nwe user',
+      NEW_USER: 'New user',
       USER_DETAIL: 'User detail',
       NAME: 'Name',
       LASTNAME: 'Last name',
@@ -45,6 +46,7 @@ export const locale = {
       LASTNAME_REQUIRED: 'Lastname required',
       DOCUMENT_TYPE_REQUIRED: 'Document type required',
       DOCUMENT_ID_REQUIRED: 'Document ID required'
+    }
   },
   ERRORS: {
     16001: 'Internal server error',
