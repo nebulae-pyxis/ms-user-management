@@ -203,7 +203,6 @@ export class UserManagementComponent implements OnInit, OnDestroy {
   }
 
   getNext(event) {
-    console.log('getNext ', event);
     const offset = event.pageSize * event.pageIndex
     
     // call your api function here with the offset

@@ -4,23 +4,23 @@
         "src": "frontend/emi/user-management",
         "groups": [
             {
-              "id": "User",
-              "icon": "assignment_turned_in",
+              "id": "RESOURCES",
+              "icon": "bookmarks",
               "translate": {
-                "en": "Users",
-                "es": "Usuarios"
+                "en": "Resources",
+                "es": "Recursos"
               },
               "priority": 1000
             }
           ],
         "contents": [
             {
-                "groupId": "User",
+                "groupId": "RESOURCES",
                 "id": "user-management",
                 "icon": "face",
                 "translate": {
-                    "en": "User management",
-                    "es": "Gestión de usuarios"
+                    "en": "Users",
+                    "es": "Usuarios"
                 },
                 "navURL": "/user-management",
                 "path": "user-management",

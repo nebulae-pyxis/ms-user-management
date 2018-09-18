@@ -202,7 +202,6 @@ export class UserFormComponent implements OnInit {
     data.username = data.username.trim();
     data.state = this.userStateForm.getRawValue().state;
 
-    console.log("Creating user ... ", data);
     this.userFormService
       .createUser$(data)
       .pipe(
@@ -229,7 +228,6 @@ export class UserFormComponent implements OnInit {
   updateUserGeneralInfo() {
     const data = this.userGeneralInfoForm.getRawValue();
 
-    console.log("Updating user general info ... ", data);
     this.userFormService
       .updateUser$(this.user.id, data)
       .pipe(
@@ -259,8 +257,6 @@ export class UserFormComponent implements OnInit {
         filter((resp: any) => !resp.errors || resp.errors.length === 0)
       )
       .subscribe(roles => {
-        console.log("Roles ==> ", roles);
-
         this.roles = roles.data.getRoles;
       });
   }
@@ -276,8 +272,6 @@ export class UserFormComponent implements OnInit {
         filter((resp: any) => !resp.errors || resp.errors.length === 0)
       )
       .subscribe(roles => {
-        console.log("User Roles ==> ", roles);
-
         this.userRoles = roles.data.getUserRoles;
       });
   }
@@ -337,7 +331,6 @@ export class UserFormComponent implements OnInit {
    * Adds the selected roles to the selected user
    */
   addRolesToUser(rolesToAdd) {
-    console.log("Adding roles to the user ... ", rolesToAdd);
     this.userFormService
       .addRolesToTheUser$(this.user.id, rolesToAdd)
       .pipe(
@@ -364,7 +357,6 @@ export class UserFormComponent implements OnInit {
    * Adds the selected roles to the selected user
    */
   removeRolesFromUser(rolesToRemove) {
-    console.log("Removing roles to the user ... ", rolesToRemove);
     this.userFormService
       .removeRolesFromUser$(this.user.id, rolesToRemove)
       .pipe(
@@ -389,8 +381,6 @@ export class UserFormComponent implements OnInit {
    * @param $event 
    */
   onUserRolesChange(roleEvent) {
-    console.log("onUserRolesChange ==> ", roleEvent);
-
     if(roleEvent.selected){
       const rolesToAdd = [];
       rolesToAdd.push({id: roleEvent.value.id, name: roleEvent.value.name});
@@ -412,8 +402,6 @@ export class UserFormComponent implements OnInit {
     if (this.pageType == "new") {
       return;
     }
-
-    console.log("onUserStateChange ==> ", $event);
 
     this.userFormService
       .updateUserState$(this.user.id, this.user.username, $event.checked)
@@ -443,7 +431,6 @@ export class UserFormComponent implements OnInit {
   resetUserPassword() {
     const data = this.userCredentialsForm.getRawValue();
 
-    console.log("reset user password ...", data);
     this.userFormService
       .resetUserPassword$(this.user.id, data)
       .pipe(
