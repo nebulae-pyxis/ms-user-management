@@ -61,6 +61,9 @@ class KeycloakDA {
 
 }
 
+/**
+ * @returns {KeycloakDA}
+ */
 module.exports = {
   singleton() {
     if (!instance) {        
