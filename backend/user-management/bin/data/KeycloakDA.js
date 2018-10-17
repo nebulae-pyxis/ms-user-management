@@ -75,7 +75,7 @@ module.exports = {
         grant_type: 'password',
         client_id: process.env.KEYCLOAK_BACKEND_CLIENT_ID,
     });
-      console.log(`KeycloakDA instance created`);
+      console.log(`KeycloakDA instance created.`);
     }
     return instance;
   }
