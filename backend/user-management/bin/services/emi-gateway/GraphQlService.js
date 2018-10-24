@@ -94,7 +94,7 @@ class GraphQlService {
           if (replyTo) {
             return broker.send$(
               replyTo,
-              "gateway.graphql.Query.response",
+              "emigateway.graphql.Query.response",
               response,
               { correlationId }
             );
@@ -134,67 +134,67 @@ class GraphQlService {
     return [
       {
         aggregateType: "User",
-        messageType: "gateway.graphql.mutation.createUser",
+        messageType: "emigateway.graphql.mutation.createUser",
         onErrorHandler,
         onCompleteHandler
       },
       {
         aggregateType: "User",
-        messageType: "gateway.graphql.mutation.updateUserGeneralInfo",
+        messageType: "emigateway.graphql.mutation.updateUserGeneralInfo",
         onErrorHandler,
         onCompleteHandler
       },
       {
         aggregateType: "User",
-        messageType: "gateway.graphql.mutation.updateUserState",
+        messageType: "emigateway.graphql.mutation.updateUserState",
         onErrorHandler,
         onCompleteHandler
       },
       {
         aggregateType: "User",
-        messageType: "gateway.graphql.mutation.resetUserPassword",
+        messageType: "emigateway.graphql.mutation.resetUserPassword",
         onErrorHandler,
         onCompleteHandler
       },
       {
         aggregateType: "User",
-        messageType: "gateway.graphql.mutation.addRolesToTheUser",
+        messageType: "emigateway.graphql.mutation.addRolesToTheUser",
         onErrorHandler,
         onCompleteHandler
       },
       {
         aggregateType: "User",
-        messageType: "gateway.graphql.mutation.removeRolesFromUser",
+        messageType: "emigateway.graphql.mutation.removeRolesFromUser",
         onErrorHandler,
         onCompleteHandler
       },
       {
         aggregateType: "User",
-        messageType: "gateway.graphql.query.getUsers",
+        messageType: "emigateway.graphql.query.getUsers",
         onErrorHandler,
         onCompleteHandler
       },
       {
         aggregateType: "User",
-        messageType: "gateway.graphql.query.getUser",
+        messageType: "emigateway.graphql.query.getUser",
         onErrorHandler,
         onCompleteHandler
       },
       {
         aggregateType: "User",
-        messageType: "gateway.graphql.query.getUserCount",
+        messageType: "emigateway.graphql.query.getUserCount",
         onErrorHandler,
         onCompleteHandler
       },
       {
         aggregateType: "User",
-        messageType: "gateway.graphql.query.getRoles",
+        messageType: "emigateway.graphql.query.getRoles",
         onErrorHandler,
         onCompleteHandler
       },
       {
         aggregateType: "User",
-        messageType: "gateway.graphql.query.getUserRoleMapping",
+        messageType: "emigateway.graphql.query.getUserRoleMapping",
         onErrorHandler,
         onCompleteHandler
       },
@@ -206,47 +206,47 @@ class GraphQlService {
    */
   generateFunctionMap() {
     return {
-      "gateway.graphql.mutation.createUser": {
+      "emigateway.graphql.mutation.createUser": {
         fn: user.createUser$,
         obj: user
       },
-      "gateway.graphql.mutation.updateUserGeneralInfo": {
+      "emigateway.graphql.mutation.updateUserGeneralInfo": {
         fn: user.updateUserGeneralInfo$,
         obj: user
       },
-      "gateway.graphql.mutation.updateUserState": {
+      "emigateway.graphql.mutation.updateUserState": {
         fn: user.updateUserState$,
         obj: user
       },
-      'gateway.graphql.mutation.resetUserPassword': {
+      'emigateway.graphql.mutation.resetUserPassword': {
         fn: user.resetUserPassword$,
         obj: user
       },
-      'gateway.graphql.mutation.addRolesToTheUser': {
+      'emigateway.graphql.mutation.addRolesToTheUser': {
         fn: user.addRolesToTheUser$,
         obj: user
       },
-      'gateway.graphql.mutation.removeRolesFromUser': {
+      'emigateway.graphql.mutation.removeRolesFromUser': {
         fn: user.removeRolesFromUser$,
         obj: user
       },
-      'gateway.graphql.query.getUserCount': {
+      'emigateway.graphql.query.getUserCount': {
         fn: user.getUserCount$,
         obj: user
       },
-      'gateway.graphql.query.getUsers': {
+      'emigateway.graphql.query.getUsers': {
         fn: user.getUsers$,
         obj: user
       },
-      'gateway.graphql.query.getUser': {
+      'emigateway.graphql.query.getUser': {
         fn: user.getUser$,
         obj: user
       },
-      'gateway.graphql.query.getRoles': {
+      'emigateway.graphql.query.getRoles': {
         fn: user.getRoles$,
         obj: user
       },
-      'gateway.graphql.query.getUserRoleMapping': {
+      'emigateway.graphql.query.getUserRoleMapping': {
         fn: user.getUserRoleMapping$,
         obj: user
       }

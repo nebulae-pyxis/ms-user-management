@@ -3,7 +3,7 @@
 const Rx = require("rxjs");
 const UserKeycloakDA = require("../data/UserKeycloakDA");
 const broker = require("../tools/broker/BrokerFactory")();
-const MATERIALIZED_VIEW_TOPIC = "materialized-view-updates";
+const MATERIALIZED_VIEW_TOPIC = "emi-materialized-view-updates";
 
 /**
  * Singleton instance
