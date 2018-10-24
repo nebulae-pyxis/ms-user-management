@@ -96,7 +96,7 @@ class GraphQlService {
             user.handleError$(err)
               .map(response => ({
                 errorResponse: { response, correlationId: message.id, replyTo: message.attributes.replyTo },
-                failedValidations: ['JWT']
+                failedValidations: ['JWT'] 
               }
               ))
           )
