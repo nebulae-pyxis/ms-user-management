@@ -28,7 +28,7 @@ class TokenCQRS {
       .mergeMap(({username, password, refreshToken}) => {
         return TokenDA.getToken$(username, password, refreshToken)
       })
-      .mergeMap(rawResponse => this.buildSuccessResponse1$(rawResponse))
+      .mergeMap(rawResponse => this.buildSuccessResponse$(rawResponse))
       .catch(err => {
         console.log('err => ', err);
         return this.handleError$(err);
@@ -57,7 +57,7 @@ class TokenCQRS {
    * @param {*} rawRespponse 
    * @returns {Observable}
    */
-  buildSuccessResponse1$(rawRespponse) {
+  buildSuccessResponse$(rawRespponse) {
     return Rx.Observable.of(rawRespponse).map(resp => {
       return {
         data: resp,
