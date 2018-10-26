@@ -12,7 +12,7 @@ export class UserManagementService {
 
 
   constructor(private gateway: GatewayService) {
-
+    
   }
 
 /**

@@ -19,7 +19,6 @@ function getResponseFromBackEnd$(response) {
       err.name = "Error";
       err.message = resp.result.error;
       Error.captureStackTrace(err, "Error");
-
       throw err;
     }
     return resp.data;
@@ -66,7 +65,7 @@ module.exports = {
         .mergeMap(response => {
           return broker.forwardAndGetReply$(
             "User",
-            "gateway.graphql.query.getUsers",
+            "emigateway.graphql.query.getUsers",
             { root, args, jwt: context.encodedToken },
             2000
           );
@@ -87,7 +86,7 @@ module.exports = {
         .mergeMap(response => {
           return broker.forwardAndGetReply$(
             "User",
-            "gateway.graphql.query.getUser",
+            "emigateway.graphql.query.getUser",
             { root, args, jwt: context.encodedToken },
             2000
           );
@@ -108,7 +107,7 @@ module.exports = {
         .mergeMap(response => {
           return broker.forwardAndGetReply$(
             "User",
-            "gateway.graphql.query.getUserRoleMapping",
+            "emigateway.graphql.query.getUserRoleMapping",
             { root, args, jwt: context.encodedToken },
             2000
           );
@@ -129,7 +128,7 @@ module.exports = {
         .mergeMap(response => {
           return broker.forwardAndGetReply$(
             "User",
-            "gateway.graphql.query.getRoles",
+            "emigateway.graphql.query.getRoles",
             { root, args, jwt: context.encodedToken },
             2000
           );
@@ -154,7 +153,7 @@ module.exports = {
         .mergeMap(response => {
           return context.broker.forwardAndGetReply$(
             "User",
-            "gateway.graphql.mutation.createUser",
+            "emigateway.graphql.mutation.createUser",
             { root, args, jwt: context.encodedToken },
             2000
           );
@@ -175,7 +174,7 @@ module.exports = {
         .mergeMap(response => {
           return context.broker.forwardAndGetReply$(
             "User",
-            "gateway.graphql.mutation.updateUserGeneralInfo",
+            "emigateway.graphql.mutation.updateUserGeneralInfo",
             { root, args, jwt: context.encodedToken },
             2000
           );
@@ -196,7 +195,7 @@ module.exports = {
         .mergeMap(response => {
           return context.broker.forwardAndGetReply$(
             "User",
-            "gateway.graphql.mutation.updateUserState",
+            "emigateway.graphql.mutation.updateUserState",
             { root, args, jwt: context.encodedToken },
             2000
           );
@@ -217,7 +216,7 @@ module.exports = {
         .mergeMap(response => {
           return context.broker.forwardAndGetReply$(
             "User",
-            "gateway.graphql.mutation.resetUserPassword",
+            "emigateway.graphql.mutation.resetUserPassword",
             { root, args, jwt: context.encodedToken },
             2000
           );
@@ -238,7 +237,7 @@ module.exports = {
         .mergeMap(response => {
           return context.broker.forwardAndGetReply$(
             "User",
-            "gateway.graphql.mutation.addRolesToTheUser",
+            "emigateway.graphql.mutation.addRolesToTheUser",
             { root, args, jwt: context.encodedToken },
             2000
           );
@@ -259,7 +258,7 @@ module.exports = {
         .mergeMap(response => {
           return context.broker.forwardAndGetReply$(
             "User",
-            "gateway.graphql.mutation.removeRolesFromUser",
+            "emigateway.graphql.mutation.removeRolesFromUser",
             { root, args, jwt: context.encodedToken },
             2000
           );

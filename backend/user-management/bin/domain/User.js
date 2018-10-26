@@ -8,7 +8,7 @@ const RoleValidator = require("../tools/RoleValidator");
 const UserValidatorHelper = require("./UserValidatorHelper");
 const Event = require("@nebulae/event-store").Event;
 const uuidv4 = require("uuid/v4");
-const MATERIALIZED_VIEW_TOPIC = "materialized-view-updates";
+const MATERIALIZED_VIEW_TOPIC = "emi-materialized-view-updates";
 const { CustomError, DefaultError } = require("../tools/customError");
 const {
   USER_MISSING_DATA_ERROR_CODE,
