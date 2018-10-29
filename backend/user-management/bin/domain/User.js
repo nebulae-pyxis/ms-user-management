@@ -38,7 +38,7 @@ class User {
       "Permission denied",
       ["business-owner"]
     )
-    .do(r =>  console.log(eaas))
+    //.do(r =>  console.log(eaas))
       .mergeMap(val => {
         return UserKeycloakDA.getUsers$(
           args.page,

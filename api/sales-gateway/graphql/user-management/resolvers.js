@@ -107,6 +107,6 @@ eventDescriptors.forEach(descriptor => {
       console.error(`Error listening ${descriptor.gqlSubscriptionName}`, error);
     },
 
-    () => console.log(`${descriptor.gqlSubscriptionName} listener STOPED.`)
+    () => console.log(`${descriptor.gqlSubscriptionName} listener STOPPED.`)
   );
 });
