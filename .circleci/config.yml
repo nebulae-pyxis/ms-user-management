@@ -103,7 +103,7 @@ jobs:
             gitChanged api/sales-gateway || source ~/.profile
             gitChanged api/sales-gateway || npm install -g @nebulae/cli
             gitChanged api/sales-gateway || nebulae register microapi --microservice-id=user-management --api-id=sales-gateway --setup-file=/home/circleci/nebulae/repo/etc/sales-mapi-setup.json --store-type=GCP_DATASTORE --gcp-service-account-token=/tmp/gcloud-service-key.json            
-            gitChanged api/sales-gateway || nebulae compose-api production --api-type=NEBULAE_GATEWAY --api-repo=https://github.com/nebulae-pyxis/sales-gateway.git --api-id=emi-gateway --output-dir=/home/circleci/nebulae/api/sales-gateway/ --store-type=GCP_DATASTORE --gcp-service-account-token=/tmp/gcloud-service-key.json      
+            gitChanged api/sales-gateway || nebulae compose-api production --api-type=NEBULAE_GATEWAY --api-repo=https://github.com/nebulae-pyxis/sales-gateway.git --api-id=sales-gateway --output-dir=/home/circleci/nebulae/api/sales-gateway/ --store-type=GCP_DATASTORE --gcp-service-account-token=/tmp/gcloud-service-key.json      
             gitChanged api/sales-gateway || ls /home/circleci/nebulae/api/sales-gateway/
       - setup_remote_docker
       - run:
@@ -116,7 +116,7 @@ jobs:
             gitChanged api/emi-gateway || ls ~/nebulae/api/shell
             gitChanged api/emi-gateway || export DOCKERHUB_IMAGE=emigateway
             gitChanged api/emi-gateway || export API_SHELL_PATH=/home/circleci/nebulae/api/
-            gitChanged api/emi-gateway || ( cd ~/nebulae/api/shell && sh ~/nebulae/api/emi-gateway/shell/deployment/docker/build-docker-hub.sh  && cd ~/nebulae/repo/ )
+            gitChanged api/emi-gateway || ( cd ~/nebulae/api/emi-gateway/shell && sh ~/nebulae/api/emi-gateway/shell/deployment/docker/build-docker-hub.sh  && cd ~/nebulae/repo/ )
             gitChanged api/emi-gateway || echo $DOCKERHUB_NAMESPACE/$DOCKERHUB_IMAGE@$(docker pull $DOCKERHUB_NAMESPACE/$DOCKERHUB_IMAGE:latest | grep sha256 | cut -c 9-) > ~/nebulae/api/emi-gateway/DOCKERHUB_GENERATED_IMAGE_DIGEST      
       - run:
           name: Build docker image (sales-gateway) and push it to hub
@@ -179,7 +179,7 @@ jobs:
             mkdir ~/nebulae/backend
             cp ~/nebulae/go/mbinit ~/nebulae/repo/backend/user-management/
             export DOCKERHUB_IMAGE=user-management.backend.user-management
-            export DOCKERHUB_TAG=0.0.25
+            export DOCKERHUB_TAG=0.0.26
             gitChanged backend/user-management || docker build  -t $DOCKERHUB_NAMESPACE/$DOCKERHUB_IMAGE:$DOCKERHUB_TAG -t $DOCKERHUB_NAMESPACE/$DOCKERHUB_IMAGE:latest ~/nebulae/repo/backend/user-management/
             gitChanged backend/user-management || docker login -u $DOCKERHUB_USER -p $DOCKERHUB_PASS
             gitChanged backend/user-management || docker push $DOCKERHUB_NAMESPACE/$DOCKERHUB_IMAGE:$DOCKERHUB_TAG

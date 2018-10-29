@@ -445,7 +445,7 @@ export class UserFormComponent implements OnInit {
           this.userCredentialsForm.reset();
         },
         error => {
-          console.log("Error resetting user password ==> ", error);
+          console.log("Error resetting user password => ", error);
           this.snackBar.open(
             "Error reseteando contraseña del usuario",
             "Cerrar",
