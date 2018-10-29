@@ -241,7 +241,7 @@ export class UserFormComponent implements OnInit {
           });
         },
         error => {
-          console.log("Error updating user general info ==> ", error);
+          console.log("Error updating user general info => ", error);
         }
       );
   }

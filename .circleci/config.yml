@@ -113,7 +113,7 @@ jobs:
             cd ~/nebulae/repo/
             mkdir -p ~/nebulae/api
             gitChanged api/emi-gateway || ( cd  ~/nebulae/api/ && git clone --depth=1 https://github.com/nebulae-pyxis/emi-gateway  ~/nebulae/api/emi-gateway/shell )      
-            gitChanged api/emi-gateway || ls ~/nebulae/api/shell
+            gitChanged api/emi-gateway || ls ~/nebulae/api/emi-gateway/shell
             gitChanged api/emi-gateway || export DOCKERHUB_IMAGE=emigateway
             gitChanged api/emi-gateway || export API_SHELL_PATH=/home/circleci/nebulae/api/
             gitChanged api/emi-gateway || ( cd ~/nebulae/api/emi-gateway/shell && sh ~/nebulae/api/emi-gateway/shell/deployment/docker/build-docker-hub.sh  && cd ~/nebulae/repo/ )
@@ -179,7 +179,7 @@ jobs:
             mkdir ~/nebulae/backend
             cp ~/nebulae/go/mbinit ~/nebulae/repo/backend/user-management/
             export DOCKERHUB_IMAGE=user-management.backend.user-management
-            export DOCKERHUB_TAG=0.0.26
+            export DOCKERHUB_TAG=0.0.27
             gitChanged backend/user-management || docker build  -t $DOCKERHUB_NAMESPACE/$DOCKERHUB_IMAGE:$DOCKERHUB_TAG -t $DOCKERHUB_NAMESPACE/$DOCKERHUB_IMAGE:latest ~/nebulae/repo/backend/user-management/
             gitChanged backend/user-management || docker login -u $DOCKERHUB_USER -p $DOCKERHUB_PASS
             gitChanged backend/user-management || docker push $DOCKERHUB_NAMESPACE/$DOCKERHUB_IMAGE:$DOCKERHUB_TAG
