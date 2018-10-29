@@ -112,11 +112,11 @@ jobs:
             source ~/nebulae/repo/.circleci/scripts/gitChanged.sh
             cd ~/nebulae/repo/
             mkdir -p ~/nebulae/api
-            gitChanged api/emi-gateway || ( cd  ~/nebulae/api/ && git clone --depth=1 https://github.com/nebulae-pyxis/emi-gateway  ~/nebulae/api/emi-gateway/shell )      
-            gitChanged api/emi-gateway || ls ~/nebulae/api/emi-gateway/shell
+            gitChanged api/emi-gateway || ( cd  ~/nebulae/api/ && git clone --depth=1 https://github.com/nebulae-pyxis/emi-gateway  ~/nebulae/api/shell/emi-gateway )      
+            gitChanged api/emi-gateway || ls ~/nebulae/api/shell/emi-gateway
             gitChanged api/emi-gateway || export DOCKERHUB_IMAGE=emigateway
             gitChanged api/emi-gateway || export API_SHELL_PATH=/home/circleci/nebulae/api/
-            gitChanged api/emi-gateway || ( cd ~/nebulae/api && sh ~/nebulae/api/emi-gateway/shell/deployment/docker/build-docker-hub.sh  && cd ~/nebulae/repo/ )
+            gitChanged api/emi-gateway || ( cd ~/nebulae/api/shell/emi-gateway && sh ~/nebulae/api/shell/emi-gateway/deployment/docker/build-docker-hub.sh  && cd ~/nebulae/repo/ )
             gitChanged api/emi-gateway || echo $DOCKERHUB_NAMESPACE/$DOCKERHUB_IMAGE@$(docker pull $DOCKERHUB_NAMESPACE/$DOCKERHUB_IMAGE:latest | grep sha256 | cut -c 9-) > ~/nebulae/api/emi-gateway/DOCKERHUB_GENERATED_IMAGE_DIGEST      
       - run:
           name: Build docker image (sales-gateway) and push it to hub
@@ -124,11 +124,11 @@ jobs:
             source ~/nebulae/repo/.circleci/scripts/gitChanged.sh
             cd ~/nebulae/repo/
             mkdir -p ~/nebulae/api
-            gitChanged api/sales-gateway || ( cd  ~/nebulae/api/ && git clone --depth=1 https://github.com/nebulae-pyxis/sales-gateway  ~/nebulae/api/sales-gateway/shell )      
-            gitChanged api/sales-gateway || ls ~/nebulae/api/sales-gateway/shell
+            gitChanged api/sales-gateway || ( cd  ~/nebulae/api/ && git clone --depth=1 https://github.com/nebulae-pyxis/sales-gateway  ~/nebulae/api/shell/sales-gateway )      
+            gitChanged api/sales-gateway || ls ~/nebulae/api/shell/sales-gateway
             gitChanged api/sales-gateway || export DOCKERHUB_IMAGE=salesgateway
             gitChanged api/sales-gateway || export API_SHELL_PATH=/home/circleci/nebulae/api/
-            gitChanged api/sales-gateway || ( cd ~/nebulae/api && sh ~/nebulae/api/sales-gateway/shell/deployment/docker/build-docker-hub.sh  && cd ~/nebulae/repo/ )
+            gitChanged api/sales-gateway || ( cd ~/nebulae/api/shell/sales-gateway && sh ~/nebulae/api/shell/sales-gateway/deployment/docker/build-docker-hub.sh  && cd ~/nebulae/repo/ )
             gitChanged api/sales-gateway || echo $DOCKERHUB_NAMESPACE/$DOCKERHUB_IMAGE@$(docker pull $DOCKERHUB_NAMESPACE/$DOCKERHUB_IMAGE:latest | grep sha256 | cut -c 9-) > ~/nebulae/api/sales-gateway/DOCKERHUB_GENERATED_IMAGE_DIGEST
     
       - persist_to_workspace:
@@ -179,7 +179,7 @@ jobs:
             mkdir ~/nebulae/backend
             cp ~/nebulae/go/mbinit ~/nebulae/repo/backend/user-management/
             export DOCKERHUB_IMAGE=user-management.backend.user-management
-            export DOCKERHUB_TAG=0.0.29
+            export DOCKERHUB_TAG=0.0.30
             gitChanged backend/user-management || docker build  -t $DOCKERHUB_NAMESPACE/$DOCKERHUB_IMAGE:$DOCKERHUB_TAG -t $DOCKERHUB_NAMESPACE/$DOCKERHUB_IMAGE:latest ~/nebulae/repo/backend/user-management/
             gitChanged backend/user-management || docker login -u $DOCKERHUB_USER -p $DOCKERHUB_PASS
             gitChanged backend/user-management || docker push $DOCKERHUB_NAMESPACE/$DOCKERHUB_IMAGE:$DOCKERHUB_TAG

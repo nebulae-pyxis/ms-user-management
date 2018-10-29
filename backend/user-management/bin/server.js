@@ -22,7 +22,7 @@ const start = () => {
         KeycloakDA.startAndExecuteTokenRefresher$()
     ).subscribe(
         (evt) => {
-            //console.log('Subscribe  =========>' , evt)
+            //console.log('Subscribe =========>' , evt)
         },
         (error) => {
             console.error('Failed to start', error);
