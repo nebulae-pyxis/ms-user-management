@@ -12,9 +12,9 @@ const contextName = "User-Management";
 const INTERNAL_SERVER_ERROR_CODE = 16001;
 const USERS_PERMISSION_DENIED_ERROR_CODE = 16002;
 
-function getResponseFromBackEnd$(response) {
+function getResponseFromBackEnd$(response) {  
   return Rx.Observable.of(response).map(resp => {
-    if (resp.result.code != 200) {
+    if (resp.result.code != 200) {      
       const err = new Error();
       err.name = "Error";
       err.message = resp.result.error;
@@ -53,29 +53,7 @@ function handleError$(err, methodName) {
 module.exports = {
   //// QUERY ///////
   Query: {
-    // getUsers(root, args, context) {
-    //   return RoleValidator.checkPermissions$(
-    //     context.authToken.realm_access.roles,
-    //     contextName,
-    //     "getUsers",
-    //     USERS_PERMISSION_DENIED_ERROR_CODE,
-    //     "Permission denied",
-    //     ["business-owner"]
-    //   )
-    //     .mergeMap(response => {
-    //       return broker.forwardAndGetReply$(
-    //         "User",
-    //         "emigateway.graphql.query.getUsers",
-    //         { root, args, jwt: context.encodedToken },
-    //         2000
-    //       );
-    //     })
-    //     .catch(err => handleError$(err, "getUsers"))
-    //     .mergeMap(response => getResponseFromBackEnd$(response))
-    //     .toPromise();
-    // },
     getToken(root, args, context){
-      console.log('getToken => ', context);
       return Rx.Observable.of({})
       .mergeMap(response => {
         return broker.forwardAndGetReply$(

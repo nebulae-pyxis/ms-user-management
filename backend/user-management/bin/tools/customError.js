@@ -1,6 +1,6 @@
 //Every single error code
 // please use the prefix assigned to this micorservice
-const INTERNAL_SERVER_ERROR_CODE = 00001;
+const INTERNAL_SERVER_ERROR_CODE = 16001;
 
 /**
  * class to emcapsulute diferent errors.
@@ -17,7 +17,7 @@ class CustomError extends Error {
       return {
         name: this.name,
         code: this.code,
-        msg: this.message,      
+        msg: this.message,    
         method: this.method
       }
     }

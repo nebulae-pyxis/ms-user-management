@@ -8,6 +8,7 @@ const INVALID_USERNAME_FORMAT_ERROR_CODE = {code: 16012, description: 'Invalid u
 const EMAIL_ALREADY_USED_ERROR_CODE = {code: 16014, description: 'Email already used'};
 const USER_UPDATE_OWN_INFO_ERROR_CODE = {code: 16015, description: 'You cannot update your own info'};
 const USER_BELONG_TO_OTHER_BUSINESS_ERROR_CODE = {code: 16016, description: 'User belongs to other business'};
+const INVALID_USER_CREDENTIALS_ERROR_CODE = {code: 16017, description: 'Invalid user credentials'};
 
 
 module.exports =  { 
@@ -18,5 +19,6 @@ module.exports =  {
     INTERNAL_SERVER_ERROR_CODE,
     INVALID_USERNAME_FORMAT_ERROR_CODE,
     USER_UPDATE_OWN_INFO_ERROR_CODE,
-    USER_BELONG_TO_OTHER_BUSINESS_ERROR_CODE
+    USER_BELONG_TO_OTHER_BUSINESS_ERROR_CODE,
+    INVALID_USER_CREDENTIALS_ERROR_CODE
 } 

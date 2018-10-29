@@ -12,6 +12,10 @@ const contextName = "User-Management";
 const INTERNAL_SERVER_ERROR_CODE = 16001;
 const USERS_PERMISSION_DENIED_ERROR_CODE = 16002;
 
+/**
+ * get response and return an error if the code is different to 200 http
+ * @param {*} response 
+ */
 function getResponseFromBackEnd$(response) {
   return Rx.Observable.of(response).map(resp => {
     if (resp.result.code != 200) {

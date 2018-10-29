@@ -76,7 +76,7 @@ class GraphQlService {
     return Rx.Observable.of(msg)
       .mergeMap(({ response, correlationId, replyTo }) =>
         replyTo
-          ? broker.send$(replyTo, "gateway.graphql.Query.response", response, { correlationId })
+          ? broker.send$(replyTo, "emigateway.graphql.Query.response", response, { correlationId })
           : Rx.Observable.of(undefined)
       )
   }
@@ -128,7 +128,7 @@ class GraphQlService {
     const onCompleteHandler = () => {
       () => console.log("GraphQlService incoming event subscription completed");
     };
-    console.log("GraphQl Service starting ...");
+    console.log("EMI GraphQl Service starting ...");
 
     return [
       {
@@ -253,6 +253,9 @@ class GraphQlService {
   }
 }
 
+/**
+ * @returns {GraphQlService}
+ */
 module.exports = () => {
   if (!instance) {
     instance = new GraphQlService();

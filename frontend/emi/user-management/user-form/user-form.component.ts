@@ -420,7 +420,7 @@ export class UserFormComponent implements OnInit {
           );
         },
         error => {
-          console.log("Error updating user state ==> ", error);
+          console.log("Error updating user state => ", error);
         }
       );
   }

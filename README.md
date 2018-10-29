@@ -294,7 +294,7 @@ nebulae compose-ui development --shell-type=FUSE2_ANGULAR --shell-repo=https://g
 
 ### 6. Compose the API emi-gateway
 ```
-nebulae compose-api development --api-type=NEBULAE_GATEWAY --api-repo=https://github.com/nebulae-pyxis/emi-gateway --api-id=emi-gateway --output-dir=FULL_PATH_TO_REPO/ms-user-management/playground/emi-gateway  --setup-file=FULL_PATH_TO_REPO/ms-user-management/etc/mapi-setup.json
+nebulae compose-api development --api-type=NEBULAE_GATEWAY --api-repo=https://github.com/nebulae-pyxis/emi-gateway --api-id=emi-gateway --output-dir=FULL_PATH_TO_REPO/ms-user-management/playground/emi-gateway  --setup-file=FULL_PATH_TO_REPO/ms-user-management/etc/emi-mapi-setup.json
 ```
 
 ### 7. Set the JWT token 

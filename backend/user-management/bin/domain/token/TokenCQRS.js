@@ -5,8 +5,10 @@ const TokenDA = require("../../data/TokenDA");
 const { CustomError, DefaultError } = require("../../tools/customError");
 const {
   PERMISSION_DENIED_ERROR_CODE,
-  INTERNAL_SERVER_ERROR_CODE
+  INTERNAL_SERVER_ERROR_CODE,
+  INVALID_USER_CREDENTIALS_ERROR_CODE
 } = require("../../tools/ErrorCodes");
+const context = "User-management"
 
 let instance;
 
@@ -27,15 +29,41 @@ class TokenCQRS {
     return Rx.Observable.of(args)
       .mergeMap(({username, password, refreshToken}) => {
         return TokenDA.getToken$(username, password, refreshToken)
+      })      
+      .catch(err => {
+        if(err.error == 'invalid_grant'){
+          return this.createCustomError$(
+            INVALID_USER_CREDENTIALS_ERROR_CODE,
+            'getToken'
+          );
+        }else{
+          return Rx.Observable.throw(err.error_description);
+        }
       })
       .mergeMap(rawResponse => this.buildSuccessResponse$(rawResponse))
       .catch(err => {
-        console.log('err => ', err);
         return this.handleError$(err);
       });
   }
 
   //#region  mappers for API responses
+  
+  /**
+   * Creates a custom error observable
+   * @param {*} errorCode Error code
+   * @param {*} methodError Method where the error was generated
+   */
+  createCustomError$(errorCode, methodError) {
+    return Rx.Observable.throw(
+      new CustomError(
+        context,
+        methodError || "",
+        errorCode.code,
+        errorCode.description
+      )
+    );
+  }
+
   handleError$(err) {
     console.log('Handle error => ', err);
     return Rx.Observable.of(err).map(err => {

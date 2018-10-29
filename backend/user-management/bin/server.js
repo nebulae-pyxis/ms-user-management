@@ -8,7 +8,8 @@ const eventSourcing = require('./tools/EventSourcing')();
 const eventStoreService = require('./services/event-store/EventStoreService')();
 const mongoDB = require('./data/MongoDB').singleton();
 const KeycloakDA = require('./data/KeycloakDA').singleton();
-const graphQlService = require('./services/emi-gateway/GraphQlService')();
+const emiGatewayGraphQlService = require('./services/emi-gateway/GraphQlService')();
+const salesGatewayGraphQlService = require('./services/sales-gateway/GraphQlService')();
 const Rx = require('rxjs');
 
 const start = () => {
@@ -16,7 +17,8 @@ const start = () => {
         eventSourcing.eventStore.start$(),
         eventStoreService.start$(),
         mongoDB.start$(),
-        graphQlService.start$(),
+        emiGatewayGraphQlService.start$(),
+        salesGatewayGraphQlService.start$(),
         KeycloakDA.startAndExecuteTokenRefresher$()
     ).subscribe(
         (evt) => {
