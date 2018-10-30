@@ -37,7 +37,10 @@ class TokenCQRS {
             'getToken'
           );
         }else{
-          return Rx.Observable.throw(err.error_description);
+          const error = new Error();
+          error.name = "Error";
+          error.message =  {"code":INTERNAL_SERVER_ERROR_CODE.code,"name":"Token","msg": `error: ${err.error} - ${err.error_description}`};
+          return Rx.Observable.throw(error);
         }
       })
       .mergeMap(rawResponse => this.buildSuccessResponse$(rawResponse))
