@@ -106,7 +106,7 @@ jobs:
             gitChanged api/sales-gateway || nebulae compose-api production --api-type=NEBULAE_GATEWAY --api-repo=https://github.com/nebulae-pyxis/sales-gateway.git --api-id=sales-gateway --output-dir=/home/circleci/nebulae/api/sales-gateway/ --store-type=GCP_DATASTORE --gcp-service-account-token=/tmp/gcloud-service-key.json      
             gitChanged api/sales-gateway || ls /home/circleci/nebulae/api/sales-gateway/
             gitChanged api/sales-gateway || ls /home/circleci/nebulae/api/sales-gateway/graphql
-            gitChanged api/sales-gateway || vi /home/circleci/nebulae/api/sales-gateway/graphql/schema.gql
+            gitChanged api/sales-gateway || cat /home/circleci/nebulae/api/sales-gateway/graphql/schema.gql
       - setup_remote_docker
       - run:
           name: Build docker image (emi-gateway) and push it to hub
