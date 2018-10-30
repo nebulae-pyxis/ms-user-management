@@ -131,7 +131,6 @@ jobs:
             gitChanged api/sales-gateway || ls ~/nebulae/api/shell/sales-gateway/api
             gitChanged api/sales-gateway || ls ~/nebulae/api/shell/sales-gateway/api/sales-gateway/
             gitChanged api/sales-gateway || ls ~/nebulae/api/shell/sales-gateway/api/sales-gateway/graphql/
-            gitChanged api/sales-gateway || ls ~/nebulae/api/shell/sales-gateway/api/sales-gateway/graphql/user-management
             gitChanged api/sales-gateway || export DOCKERHUB_IMAGE=salesgateway
             gitChanged api/sales-gateway || export API_SHELL_PATH=/home/circleci/nebulae/api/
             gitChanged api/sales-gateway || ( cd ~/nebulae/api/shell/sales-gateway && sh ~/nebulae/api/shell/sales-gateway/deployment/docker/build-docker-hub.sh  && cd ~/nebulae/repo/ )
