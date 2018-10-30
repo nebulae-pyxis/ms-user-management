@@ -5,7 +5,7 @@ type TokenResponse {
   refreshToken: String
   "Expiration time (in seconds) of the access token."
   expiresIn: Int
-  "Expiration time (in seconds) of the refresh token"
+  "Expiration time (in seconds) of the refresh token."
   refreshExpiresIn: Int  
 }
 
