@@ -128,6 +128,7 @@ jobs:
             mkdir -p ~/nebulae/api
             gitChanged api/sales-gateway || ( cd  ~/nebulae/api/ && git clone --depth=1 https://github.com/nebulae-pyxis/sales-gateway  ~/nebulae/api/shell/sales-gateway )      
             gitChanged api/sales-gateway || ls ~/nebulae/api/shell/sales-gateway
+            gitChanged api/sales-gateway || ls ~/nebulae/api/shell/sales-gateway/api
             gitChanged api/sales-gateway || export DOCKERHUB_IMAGE=salesgateway
             gitChanged api/sales-gateway || export API_SHELL_PATH=/home/circleci/nebulae/api/
             gitChanged api/sales-gateway || ( cd ~/nebulae/api/shell/sales-gateway && sh ~/nebulae/api/shell/sales-gateway/deployment/docker/build-docker-hub.sh  && cd ~/nebulae/repo/ )
