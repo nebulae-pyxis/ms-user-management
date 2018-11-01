@@ -6,6 +6,7 @@
   "bin": {
     "mbe-user-management": "bin/server.js"
   },
+  
   "scripts": {
     "start": "node --max-old-space-size=512 bin/server.js",
     "sync-state": "node bin/sync_state.js",
