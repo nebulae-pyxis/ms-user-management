@@ -105,8 +105,6 @@ jobs:
             gitChanged api/sales-gateway || nebulae register microapi --microservice-id=user-management --api-id=sales-gateway --setup-file=/home/circleci/nebulae/repo/etc/sales-mapi-setup.json --store-type=GCP_DATASTORE --gcp-service-account-token=/tmp/gcloud-service-key.json            
             gitChanged api/sales-gateway || nebulae compose-api production --api-type=NEBULAE_GATEWAY --api-repo=https://github.com/nebulae-pyxis/sales-gateway.git --api-id=sales-gateway --output-dir=/home/circleci/nebulae/api/sales-gateway/ --store-type=GCP_DATASTORE --gcp-service-account-token=/tmp/gcloud-service-key.json      
             gitChanged api/sales-gateway || ls /home/circleci/nebulae/api/sales-gateway/
-            gitChanged api/sales-gateway || ls /home/circleci/nebulae/api/sales-gateway/graphql
-            gitChanged api/sales-gateway || cat /home/circleci/nebulae/api/sales-gateway/graphql/user-management/schema.gql
       - setup_remote_docker
       - run:
           name: Build docker image (emi-gateway) and push it to hub
@@ -127,10 +125,6 @@ jobs:
             cd ~/nebulae/repo/
             mkdir -p ~/nebulae/api
             gitChanged api/sales-gateway || ( cd  ~/nebulae/api/ && git clone --depth=1 https://github.com/nebulae-pyxis/sales-gateway  ~/nebulae/api/shell/sales-gateway )      
-            gitChanged api/sales-gateway || ls ~/nebulae/api/shell/sales-gateway
-            gitChanged api/sales-gateway || ls ~/nebulae/api/shell/sales-gateway/api
-            gitChanged api/sales-gateway || ls ~/nebulae/api/shell/sales-gateway/api/sales-gateway/
-            gitChanged api/sales-gateway || ls ~/nebulae/api/shell/sales-gateway/api/sales-gateway/graphql/
             gitChanged api/sales-gateway || export DOCKERHUB_IMAGE=salesgateway
             gitChanged api/sales-gateway || export API_SHELL_PATH=/home/circleci/nebulae/api/
             gitChanged api/sales-gateway || ( cd ~/nebulae/api/shell/sales-gateway && sh ~/nebulae/api/shell/sales-gateway/deployment/docker/build-docker-hub.sh  && cd ~/nebulae/repo/ )

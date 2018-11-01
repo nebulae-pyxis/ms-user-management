@@ -6,7 +6,7 @@ const { CustomError, DefaultError } = require("../../tools/customError");
 const {
   PERMISSION_DENIED_ERROR_CODE,
   INTERNAL_SERVER_ERROR_CODE,
-  INVALID_USER_CREDENTIALS_ERROR_CODE
+  INVALID_USER_CREDENTIALS_OR_TOKEN_ERROR_CODE
 } = require("../../tools/ErrorCodes");
 const context = "User-management"
 
@@ -33,11 +33,14 @@ class TokenCQRS {
       .catch(err => {
         if(err.error == 'invalid_grant'){
           return this.createCustomError$(
-            INVALID_USER_CREDENTIALS_ERROR_CODE,
+            INVALID_USER_CREDENTIALS_OR_TOKEN_ERROR_CODE,
             'getToken'
           );
         }else{
-          return Rx.Observable.throw(err.error_description);
+          const error = new Error();
+          error.name = "Error";
+          error.message =  {"code":INTERNAL_SERVER_ERROR_CODE.code,"name":"Token","msg": `error: ${err.error} - ${err.error_description}`};
+          return Rx.Observable.throw(error);
         }
       })
       .mergeMap(rawResponse => this.buildSuccessResponse$(rawResponse))

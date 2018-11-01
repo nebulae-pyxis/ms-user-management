@@ -29,14 +29,15 @@ class GraphQlService {
    */
   subscribeEventHandler({
     aggregateType,
-    messageType,
+    messageType,    
     onErrorHandler,
-    onCompleteHandler
+    onCompleteHandler,
+    requireAuth = true
   }) {
     const handler = this.functionMap[messageType];
     const subscription = broker
       .getMessageListener$([aggregateType], [messageType])
-      .mergeMap(message => this.verifyRequest$(message))
+      .mergeMap(message => this.verifyRequest$(message, requireAuth))
       .mergeMap(request => (request.failedValidations.length > 0)
         ? Rx.Observable.of(request.errorResponse)
         : Rx.Observable.of(request)
@@ -84,14 +85,15 @@ class GraphQlService {
   /**
    * Verify the message if the request is valid.
    * @param {any} request request message
+   * @param {boolean} [requireAuth=true] indicates if the token must be verified
    * @returns { Rx.Observable< []{request: any, failedValidations: [] }>}  Observable object that containg the original request and the failed validations
    */
-  verifyRequest$(request) {
+  verifyRequest$(request, requireAuth = true) {
     return Rx.Observable.of(request)
       //decode and verify the jwt token
       .mergeMap(message =>
         Rx.Observable.of(message)
-          .map(message => ({ authToken: jsonwebtoken.verify(message.data.jwt, jwtPublicKey), message, failedValidations: [] }))
+          .map(message => ({ authToken: requireAuth ? jsonwebtoken.verify(message.data.jwt, jwtPublicKey): null, message, failedValidations: [] }))
           .catch(err =>
             token.cqrs.handleError$(err)
               .map(response => ({
@@ -135,7 +137,8 @@ class GraphQlService {
         aggregateType: "Token",
         messageType: "salesgateway.graphql.query.getToken",
         onErrorHandler,
-        onCompleteHandler
+        onCompleteHandler,
+        requireAuth: false
       }
     ];
   }

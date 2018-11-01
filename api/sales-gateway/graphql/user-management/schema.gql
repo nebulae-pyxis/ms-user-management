@@ -11,5 +11,5 @@ type TokenResponse {
 
 type Query {
   "Gets token to make operations that require authentication. If the refresh token is passed as a parameter, we'll try to refresh the access token; otherwise, we will generate a new access token with the user and password."
-  getToken(username: String, password: String, refreshToken: String): TokenResponse
+  getToken(username: String, password: String, refreshToken: String): TokenResponse @requireAuth
 }

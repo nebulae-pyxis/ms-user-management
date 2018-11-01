@@ -31,7 +31,9 @@ class TokenDA {
       grant_type: isRefreshToken ? 'refresh_token': 'password'
     };
 
-    if(!isRefreshToken){
+    if(isRefreshToken){
+      settings.refresh_token = refreshToken;
+    } else {
       settings.username = username;
       settings.password = password;
     }
