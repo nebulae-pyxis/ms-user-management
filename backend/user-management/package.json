@@ -6,9 +6,9 @@
   "bin": {
     "mbe-user-management": "bin/server.js"
   },
-  
+
   "scripts": {
-    "start": "node --max-old-space-size=512 bin/server.js",
+    "start": "node --max-old-space-size=256 bin/server.js",
     "sync-state": "node bin/sync_state.js",
     "get-ready": "node bin/get_ready.js",
     "test": "./node_modules/.bin/mocha --recursive --reporter spec"
