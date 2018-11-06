@@ -13,12 +13,15 @@ spec:
         app: user-management
     spec:      
       containers:
-      - image: nebulaepyxis/user-management.backend.user-management:0.0.33
+      - image: nebulaepyxis/user-management.backend.user-management:0.0.35
         name: user-management
         volumeMounts:
         - name: google-application-credentials
           mountPath: "/etc/GOOGLE_APPLICATION_CREDENTIALS"
           readOnly: true
+        resources:
+          requests:
+            cpu: "50m"
         env:     
         # EVENT STORE CONFIG 
         - name: GOOGLE_APPLICATION_CREDENTIALS
@@ -71,10 +74,7 @@ spec:
         - name: KEYCLOAK_BACKEND_CLIENT_ID
           value: "admin-cli"
         - name: KEYCLOAK_BACKEND_REALM_NAME
-          value: "PYXIS"
-        resources:
-          requests:
-            cpu: "50m"
+          value: "PYXIS"        
       volumes:
       - name: google-application-credentials
         secret:
