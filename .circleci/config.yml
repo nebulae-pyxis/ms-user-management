@@ -178,7 +178,7 @@ jobs:
             mkdir ~/nebulae/backend
             cp ~/nebulae/go/mbinit ~/nebulae/repo/backend/user-management/
             export DOCKERHUB_IMAGE=user-management.backend.user-management
-            export DOCKERHUB_TAG=0.0.35
+            export DOCKERHUB_TAG=0.0.36
             gitChanged backend/user-management || docker build -t $DOCKERHUB_NAMESPACE/$DOCKERHUB_IMAGE:$DOCKERHUB_TAG -t $DOCKERHUB_NAMESPACE/$DOCKERHUB_IMAGE:latest ~/nebulae/repo/backend/user-management/
             gitChanged backend/user-management || docker login -u $DOCKERHUB_USER -p $DOCKERHUB_PASS
             gitChanged backend/user-management || docker push $DOCKERHUB_NAMESPACE/$DOCKERHUB_IMAGE:$DOCKERHUB_TAG
@@ -220,7 +220,7 @@ jobs:
             name: Deploy sales-gateway API
             command: |
               (ls ~/nebulae/api/sales-gateway/DOCKERHUB_GENERATED_IMAGE_DIGEST && echo docker image DIGEST to set $(< ~/nebulae/api/sales-gateway/DOCKERHUB_GENERATED_IMAGE_DIGEST) ) || echo api not found
-              (ls ~/nebulae/api/sales-gateway/DOCKERHUB_GENERATED_IMAGE_DIGEST && kubectl set image deployment/api-sales-gateway api-emi-gateway=$(< ~/nebulae/api/sales-gateway/DOCKERHUB_GENERATED_IMAGE_DIGEST) ) || echo api not found
+              (ls ~/nebulae/api/sales-gateway/DOCKERHUB_GENERATED_IMAGE_DIGEST && kubectl set image deployment/api-sales-gateway api-sales-gateway=$(< ~/nebulae/api/sales-gateway/DOCKERHUB_GENERATED_IMAGE_DIGEST) ) || echo api not found
         - run:
             name: Deploy BackEnds 
             command: |

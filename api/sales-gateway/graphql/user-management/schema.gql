@@ -1,5 +1,5 @@
 type TokenResponse {
-  "Access token"
+  "Access token."
   accessToken: String
   "Refresh token"
   refreshToken: String
