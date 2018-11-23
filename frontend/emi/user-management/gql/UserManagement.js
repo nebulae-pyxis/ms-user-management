@@ -2,10 +2,34 @@ import gql from "graphql-tag";
 
 // We use the gql tag to parse our query string into a query document
 
+export const getBusinessByFilterText = gql`
+  query getBusinessByFilterText($filterText: String, $limit: Int) {
+    getBusinessByFilterText(filterText: $filterText, limit: $limit) {
+      _id
+      generalInfo{
+        name
+      }
+      state
+    }
+  }
+`;
+
+export const getMyBusiness = gql`
+  query myBusiness {
+    myBusiness {
+      _id
+      generalInfo{
+        name
+      }
+      state
+    }
+  }
+`;
+
 //Gets the users filtered by page, count and search filter
 export const getUsers = gql`
-  query getUsers($page: Int!, $count: Int!, $searchFilter: String){
-    getUsers(page: $page, count: $count, searchFilter: $searchFilter){
+  query getUsers($page: Int!, $count: Int!, $searchFilter: String, $businessId: String!){
+    getUsers(page: $page, count: $count, searchFilter: $searchFilter, businessId: $businessId){
       id
       username
       generalInfo{
@@ -23,8 +47,8 @@ export const getUsers = gql`
 
 //Gets the users filtered by page, count and search filter
 export const getUser = gql`
-  query getUser($username: String!){
-    getUser(username: $username){
+  query getUser($username: String!, $businessId: String!){
+    getUser(username: $username, businessId: $businessId){
       id
       username
       generalInfo{
@@ -52,8 +76,8 @@ export const getRoles = gql`
 
 //Gets the role mapping of an user
 export const getUserRoleMapping = gql`
-  query getUserRoleMapping($userId: ID!){
-    getUserRoleMapping(userId: $userId){
+  query getUserRoleMapping($userId: ID!, $businessId: String!){
+    getUserRoleMapping(userId: $userId, businessId: $businessId){
       id
       name
     }
@@ -62,8 +86,8 @@ export const getUserRoleMapping = gql`
 
 // MUTATIONS
 export const addRolesToTheUser = gql`
-  mutation addRolesToTheUser($userId: ID!, $input: RolesInput) {
-    addRolesToTheUser(userId: $userId, input: $input) {
+  mutation addRolesToTheUser($userId: ID!, $businessId: String!, $input: RolesInput) {
+    addRolesToTheUser(userId: $userId, businessId: $businessId, input: $input) {
       code
       message
     }
@@ -71,8 +95,8 @@ export const addRolesToTheUser = gql`
 `;
 
 export const removeRolesFromUser = gql`
-  mutation removeRolesFromUser($userId: ID!, $input: RolesInput) {
-    removeRolesFromUser(userId: $userId, input: $input) {
+  mutation removeRolesFromUser($userId: ID!, $businessId: String!, $input: RolesInput) {
+    removeRolesFromUser(userId: $userId, businessId: $businessId, input: $input) {
       code
       message
     }
@@ -80,8 +104,8 @@ export const removeRolesFromUser = gql`
 `;
 
 export const createUser = gql`
-  mutation createUser($input: UserInput) {
-    createUser(input: $input) {
+  mutation createUser($businessId: String!, $input: UserInput) {
+    createUser(businessId: $businessId, input: $input) {
       code
       message
     }
@@ -89,8 +113,8 @@ export const createUser = gql`
 `;
 
 export const updateUserGeneralInfo = gql`
-  mutation updateUserGeneralInfo($userId: ID!,$input: UserInput) {
-    updateUserGeneralInfo(userId: $userId, input: $input) {
+  mutation updateUserGeneralInfo($userId: ID!, $businessId: String!, $input: UserInput) {
+    updateUserGeneralInfo(userId: $userId, businessId: $businessId, input: $input) {
       code
       message
     }
@@ -98,8 +122,8 @@ export const updateUserGeneralInfo = gql`
 `;
 
 export const updateUserState = gql`
-  mutation updateUserState($userId: ID!, $username: String!, $state: Boolean!) {
-    updateUserState(userId: $userId, username: $username, state: $state) {
+  mutation updateUserState($userId: ID!, $businessId: String!, $username: String!, $state: Boolean!) {
+    updateUserState(userId: $userId, businessId: $businessId, username: $username, state: $state) {
       code
       message
     }
@@ -107,8 +131,8 @@ export const updateUserState = gql`
 `;
 
 export const resetUserPassword = gql`
-  mutation resetUserPassword($userId: ID!, $input: UserPasswordInput) {
-    resetUserPassword(userId: $userId, input: $input) {
+  mutation resetUserPassword($userId: ID!, $businessId: String!, $input: UserPasswordInput) {
+    resetUserPassword(userId: $userId, businessId: $businessId, input: $input) {
       code
       message
     }

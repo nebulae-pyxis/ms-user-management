@@ -32,6 +32,9 @@ export class UserFormComponent implements OnInit {
   roles = [];
   userRoles = [];
 
+  paramBusinessId: any;
+  paramUsername: any;
+
   constructor(
     private translationLoader: FuseTranslationLoaderService,
     private translate: TranslateService,
@@ -58,15 +61,21 @@ export class UserFormComponent implements OnInit {
   findUser() {
     this.activatedRouter.params
       .pipe(
+
         mergeMap(params => {
           if(params.username === "new"){
-            return Rx.Observable.of(undefined);
+            return Rx.Observable.of([undefined, params.businessId, params.username]);
           }else{
-            return this.userFormService.getUser$(params.username);
+            return this.userFormService.getUser$(params.username, params.businessId)
+            .pipe(
+              map(userData => [userData, params.businessId, params.username])
+            );
           }          
         })
       )
-      .subscribe(userData => {
+      .subscribe(([userData, businessId, username]) => {
+        this.paramBusinessId = businessId;
+        this.paramUsername = username;
         this.user = new User(
           userData
             ? userData.data.getUser
@@ -91,7 +100,7 @@ export class UserFormComponent implements OnInit {
         { value: this.user.username, disabled: this.pageType != "new" },
         Validators.compose([
           Validators.required,
-          Validators.pattern("^(?=[a-zA-Z0-9.]{8,}$)(?=.*?[a-z])(?=.*?[0-9]).*")
+          Validators.pattern("^[a-zA-Z0-9._-]{8,}$")
         ])
       ],
       name: [
@@ -114,7 +123,7 @@ export class UserFormComponent implements OnInit {
         this.user.generalInfo ? this.user.generalInfo.email : "",
         Validators.email
       ],
-      phone: [this.user.generalInfo ? this.user.generalInfo.phone : ""]
+      phone: [this.user.generalInfo ? this.user.generalInfo.phone : "", Validators.required]
     });
   }
 
@@ -203,7 +212,7 @@ export class UserFormComponent implements OnInit {
     data.state = this.userStateForm.getRawValue().state;
 
     this.userFormService
-      .createUser$(data)
+      .createUser$(data, this.paramBusinessId)
       .pipe(
         mergeMap(resp => this.graphQlAlarmsErrorHandler$(resp)),
         filter((resp: any) => !resp.errors || resp.errors.length === 0)
@@ -229,7 +238,7 @@ export class UserFormComponent implements OnInit {
     const data = this.userGeneralInfoForm.getRawValue();
 
     this.userFormService
-      .updateUser$(this.user.id, data)
+      .updateUser$(this.user.id, data, this.paramBusinessId)
       .pipe(
         mergeMap(resp => this.graphQlAlarmsErrorHandler$(resp)),
         filter((resp: any) => !resp.errors || resp.errors.length === 0)
@@ -266,7 +275,7 @@ export class UserFormComponent implements OnInit {
    */
   loadUserRoles() {
     this.userFormService
-      .getUserRoleMapping$(this.user.id)
+      .getUserRoleMapping$(this.user.id, this.paramBusinessId)
       .pipe(
         mergeMap(resp => this.graphQlAlarmsErrorHandler$(resp)),
         filter((resp: any) => !resp.errors || resp.errors.length === 0)
@@ -284,7 +293,7 @@ export class UserFormComponent implements OnInit {
     if (this.pageType == "new") {
       return;
     }
-    this.userFormService.getUserRoleMapping$(this.user.id).pipe(
+    this.userFormService.getUserRoleMapping$(this.user.id, this.paramBusinessId).pipe(
       mergeMap(userRolesData => Rx.Observable.from(userRolesData.data.getUserRoleMapping)),
       map((role: { id, name } | any) => {
           return {
@@ -332,7 +341,7 @@ export class UserFormComponent implements OnInit {
    */
   addRolesToUser(rolesToAdd) {
     this.userFormService
-      .addRolesToTheUser$(this.user.id, rolesToAdd)
+      .addRolesToTheUser$(this.user.id, rolesToAdd, this.paramBusinessId)
       .pipe(
         mergeMap(resp => this.graphQlAlarmsErrorHandler$(resp)),
         filter((resp: any) => !resp.errors || resp.errors.length === 0)
@@ -358,7 +367,7 @@ export class UserFormComponent implements OnInit {
    */
   removeRolesFromUser(rolesToRemove) {
     this.userFormService
-      .removeRolesFromUser$(this.user.id, rolesToRemove)
+      .removeRolesFromUser$(this.user.id, rolesToRemove, this.paramBusinessId)
       .pipe(
         mergeMap(resp => this.graphQlAlarmsErrorHandler$(resp)),
         filter((resp: any) => !resp.errors || resp.errors.length === 0)
@@ -404,7 +413,7 @@ export class UserFormComponent implements OnInit {
     }
 
     this.userFormService
-      .updateUserState$(this.user.id, this.user.username, $event.checked)
+      .updateUserState$(this.user.id, this.user.username, $event.checked, this.paramBusinessId)
       .pipe(
         mergeMap(resp => this.graphQlAlarmsErrorHandler$(resp)),
         filter((resp: any) => !resp.errors || resp.errors.length === 0)
@@ -432,7 +441,7 @@ export class UserFormComponent implements OnInit {
     const data = this.userCredentialsForm.getRawValue();
 
     this.userFormService
-      .resetUserPassword$(this.user.id, data)
+      .resetUserPassword$(this.user.id, data, this.paramBusinessId)
       .pipe(
         mergeMap(resp => this.graphQlAlarmsErrorHandler$(resp)),
         filter((resp: any) => !resp.errors || resp.errors.length === 0)

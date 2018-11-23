@@ -1,4 +1,3 @@
-import { UserManagementService } from './user-management.service';
 import {
   Component,
   OnInit,
@@ -7,11 +6,20 @@ import {
   OnDestroy
 } from "@angular/core";
 
+import {
+  FormBuilder,
+  FormGroup,
+  FormControl,
+  Validators
+} from "@angular/forms";
+
 //////////// i18n ////////////
 import { FuseTranslationLoaderService } from "./../../../core/services/translation-loader.service";
 import { TranslateService } from "@ngx-translate/core";
 import { locale as english } from "./i18n/en";
 import { locale as spanish } from "./i18n/es";
+
+import { UserManagementService } from './user-management.service';
 
 //////////// ANGULAR MATERIAL ///////////
 import {
@@ -26,16 +34,23 @@ import { fuseAnimations } from '../../../core/animations';
 
 //////////// RXJS ////////////
 import * as Rx from "rxjs/Rx";
-import { of, fromEvent } from "rxjs";
+import { Subject, BehaviorSubject, Subscription, fromEvent, of, from, Observable, combineLatest } from "rxjs";
 import {
   first,
+  startWith,
+  take,
   filter,
   tap,
+  map,
   mergeMap,
   debounceTime,
-  distinctUntilChanged
+  distinctUntilChanged,
+  toArray,
+  takeUntil,
 } from "rxjs/operators";
-import { Subscription } from "rxjs/Subscription";
+
+//////////// Services ////////////
+import { KeycloakService } from "keycloak-angular";
 
 @Component({
   // tslint:disable-next-line:component-selector
@@ -45,8 +60,9 @@ import { Subscription } from "rxjs/Subscription";
   animations: fuseAnimations
 })
 export class UserManagementComponent implements OnInit, OnDestroy {
+  private ngUnsubscribe = new Subject();
   // Rxjs subscriptions
-  subscriptions = [];
+  //subscriptions = [];
   // Table data
   dataSource = new MatTableDataSource();
   // Columns to show in the table
@@ -64,61 +80,198 @@ export class UserManagementComponent implements OnInit, OnDestroy {
   sortOrder = null;
   itemPerPage = '';
 
+  filterForm: FormGroup;
+  businessFilterCtrl: FormControl;
+  businessQueryFiltered$: Observable<any>;
+  //selectedBusinessSubject$ = new Subject<any>();
+  isSystemAdmin: Boolean = false;
   selectedUser: any;
+  selectedBusinessData: any = null;
+  selectedBusinessId: any = null;
 
   constructor(
     private userManagementService: UserManagementService,
+    private keycloakService: KeycloakService,
     private translationLoader: FuseTranslationLoaderService,
     private translate: TranslateService,
     private dialog: MatDialog,
+    private formBuilder: FormBuilder,
     private snackBar: MatSnackBar
   ) {
     this.translationLoader.loadTranslations(english, spanish);
+    this.businessFilterCtrl = new FormControl();
   }
 
+  ngAfterViewInit() {
+
+  }
 
   ngOnInit() {
+    this.checkIfUserIsAdmin$().subscribe();
+    this.buildFilterForm();
+    this.loadBusinessFilter();
+    this.loadFilterCache();
     // Refresh the users table
-    this.refreshDataTable(
-      this.page,
-      this.count,
-      this.searchFilter
+    this.refreshTable();
+  }
+
+  loadFilterCache(){
+    return this.userManagementService.selectedBusinessEvent$
+    .pipe(
+      take(1)
+    )
+    .subscribe(selectedBusiness=> {
+      if(selectedBusiness){
+        this.selectedBusinessData = selectedBusiness;
+        this.selectedBusinessId = selectedBusiness._id;
+        this.businessFilterCtrl.setValue(this.selectedBusinessData);
+      }
+    });
+  }
+
+  buildFilterForm(){
+    this.filterForm = this.formBuilder.group({
+      business: [null],
+      user: [null]
+    });
+  }
+
+  getUserFilter$(){
+    return fromEvent(this.filter.nativeElement, 'keyup')
+    .pipe(
+      //tap(data => ,
+      startWith(undefined),
+      map((element: any) => {
+        return (element || {}).target ? element.target.value.trim(): undefined;
+      }),
+      debounceTime(150),
+      distinctUntilChanged()
     );
+  }
 
-    //Creates an observable for the filter in the table
-    this.subscriptions.push(
-      fromEvent(this.filter.nativeElement, "keyup")
-        .pipe(
-          debounceTime(150),
-          distinctUntilChanged()
-        )
-        .subscribe(() => {
+    /**
+   * Paginator of the table
+   */
+  getPaginator$() {
+    return this.paginator.page.pipe(startWith({ pageIndex: 0, pageSize: 10 }));
+  }
 
-          if (this.filter.nativeElement) {
-            let filterValue = this.filter.nativeElement.value;
-            filterValue = filterValue.trim();
-            this.searchFilter = filterValue;
-            this.refreshDataTable(
-              this.page,
-              this.count,
-              this.searchFilter
-            );
-          }
-        }));
+  getUsers$(page, count, searchFilter, businessId) {
+    return this.userManagementService
+      .getUsers$(page, count, searchFilter, businessId)
+      .pipe(
+        mergeMap(resp => this.graphQlAlarmsErrorHandler$(resp)),
+        filter((resp: any) => !resp.errors || resp.errors.length === 0),
+      );
+  }
 
-
-    // Creates an observable for listen the events when the paginator of the table is modified
-    this.subscriptions.push(
-      this.paginator.page.subscribe(pageChanged => {
-        this.page = pageChanged.pageIndex;
-        this.count = pageChanged.pageSize;
-        this.refreshDataTable(
-          pageChanged.pageIndex,
-          pageChanged.pageSize,
-          this.searchFilter
-        );
-      })
+  getBusinessFilter$(){
+    return this.userManagementService.selectedBusinessEvent$
+    .pipe(
+      debounceTime(150),
+      distinctUntilChanged()
     );
+  }
+
+  refreshTable(){
+    combineLatest(
+      this.getUserFilter$(),
+      this.getBusinessFilter$(),
+      this.getPaginator$()
+    )
+    .pipe(
+      filter(([userFilter, businessFilter, paginator]) => {
+        return businessFilter != null;
+      }),
+      mergeMap(([userFilter, businessFilter, paginator]) => {
+        console.log('refreshTable111111111 ', [userFilter, businessFilter, paginator]);
+        return this.getUsers$(paginator.pageIndex, paginator.pageSize, userFilter, businessFilter._id)
+      }),
+      takeUntil(this.ngUnsubscribe)
+    )
+    .subscribe(model => {
+      console.log('refreshTable2222222222 => ', model);
+      this.dataSource.data = model.data.getUsers;
+    });
+  }
+
+  loadBusinessFilter() {
+    this.businessQueryFiltered$ = this.checkIfUserIsAdmin$()
+    .pipe(      
+      mergeMap(isAdmin => {
+        if (isAdmin) {
+          return this.businessFilterCtrl.valueChanges.pipe(
+            startWith(undefined),
+            debounceTime(500),
+            distinctUntilChanged(),
+            mergeMap((filterText: String) => {
+              return this.getBusinessFiltered$(filterText, 10);
+            })
+          );
+          
+        } else {
+          return Observable.defer(() => this.userManagementService.getMyBusiness$())
+          .pipe(
+            map((res: any) => res.data.myBusiness),
+            tap(business => {      
+              this.businessFilterCtrl.setValue(business);            
+              this.onSelectBusinessEvent(business);
+            }),
+            toArray()
+          );
+        }
+      }),      
+      takeUntil(this.ngUnsubscribe)
+    );
+  }
+
+    /**
+   * Checks if the logged user has role SYSADMIN
+   */
+  checkIfUserIsAdmin$() {
+    return Rx.Observable.of(this.keycloakService.getUserRoles(true)).pipe(
+      //tap(data => console.log('userRoles => ', data.some(role => role === 'SYSADMIN' || role === 'platform-admin'))),
+      map(userRoles => {
+        console.log('userRoles => ', userRoles.some(role => role === 'SYSADMIN' || role === 'platform-admin'));
+        return userRoles.some(role => role === 'SYSADMIN' || role === 'platform-admin');
+      }),
+      tap(isAdmin => {
+        console.log('this.isSystemAdmin 1=> ', isAdmin);
+        this.isSystemAdmin = isAdmin;
+      }),
+    );
+  }
+
+  getBusinessFiltered$(filterText: String, limit: number): Observable<any[]> {
+    return this.userManagementService.getBusinessByFilter(filterText, limit).pipe(      
+      mergeMap(resp => this.graphQlAlarmsErrorHandler$(resp)),
+      filter(resp => !resp.errors),
+      mergeMap(result => from(result.data.getBusinessByFilterText)),
+      toArray(),
+      takeUntil(this.ngUnsubscribe)
+    );
+  }
+
+    /**
+   * Listens when a new business have been selected
+   * @param business  selected business
+   */
+  onSelectBusinessEvent(business) {
+    console.log('onSelectBusinessEvent1 => ', business);   
+    
+    if(business){
+      console.log('onSelectBusinessEvent2 => ', business);   
+      this.selectedBusinessId = business._id;
+    }    
+
+    this.userManagementService.selectBusiness(business);
+
+  }
+
+  displayFn(business) {
+    console.log('display => ', business);
+    console.log('display2 => ', (business || {generalInfo: {}}).generalInfo.name);
+    return (business || {generalInfo: {}}).generalInfo.name;
   }
 
   /**
@@ -126,17 +279,18 @@ export class UserManagementComponent implements OnInit, OnDestroy {
    * @param page page number
    * @param count Max amount of users that will be return.
    * @param searchFilter Search filter
+   * @param businessId business id filter
    */
-  refreshDataTable(page, count, searchFilter) {
-    this.userManagementService
-      .getUsers$(page, count, searchFilter)
-      .pipe(
-        mergeMap(resp => this.graphQlAlarmsErrorHandler$(resp)),
-        filter((resp: any) => !resp.errors || resp.errors.length === 0),
-      ).subscribe(model => {
-        this.dataSource.data = model.data.getUsers;
-      });
-  }
+  // refreshDataTable(page, count, searchFilter, businessId) {
+  //   this.userManagementService
+  //     .getUsers$(page, count, searchFilter, businessId)
+  //     .pipe(
+  //       mergeMap(resp => this.graphQlAlarmsErrorHandler$(resp)),
+  //       filter((resp: any) => !resp.errors || resp.errors.length === 0),
+  //     ).subscribe(model => {
+  //       this.dataSource.data = model.data.getUsers;
+  //     });
+  // }
 
   /**
    * Handles the Graphql errors and show a message to the user
@@ -204,16 +358,18 @@ export class UserManagementComponent implements OnInit, OnDestroy {
 
   getNext(event) {
     const offset = event.pageSize * event.pageIndex
-    
+
     // call your api function here with the offset
   }
 
   ngOnDestroy() {
-    if (this.subscriptions) {
-      this.subscriptions.forEach(sub => {
-        sub.unsubscribe();
-      });
-    }
+    // if (this.subscriptions) {
+    //   this.subscriptions.forEach(sub => {
+    //     sub.unsubscribe();
+    //   });
+    // }
+    this.ngUnsubscribe.next();
+    this.ngUnsubscribe.complete();
   }
 
 }

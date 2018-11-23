@@ -89,28 +89,28 @@ type CommandResponse {
 
 type Query {
   "Gets the users "
-  getUsers(page: Int!, count: Int!, searchFilter: String): [User]
+  getUsers(page: Int!, count: Int!, searchFilter: String, businessId: String!): [User]
   "Gets a user by its username"
-  getUser(username: String!): User
+  getUser(username: String!, businessId: String!): User
   "Gets user role mapping"
-  getUserRoleMapping(userId: ID!): [UserRole]
+  getUserRoleMapping(userId: ID!, businessId: String!): [UserRole]
   "Gets roles that the petitioner can assign to another users according to its role"
   getRoles: [Role]
 }
 
 type Mutation {
   "Create a new user"
-  createUser(input: UserInput): CommandResponse
+  createUser(businessId: String!, input: UserInput): CommandResponse
   "Updates the user according to the ID"
-  updateUserGeneralInfo(userId: ID!, input: UserInput): CommandResponse
+  updateUserGeneralInfo(userId: ID!, businessId: String!, input: UserInput): CommandResponse
   "Updates the user state"
-  updateUserState(userId: ID!, username: String!, state: Boolean!): CommandResponse
+  updateUserState(userId: ID!, username: String!, businessId: String!, state: Boolean!): CommandResponse
   "Changes user password"
-  resetUserPassword(userId: ID!, input: UserPasswordInput): CommandResponse  
+  resetUserPassword(userId: ID!, businessId: String!, input: UserPasswordInput): CommandResponse  
   "Adds the roles to the user"
-  addRolesToTheUser(userId: ID!, input: RolesInput): CommandResponse
+  addRolesToTheUser(userId: ID!, businessId: String!, input: RolesInput): CommandResponse
   "Removes the roles from the user"
-  removeRolesFromUser(userId: ID!, input: RolesInput): CommandResponse
+  removeRolesFromUser(userId: ID!, businessId: String!, input: RolesInput): CommandResponse
 }
 
 type Subscription {

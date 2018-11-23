@@ -19,7 +19,7 @@ const start = () => {
         mongoDB.start$(),
         emiGatewayGraphQlService.start$(),
         salesGatewayGraphQlService.start$(),
-        KeycloakDA.startAndExecuteTokenRefresher$()
+        KeycloakDA.checkKeycloakToken$()
     ).subscribe(
         (evt) => {
             //console.log('Subscribe =========>' , evt)

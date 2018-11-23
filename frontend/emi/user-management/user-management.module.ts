@@ -21,7 +21,11 @@ const routes: Routes = [
     component: UserManagementComponent,
   },
   {
-    path: 'user/:username',
+    path: ':id',
+    component: UserManagementComponent,
+  },
+  {
+    path: 'user/:businessId/:username',
     component: UserFormComponent,
     // resolve: {
     //   data: UserFormService

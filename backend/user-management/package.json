@@ -6,7 +6,6 @@
   "bin": {
     "mbe-user-management": "bin/server.js"
   },
-
   "scripts": {
     "start": "node --max-old-space-size=256 bin/server.js",
     "sync-state": "node bin/sync_state.js",
@@ -32,7 +31,7 @@
   },
   "dependencies": {
     "@nebulae/event-store": "^0.3.3",
-    "@nebulae/keycloak-admin-client": "^0.13.4",
+    "@nebulae/keycloak-admin-client": "^0.13.5",
     "async-mqtt": "^1.0.1",
     "dotenv": "^5.0.1",
     "jsonwebtoken": "^8.2.1",

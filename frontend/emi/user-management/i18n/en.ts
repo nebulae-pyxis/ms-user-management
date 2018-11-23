@@ -2,6 +2,8 @@ export const locale = {
   lang: 'en',
   data: {
     USER: {
+      SELECT_BUSINESS: 'Search business unit',
+      SEARCH_USER: 'Search user',
       USER: 'Users',
       SEARCH: 'Search',
       USERNAME: 'Username',
@@ -40,20 +42,27 @@ export const locale = {
       REMOVE_ROLES: 'Remove roles',
       SYSTEM_ROLES: 'System roles',
       USER_ROLES_ASSIGNED: 'Assigned roles of the user',
-      INVALID_USERNAME_FORMAT: 'The username must contain at least 8 characters and be composed of at least one (1) number and one (1) lowercase letter.',
+      INVALID_USERNAME_FORMAT: 'The username must contain at least 8 characters and be composed by numbers, letters, periods and hyphens.',
       USERNAME_REQUIRED: 'Username required',
+      EMAIL_FORMAT: 'Invalid format email',
       NAME_REQUIRED: 'Name required',
       LASTNAME_REQUIRED: 'Lastname required',
       DOCUMENT_TYPE_REQUIRED: 'Document type required',
-      DOCUMENT_ID_REQUIRED: 'Document ID required'
+      DOCUMENT_ID_REQUIRED: 'Document ID required',
+      PHONE_REQUIRED: 'Phone required',
+      INVALID_PASSWORD: 'The password must be at least 8 characters and consist of numbers, letters or period (.)',
+      NEW_PASSWORD_REQUIRED: 'Password required',
+      NOT_EQUIVALENT_PASSWORD: 'The verification password does not match.',
+      MY_BUSINESS: 'Business unit'
     }
   },
   ERRORS: {
+    15001: 'Internal server error',
     16001: 'Internal server error',
     16002: 'Permission denied',
     16010: 'User missing data',
     16011: 'The username is already used',
-    16012: 'invalid username, the username must contain at least 8 characters and be composed of at least one (1) number and one (1) lowercase letter.',
+    16012: 'invalid username, the username must contain at least 8 charactersand be composed by numbers, letters, periods and hyphens.',
     16014: 'The email is already used',
     16015: 'Permission denied, it is not possible to update your own users information',
     16016: 'Usuario no encontrado'

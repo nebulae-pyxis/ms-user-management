@@ -2,6 +2,8 @@ export const locale = {
   lang: 'es',
   data: {
     USER: {
+      SELECT_BUSINESS: 'Buscar unidad de negocio',
+      SEARCH_USER: 'Buscar usuario',
       USER: 'Usuarios',
       SEARCH: 'Buscar',
       USERNAME: 'Nombre de usuario',
@@ -40,14 +42,21 @@ export const locale = {
       REMOVE_ROLES: 'Eliminar roles',
       SYSTEM_ROLES: 'Roles del sistema',
       USER_ROLES_ASSIGNED: 'Roles asignados al usuario',
-      INVALID_USERNAME_FORMAT: 'El nombre de usuario debe contener como mínimo 8 caracteres y estar compuesto por al menos un (1) número y una (1) letra minúscula.',
+      INVALID_USERNAME_FORMAT: 'El nombre de usuario debe contener como mínimo 8 caracteres y solo puede estar compuesto por números, letras, puntos y guiones.',
       USERNAME_REQUIRED: 'Nombre de usuario requerido',
       NAME_REQUIRED: 'Nombre requerido',
+      EMAIL_FORMAT: 'Formato de email inválido',
       LASTNAME_REQUIRED: 'Apellido requerido',
       DOCUMENT_TYPE_REQUIRED: 'Tipo de documento requerido',
-      DOCUMENT_ID_REQUIRED: 'ID documento requerido'
+      DOCUMENT_ID_REQUIRED: 'ID documento requerido',
+      PHONE_REQUIRED: 'Teléfono requerido',
+      INVALID_PASSWORD: 'La contraseña debe ser de mínimo 8 caracteres y estar compuesta por números y letras o puntos(.)',
+      NEW_PASSWORD_REQUIRED: 'Contraseña requerida',
+      NOT_EQUIVALENT_PASSWORD: 'La contraseña de verificación no coincide.',
+      MY_BUSINESS: 'Unidad de negocio'
     },
     ERRORS: {
+      15001: 'Error interno de servidor',
       16001: 'Error interno de servidor',
       16002: 'Permiso denegado.',
       16010: 'Datos faltantes del usuario',

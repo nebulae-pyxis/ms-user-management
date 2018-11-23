@@ -36,15 +36,17 @@ class User {
       "getUsers$()",
       PERMISSION_DENIED_ERROR_CODE,
       "Permission denied",
-      ["business-owner"]
+      ["SYSADMIN", "platform-admin", "business-owner"]
     )
-    //.do(r => console.log(eaas))
+    .do(roles => {
+      UserValidatorHelper.checkBusiness(args, roles, authToken)
+    })
       .mergeMap(val => {
         return UserKeycloakDA.getUsers$(
           args.page,
           args.count,
           args.searchFilter,
-          authToken.businessId
+          args.businessId
         );
       })
       .mergeMap(rawResponse => this.buildSuccessResponse$(rawResponse))
@@ -67,13 +69,17 @@ class User {
       "getUser$()",
       PERMISSION_DENIED_ERROR_CODE,
       "Permission denied",
-      ["business-owner"]
+      ["SYSADMIN", "platform-admin", "business-owner"]
     )
-      .mergeMap(val => {
+    .do(roles => {
+      UserValidatorHelper.checkBusiness(args, roles, authToken)
+    })
+    .mergeMap(val => {
+
         return UserKeycloakDA.getUser$(
           args.username,
           undefined,
-          authToken.businessId
+          args.businessId
         );
       })
       .mergeMap(rawResponse => this.buildSuccessResponse$(rawResponse))
@@ -95,7 +101,7 @@ class User {
       "getUser$()",
       PERMISSION_DENIED_ERROR_CODE,
       "Permission denied",
-      ["business-owner"]
+      ["SYSADMIN", "platform-admin", "business-owner"]
     )
       .mergeMap(val => {
         return UserKeycloakDA.getRoles$(
@@ -122,7 +128,7 @@ class User {
       "getUser$()",
       PERMISSION_DENIED_ERROR_CODE,
       "Permission denied",
-      ["business-owner"]
+      ["SYSADMIN", "platform-admin", "business-owner"]
     )
       .mergeMap(val => {
         return UserKeycloakDA.getUserRoleMapping$(
@@ -146,7 +152,7 @@ class User {
       "changeUserState$()",
       PERMISSION_DENIED_ERROR_CODE,
       "Permission denied",
-      ["business-owner"]
+      ["SYSADMIN", "platform-admin", "business-owner"]
     )
       .mergeMap(val => {
         return UserKeycloakDA.getUserCount$();

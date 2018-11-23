@@ -50,13 +50,15 @@ export class UserFormService {
 
   /**
    * Gets the users by its username
-   * @param username
+   * @param username Username of the user
+   * @param businessId Id of the business to which the user belongs
    */
-  getUser$(username) {
+  getUser$(username, businessId) {
     return this.gateway.apollo.query<any>({
       query: getUser,
       variables: {
-        username: username
+        username: username,
+        businessId: businessId
       },
       fetchPolicy: "network-only",
       errorPolicy: "all"
@@ -78,12 +80,14 @@ export class UserFormService {
   /**
    * Gets the roles of the indicated user.
    * @param userId Id of the user to query
+   * @param businessId Id of the business to which the user belongs
    */
-  getUserRoleMapping$(userId) {
+  getUserRoleMapping$(userId, businessId) {
     return this.gateway.apollo.query<any>({
       query: getUserRoleMapping,
       variables: {
-        userId: userId
+        userId: userId,
+        businessId: businessId
       },
       fetchPolicy: "network-only",
       errorPolicy: "all"
@@ -94,8 +98,9 @@ export class UserFormService {
    * Adds roles to the specified user
    * @param userId Id of the user to which the roles will be added
    * @param roles Roles to be added
+   * @param businessId Id of the business to which the user belongs
    */
-  addRolesToTheUser$(userId, roles): Observable<any> {
+  addRolesToTheUser$(userId, roles, businessId): Observable<any> {
     const rolesInput = {
       roles: roles
     };
@@ -104,6 +109,7 @@ export class UserFormService {
       mutation: addRolesToTheUser,
       variables: {
         userId: userId,
+        businessId: businessId,
         input: rolesInput
       },
       errorPolicy: "all"
@@ -114,8 +120,9 @@ export class UserFormService {
    * Removes roles to the specified user
    * @param userId Id of the user to which the roles will be removed
    * @param roles Roles to be removed
+   * @param businessId Id of the business to which the user belongs
    */
-  removeRolesFromUser$(userId, roles): Observable<any> {
+  removeRolesFromUser$(userId, roles, businessId): Observable<any> {
     const rolesInput = {
       roles: roles
     };
@@ -124,6 +131,7 @@ export class UserFormService {
       mutation: removeRolesFromUser,
       variables: {
         userId: userId,
+        businessId: businessId,
         input: rolesInput
       },
       errorPolicy: "all"
@@ -133,8 +141,9 @@ export class UserFormService {
   /**
    * Creates a new user
    * @param user user to be created
+   * @param businessId Id of the business to which the user belongs
    */
-  createUser$(user): Observable<any> {
+  createUser$(user, businessId): Observable<any> {
     const userInput = {
       username: user.username,
       name: user.name,
@@ -149,7 +158,8 @@ export class UserFormService {
     return this.gateway.apollo.mutate<any>({
       mutation: createUser,
       variables: {
-        input: userInput
+        input: userInput,
+        businessId: businessId
       },
       errorPolicy: "all"
     });
@@ -159,8 +169,9 @@ export class UserFormService {
    * Updates the user general info
    * @param userId Id of the user to be updated
    * @param user New general info of the user
+   * @param businessId Id of the business to which the user belongs
    */
-  updateUser$(userId, user): Observable<any> {
+  updateUser$(userId, user, businessId): Observable<any> {
     const userInput = {
       username: user.username,
       name: user.name,
@@ -175,6 +186,7 @@ export class UserFormService {
       mutation: updateUserGeneralInfo,
       variables: {
         userId: userId,
+        businessId: businessId,
         input: userInput
       },
       errorPolicy: "all"
@@ -186,13 +198,15 @@ export class UserFormService {
    * @param userId User ID
    * @param username username
    * @param newState New state of the user
+   * @param businessId Id of the business to which the user belongs
    */
-  updateUserState$(userId, username, newState): Observable<any> {
+  updateUserState$(userId, username, newState, businessId): Observable<any> {
     return this.gateway.apollo.mutate<any>({
       mutation: updateUserState,
       variables: {
         userId: userId,
         username: username,
+        businessId: businessId,
         state: newState
       },
       errorPolicy: "all"
@@ -201,8 +215,11 @@ export class UserFormService {
 
   /**
    * Resets the user password
+   * @param userId id of the user 
+   * @param userPassword new password
+   * @param businessId Id of the business to which the user belongs
    */
-  resetUserPassword$(userId, userPassword): Observable<any> {
+  resetUserPassword$(userId, userPassword, businessId): Observable<any> {
     const userPasswordInput = {
       password: userPassword.password,
       temporary: userPassword.temporary
@@ -212,6 +229,7 @@ export class UserFormService {
       mutation: resetUserPassword,
       variables: {
         userId: userId,
+        businessId: businessId,
         input: userPasswordInput
       },
       errorPolicy: "all"

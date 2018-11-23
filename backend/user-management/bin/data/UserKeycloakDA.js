@@ -43,6 +43,8 @@ class UserKeycloakDA {
    * @param {*} user user to create
    */
   static createUser$(user) {
+    //const USER_ROLES_ALLOW_TO_ASSIGN = JSON.parse(process.env.USER_ROLES_ALLOW_TO_ASSIGN);
+
     const attributes = {};
     attributes["documentType"] = user.documentType;
     attributes["documentId"] = user.documentId;
@@ -219,7 +221,7 @@ class UserKeycloakDA {
         .mergeMap(users => {
           return Rx.Observable.from(users)
         })
-        // We can only return the users belonging to the same business of the user that is making the query.
+        // We can only return the users belonging to the indicated business.
         .filter(
           user => {
             return businessId == null ||
@@ -354,6 +356,22 @@ class UserKeycloakDA {
         .toArray()
     );
   }
+
+
+  /**
+   * get roles from Keycloak
+   */
+  static getRolesKeycloak$(){
+    //Gets all of the user roles registered on the Keycloak realm
+    return Rx.Observable.defer(() =>
+      KeycloakDA.keycloakClient.realms.roles.find(
+        process.env.KEYCLOAK_BACKEND_REALM_NAME
+      )
+    );
+  }
 }
 
+/**
+ * @returns {UserKeycloakDA}
+ */
 module.exports = UserKeycloakDA;

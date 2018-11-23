@@ -18,8 +18,47 @@ class UserEventConsumer {
    * @param {*} userCreatedEvent User created event
    */
   handleUserCreated$(userCreatedEvent) {
-    const user = userCreatedEvent.data;
-    return UserKeycloakDA.createUser$(user).mergeMap(result => {
+    const user = userCreatedEvent.data;    
+
+    return UserKeycloakDA.getUsers$(0, 1, undefined, user.businessId, undefined, undefined)
+    .mergeMap(users => {
+      console.log('Amount users => ', users);
+      
+      return UserKeycloakDA.createUser$(user)
+      .mergeMap(user=>{
+        //If this is the first user of a business, the user must be preconfigured with the roles specified in the envirment variable and a random password
+        if(users.length == 0){
+          const ROLE_FIRST_USER_ASSIGN = JSON.parse(process.env.ROLE_FIRST_USER_ASSIGN);
+          return UserKeycloakDA.getRolesKeycloak$()
+          .mergeMap(roles => {
+
+            const rolesToAdd = roles.map(role => {
+              return {
+                id: role.id,
+                name: role.name
+              }
+            }).filter(role => ROLE_FIRST_USER_ASSIGN.roles.includes(role.name));
+
+            const randomPassword = {
+              temporary: true,
+              value: (Math.floor(Math.random()*90000000) + 10000000)+''
+            };
+
+            console.log('randomPassword => ', randomPassword);
+
+            //Adds default roles and temporal password
+            return Rx.Observable.forkJoin(
+              UserKeycloakDA.addRolesToTheUser$(user.id, rolesToAdd),
+              UserKeycloakDA.resetUserPassword$(user.id, randomPassword)  
+            ).mapTo(user)
+
+            //return UserKeycloakDA.addRolesToTheUser$(user.id, rolesToAdd).mapTo(user)
+          })
+        }
+        return Rx.Observable.of(user);
+      });
+    })
+    .mergeMap(result => {
       return broker.send$(
         MATERIALIZED_VIEW_TOPIC,
         `UserUpdatedSubscription`,

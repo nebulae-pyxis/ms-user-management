@@ -44,12 +44,12 @@
 
           <div class="tab-content p-24" fxLayout="column" fusePerfectScrollbar>
 
-            <form name="userGeneralInfoForm" [formGroup]="userGeneralInfoForm" class="user w-100-p" fxLayout="column" class="mat-white-bg mat-elevation-z4 p-24 mr-24 mb-24">
+            <form name="userGeneralInfoForm" [formGroup]="userGeneralInfoForm" class="user w-100-p" fxLayout="column" class="mat-white-bg p-24 mr-24 mb-24">
 
-              <div fxLayout="row">
-                <div fxFlex="80" fxLayoutAlign="start start" class="h2">{{'USER.GENERAL_INFO' | translate}}</div>
+              <div fxLayout="row" fxLayout.lt-sm="column" fxLayoutAlign="space-between  start">
+                <div class="h2">{{'USER.GENERAL_INFO' | translate}}</div>
 
-                <form fxFlex="20" fxLayoutAlign="end start" name="userStateForm" [formGroup]="userStateForm" class="user" fxLayout="column">
+                <form name="userStateForm" [formGroup]="userStateForm" class="user" fxLayout="column">
                   <!--mat-checkbox formControlName="state" [(ngModel)]="user.state">{{'USER.USER_ENABLED' | translate}}</mat-checkbox-->
                   <mat-slide-toggle formControlName="state" color="accent" (change)="onUserStateChange($event)" [(ngModel)]="user.state">
                     <label *ngIf="user.state">{{'USER.USER_ENABLED' | translate}}</label>
@@ -59,7 +59,7 @@
               </div>
 
               <mat-form-field class="w-100-p">
-                <input matInput name="username" formControlName="username" placeholder="{{'USER.USERNAME' | translate}}">
+                <input matInput name="username" formControlName="username" maxlength="15" placeholder="{{'USER.USERNAME' | translate}}">
                 <mat-error *ngIf="userGeneralInfoForm.hasError('required', ['username'])">
                   {{'USER.USERNAME_REQUIRED' | translate}}
                 </mat-error>
@@ -69,14 +69,14 @@
               </mat-form-field>
 
               <mat-form-field class="w-100-p">
-                <input matInput name="name" formControlName="name" placeholder="{{'USER.NAME' | translate}}">
+                <input matInput name="name" formControlName="name" maxlength="40" placeholder="{{'USER.NAME' | translate}}">
                 <mat-error *ngIf="userGeneralInfoForm.hasError('required', ['name'])">
                   {{'USER.NAME_REQUIRED' | translate}}
                 </mat-error>
               </mat-form-field>
 
               <mat-form-field class="w-100-p">
-                <input matInput name="lastname" formControlName="lastname" placeholder="{{'USER.LASTNAME' | translate}}">
+                <input matInput name="lastname" formControlName="lastname" maxlength="40" placeholder="{{'USER.LASTNAME' | translate}}">
                 <mat-error *ngIf="userGeneralInfoForm.hasError('required', ['lastname'])">
                   {{'USER.LASTNAME_REQUIRED' | translate}}
                 </mat-error>
@@ -101,14 +101,17 @@
               </mat-form-field>
 
               <mat-form-field class="w-100-p">
-                <input matInput name="email" formControlName="email" placeholder="{{'USER.EMAIL' | translate}}">
-                <mat-error *ngIf="userGeneralInfoForm.hasError('required', ['documentType'])">
-                  {{'USER.DOCUMENT_TYPE_REQUIRED' | translate}}
+                <input matInput name="email" formControlName="email" maxlength="50" placeholder="{{'USER.EMAIL' | translate}}">
+                <mat-error *ngIf="userGeneralInfoForm.hasError('pattern', ['email'])">
+                  {{'USER.EMAIL_FORMAT' | translate}}
                 </mat-error>
               </mat-form-field>
 
               <mat-form-field class="w-100-p">
-                <input matInput name="phone" formControlName="phone" placeholder="{{'USER.PHONE' | translate}}">
+                <input matInput name="phone" formControlName="phone" maxlength="15" placeholder="{{'USER.PHONE' | translate}}">
+                <mat-error *ngIf="userGeneralInfoForm.hasError('required', ['phone'])">
+                  {{'USER.PHONE_REQUIRED' | translate}}
+                </mat-error>
               </mat-form-field>
 
               <div class="mt-16">
@@ -126,16 +129,20 @@
         <mat-tab label="{{'USER.CREDENTIALS' | translate}}" *ngIf="user.id">
           <div class="tab-content p-24" fusePerfectScrollbar>
 
-            <form name="userCredentialsForm" [formGroup]="userCredentialsForm" class="user w-100-p" fxLayout="column" class="mat-white-bg mat-elevation-z4 p-24 mr-24 mb-24">
+            <form name="userCredentialsForm" [formGroup]="userCredentialsForm" class="user w-100-p" fxLayout="column" class="mat-white-bg p-24 mr-24 mb-24">
               <div fxLayout="row">
                 <div fxFlex="80" fxLayoutAlign="start start" class="h2">{{'USER.RESET_CREDENTIALS' | translate}}</div>
               </div>
 
               <mat-form-field class="w-100-p">
                 <input matInput name="password" formControlName="password" placeholder="{{'USER.NEW_PASSWORD' | translate}}" type="password">
-                <mat-error *ngIf="userCredentialsForm.hasError('required', 'newPassword')">
+                <mat-error *ngIf="userCredentialsForm.hasError('required', ['password'])">
                   {{'USER.NEW_PASSWORD_REQUIRED' | translate}}
                 </mat-error>
+                <mat-error *ngIf="userCredentialsForm.hasError('pattern', ['password'])">
+                  {{'USER.INVALID_PASSWORD' | translate}}
+                </mat-error>
+                
               </mat-form-field>
 
               <mat-form-field class="w-100-p">
@@ -144,6 +151,9 @@
                 <mat-error *ngIf="userCredentialsForm.hasError('required', 'passwordConfirmation')">
                   {{'USER.PASSWORD_CONFIRMATION_REQUIRED' | translate}}
                 </mat-error>
+                <mat-error *ngIf="userCredentialsForm.hasError('notEquivalent', ['passwordConfirmation'])">
+                  {{'USER.NOT_EQUIVALENT_PASSWORD' | translate}}
+                </mat-error>
               </mat-form-field>
 
               <mat-slide-toggle formControlName="temporary" color="accent">
@@ -151,7 +161,7 @@
               </mat-slide-toggle>
 
               <div class="mt-16">
-                <button mat-raised-button *ngIf="user.id" (click)="resetUserPassword()" [disabled]="userCredentialsForm.invalid || userCredentialsForm.pristine">{{'USER.SAVE'
+                <button mat-raised-button *ngIf="user.id" (click)="resetUserPassword()">{{'USER.SAVE'
                   | translate}}</button>
               </div>
 
@@ -164,7 +174,7 @@
         <mat-tab label="{{'USER.ROLES' | translate}}" *ngIf="user.id">
           <div class="tab-content p-24" fusePerfectScrollbar>
 
-              <div fxLayout="column" class="mat-white-bg mat-elevation-z4 p-24 mr-24 mb-24">
+              <div fxLayout="column" class="mat-white-bg p-24 mr-24 mb-24">
                   <div fxLayoutAlign="start start" class="h2">{{'USER.ROLES' | translate}}</div>
                   <div fxLayout="row">
                       <div fxLayoutAlign="center start" fxFlex="30" style="margin:7px;">

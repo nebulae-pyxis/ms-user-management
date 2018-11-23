@@ -1,6 +1,46 @@
 @import 'src/app/core/scss/fuse';
 
 :host {
+  width: 100%;
+
+  .center {
+
+      .header {
+
+          .search-wrapper {
+              @include mat-elevation(7);
+
+              .sidenav-toggle {
+                  margin: 0;
+                  width: 45px;
+                  height: 45px;
+                  background: #FFF;
+                  border-radius: 0;
+                  border-right: 1px solid rgba(0, 0, 0, .12);
+              }
+
+              .search {
+                  width: 100%;
+                  height: 45px;
+                  line-height: 45px;
+                  padding: 18px;
+
+                  input {
+                      height: 45px;
+                      padding-left: 16px;
+                      color: rgba(0, 0, 0, 0.54);
+                      border: none;
+                      outline: none;
+                  }
+
+              }
+          }
+      }
+  }
+}
+
+
+:host {
   .mat-header-cell {
     color: #444444;
     font-size: 15px;

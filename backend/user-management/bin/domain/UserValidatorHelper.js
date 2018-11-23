@@ -8,11 +8,12 @@ const {
   EMAIL_ALREADY_USED_ERROR_CODE,
   PERMISSION_DENIED_ERROR_CODE,
   INVALID_USERNAME_FORMAT_ERROR_CODE,
+  MISSING_BUSINESS_ERROR_CODE,
   USER_UPDATE_OWN_INFO_ERROR_CODE,
   USER_BELONG_TO_OTHER_BUSINESS_ERROR_CODE
 } = require("../tools/ErrorCodes");
 const context = "UserManagement";
-const userNameRegex = /^(?=[a-zA-Z0-9.]{8,}$)(?=.*?[a-z])(?=.*?[0-9]).*/;
+const userNameRegex = /^[a-zA-Z0-9._-]{8,}$/;
 
 class UserValidatorHelper {
   //Validates if the user can be created checking if the info
@@ -22,8 +23,11 @@ class UserValidatorHelper {
     //Validate if the user that is performing the operation has the required role.
     return (
       this.checkRole$(authToken, method)
-        .mergeMap(rol => {
+        .mergeMap(roles => {
           const user = !data.args ? undefined : data.args.input;
+          const businessId = !data.args
+            ? undefined
+            : data.args.businessId.trim();
           //Validate if required parameters were sent
           const invalidUserMissingData =
             !user ||
@@ -46,14 +50,30 @@ class UserValidatorHelper {
             );
           }
 
+          //If the business ID to which the user belongs is not indicated, we must throw an error indicating the problem.
+          if (!businessId || businessId == "") {
+            return this.createCustomError$(MISSING_BUSINESS_ERROR_CODE, method);
+          }
+
+          //If the user that is performing the operation is not SYSADMIN or platfrom-admin,
+          // we must check that the business id match with the id of the token
+          if (!(roles["SYSADMIN"] || roles["platform-admin"])) {
+            if (businessId != authToken.businessId) {
+              return this.createCustomError$(
+                USER_BELONG_TO_OTHER_BUSINESS_ERROR_CODE,
+                method
+              );
+            }
+          }
+
+          user.businessId = businessId;
           user.username = user.username.trim();
-          user.businessId = authToken.businessId;
 
           return Rx.Observable.of(user);
         })
         //Checks if the username already was used
         .mergeMap(user => {
-          return this.checkUserExists$(user, user.username, method);
+          return this.checkUserExists$(user, user.username, null, method);
         })
         //Checks if the email already was used
         .mergeMap(user => {
@@ -69,12 +89,14 @@ class UserValidatorHelper {
     //Validate if the user that is performing the operation has the required role.
     return (
       this.checkRole$(authToken, method)
-        .mergeMap(rol => {
+        .mergeMap(roles => {
           const user = {
             generalInfo: !data.args ? undefined : data.args.input,
-            id: !data.args ? undefined : data.args.userId,
-            businessId: authToken.businessId
+            id: !data.args ? undefined : data.args.userId
           };
+          const businessId = !data.args
+            ? undefined
+            : data.args.businessId.trim();
 
           if (
             !user.id ||
@@ -88,13 +110,33 @@ class UserValidatorHelper {
             );
           }
 
+          //If the business ID to which the user belongs is not indicated, we must throw an error indicating the problem.
+          if (!businessId || businessId == "") {
+            return this.createCustomError$(MISSING_BUSINESS_ERROR_CODE, method);
+          }
+
+          //If the user that is performing the operation is not SYSADMIN or platfrom-admin,
+          // we must check that the business id match with the id of the token
+          console.log("Roles ======> ", roles);
+          if (!(roles["SYSADMIN"] || roles["platform-admin"])) {
+            if (businessId != authToken.businessId) {
+              return this.createCustomError$(
+                USER_BELONG_TO_OTHER_BUSINESS_ERROR_CODE,
+                method
+              );
+            }
+          }
+
+          user.businessId = businessId;
           return Rx.Observable.of(user);
         })
         //Checks if the user that is being updated exists on the same business of the user that is performing the operation
         .mergeMap(user => {
-          return this.checkIfUserBelongsToTheSameBusiness$(user, authToken, method);
+          return this.checkIfUserBelongsToTheSameBusiness$(user, method);
         })
-        .mergeMap(user => this.checkIfUserIsTheSameUserLogged$(user, authToken, method))
+        .mergeMap(user =>
+          this.checkIfUserIsTheSameUserLogged$(user, authToken, method)
+        )
         //Checks if the new email is already used by other user
         .mergeMap(user => {
           return UserKeycloakDA.getUser$(
@@ -121,12 +163,14 @@ class UserValidatorHelper {
     return (
       this.checkRole$(authToken, method)
 
-        .mergeMap(rol => {
+        .mergeMap(roles => {
           const user = {
             id: !data.args ? undefined : data.args.userId,
             state: !data.args ? undefined : data.args.state
           };
-
+          const businessId = !data.args
+            ? undefined
+            : data.args.businessId.trim();
           if (!user.id || user.state == null) {
             return this.createCustomError$(
               USER_MISSING_DATA_ERROR_CODE,
@@ -134,13 +178,47 @@ class UserValidatorHelper {
             );
           }
 
+          //If the business ID to which the user belongs is not indicated, we must throw an error indicating the problem.
+          if (!businessId || businessId == "") {
+            return this.createCustomError$(MISSING_BUSINESS_ERROR_CODE, method);
+          }
+
+          //Only user with SYSADMIN and platform-admin role can update user that belongs to another businesses
+          if (!(roles["SYSADMIN"] || roles["platform-admin"])) {
+            if (businessId != authToken.businessId) {
+              return this.createCustomError$(
+                USER_BELONG_TO_OTHER_BUSINESS_ERROR_CODE,
+                method
+              );
+            }
+          }
+
+          user.businessId = businessId;
           return Rx.Observable.of(user);
         })
         //Checks if the user that is being updated exists on the same business of the user that is performing the operation
         .mergeMap(user => {
-          return this.checkIfUserBelongsToTheSameBusiness$(user, authToken, method);
+          return this.checkIfUserBelongsToTheSameBusiness$(user, method);
         })
     );
+  }
+
+  static checkBusiness(args, roles, authToken) {
+    //If the business ID to which the user belongs is not indicated, we must throw an error indicating the problem.
+    if (!args.businessId || args.businessId.trim() == "") {
+      return this.createCustomError$(MISSING_BUSINESS_ERROR_CODE, method);
+    }
+
+    //Only user with SYSADMIN and platform-admin role can update user that belongs to another businesses
+    if (!(roles["SYSADMIN"] || roles["platform-admin"])) {
+      if (args.businessId.trim() != authToken.businessId) {
+        return this.createCustomError$(
+          USER_BELONG_TO_OTHER_BUSINESS_ERROR_CODE,
+          method
+        );
+      }
+    }   
+    
   }
 
   //Validates if the user can resset its password
@@ -149,7 +227,7 @@ class UserValidatorHelper {
     //Validate if the user that is performing the operation has the required role.
     return (
       this.checkRole$(authToken, method)
-        .mergeMap(rol => {
+        .mergeMap(roles => {
           const userPassword = !data.args ? undefined : data.args.input;
 
           const user = {
@@ -157,7 +235,8 @@ class UserValidatorHelper {
             password: {
               temporary: userPassword.temporary || false,
               value: userPassword.password
-            }
+            },
+            businessId: args.business ? args.business.trim(): undefined
           };
 
           if (!user.id || !userPassword || !userPassword.password) {
@@ -167,12 +246,19 @@ class UserValidatorHelper {
             );
           }
 
+          this.checkBusiness(user, roles, authToken);
+          console.log("resetPassword => ", user);
+
           return Rx.Observable.of(user);
         })
         .mergeMap(user => this.checkIfUserIsTheSameUserLogged$(user, authToken))
         //Checks if the user that is being updated exists on the same business of the user that is performing the operation
         .mergeMap(user => {
-          return this.checkIfUserBelongsToTheSameBusiness$(user, authToken, method);
+          return this.checkIfUserBelongsToTheSameBusiness$(
+            user,
+            authToken,
+            method
+          );
         })
     );
   }
@@ -183,10 +269,11 @@ class UserValidatorHelper {
     //Validate if the user that is performing the operation has the required role.
     return (
       this.checkRole$(authToken, method)
-        .mergeMap(rol => {
+        .mergeMap(roles => {
           const user = {
             id: !data.args ? undefined : data.args.userId,
-            userRoles: !data.args ? undefined : data.args.input
+            userRoles: !data.args ? undefined : data.args.input,
+            businessId: args.business ? args.business.trim(): undefined
           };
           if (!user.id || !user.userRoles) {
             return this.createCustomError$(
@@ -195,28 +282,32 @@ class UserValidatorHelper {
             );
           }
 
+          this.checkBusiness(user, roles, authToken);
+          console.log("validateUserRoles => ", user);
+
           return Rx.Observable.of(user);
         })
         .mergeMap(user => this.checkIfUserIsTheSameUserLogged$(user, authToken))
         //Checks if the user that is being updated exists on the same business of the user that is performing the operation
         .mergeMap(user => {
-          return this.checkIfUserBelongsToTheSameBusiness$(user, authToken, method);
+          return this.checkIfUserBelongsToTheSameBusiness$(
+            user,
+            authToken,
+            method
+          );
         })
     );
   }
 
   /**
    * Checks if the user that is performing the operation is the same user that is going to be updated.
-   * @param {*} user 
-   * @param {*} authToken 
+   * @param {*} user
+   * @param {*} authToken
    * @returns error if its trying to update its user
    */
-  static checkIfUserIsTheSameUserLogged$(user, authToken, method){
+  static checkIfUserIsTheSameUserLogged$(user, authToken, method) {
     if (user.id == authToken.sub) {
-      return this.createCustomError$(
-        USER_UPDATE_OWN_INFO_ERROR_CODE,
-        method
-      );
+      return this.createCustomError$(USER_UPDATE_OWN_INFO_ERROR_CODE, method);
     }
     return Rx.Observable.of(user);
   }
@@ -225,9 +316,9 @@ class UserValidatorHelper {
    * Checks if the user belongs to the same business of the user that is performing the operation
    * @param {*} userId User ID
    */
-  static checkIfUserBelongsToTheSameBusiness$(user, authToken, method) {
+  static checkIfUserBelongsToTheSameBusiness$(user, method) {
     return UserKeycloakDA.getUserByUserId$(user.id).mergeMap(userFound => {
-      if (userFound && userFound.businessId != authToken.businessId) {
+      if (userFound && userFound.businessId != user.businessId) {
         return this.createCustomError$(
           USER_BELONG_TO_OTHER_BUSINESS_ERROR_CODE,
           method
@@ -250,7 +341,7 @@ class UserValidatorHelper {
       method,
       PERMISSION_DENIED_ERROR_CODE.code,
       PERMISSION_DENIED_ERROR_CODE.description,
-      ["business-owner"]
+      ["SYSADMIN", "platform-admin", "business-owner"]
     );
   }
 
@@ -261,10 +352,14 @@ class UserValidatorHelper {
    * @param {*} email Email to check
    */
   static checkUserExists$(user, username, email, method) {
+    console.log('checkUserExists => ', username, email);
     return UserKeycloakDA.getUser$(username, email, null).mergeMap(
       userUsernameFound => {
-        if (userUsernameFound) {
+        console.log('userUsernameFound => ', userUsernameFound);
+        if (userUsernameFound && username) {
           return this.createCustomError$(USER_NAME_ALREADY_USED_CODE, method);
+        }else if(userUsernameFound){
+          return this.createCustomError$(EMAIL_ALREADY_USED_ERROR_CODE, method);
         }
         return Rx.Observable.of(user);
       }
