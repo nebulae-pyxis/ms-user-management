@@ -34,7 +34,7 @@ class KeycloakDA {
       //console.log('exhaustMap ', time);
       return Rx.Observable.of(time)
       .mergeMap(data=>{
-        if(this.keycloakToken == null){
+        if(this.keycloakToken == null || (this.keycloakToken != null && this.keycloakToken.refresh_expires_in <= 20)){
           return this.getToken$();
         }else{
           return this.refreshToken$();
@@ -47,10 +47,13 @@ class KeycloakDA {
         .retry(2);
       })
       .do(([client, token]) => {
-        console.log('Token refreshed, new token expires in: ', token.refresh_expires_in);
+        console.log('Token refreshed; refresh token expires in:  ', token.refresh_expires_in, ', token expires in: ', token.expires_in);
+        //takes the lowest expiration time
+        const expirationTimeToken = token.expires_in < token.refresh_expires_in ? token.expires_in : token.refresh_expires_in;
+
         this.keycloakClient = client; 
         this.keycloakToken = token;
-        let expirationTimeMillis = token.refresh_expires_in > 20 ? (token.refresh_expires_in-20) * 1000: 1000;
+        let expirationTimeMillis = expirationTimeToken > 20 ? (expirationTimeToken-20) * 1000: 1000;
         
         //set the new time
         this.tokenTimeSubject$.next(expirationTimeMillis);
