@@ -47,10 +47,10 @@ class KeycloakDA {
         .retry(2);
       })
       .do(([client, token]) => {
-        // console.log('Token refreshed');
+        console.log('Token refreshed, new token expires in: ', token.refresh_expires_in);
         this.keycloakClient = client; 
         this.keycloakToken = token;
-        let expirationTimeMillis = token.refresh_expires_in > 20 ? (token.refresh_expires_in-20) * 1000: (token.refresh_expires_in) * 1000;
+        let expirationTimeMillis = token.refresh_expires_in > 20 ? (token.refresh_expires_in-20) * 1000: 1000;
         
         //set the new time
         this.tokenTimeSubject$.next(expirationTimeMillis);
