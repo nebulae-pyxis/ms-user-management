@@ -236,7 +236,7 @@ class UserValidatorHelper {
               temporary: userPassword.temporary || false,
               value: userPassword.password
             },
-            businessId: args.business ? args.business.trim(): undefined
+            businessId: !data.args ? undefined : (data.args.business ? data.args.business.trim(): undefined)
           };
 
           if (!user.id || !userPassword || !userPassword.password) {
@@ -273,7 +273,7 @@ class UserValidatorHelper {
           const user = {
             id: !data.args ? undefined : data.args.userId,
             userRoles: !data.args ? undefined : data.args.input,
-            businessId: args.business ? args.business.trim(): undefined
+            businessId: !data.args ? undefined : (data.args.business ? data.args.business.trim(): undefined)
           };
           if (!user.id || !user.userRoles) {
             return this.createCustomError$(
