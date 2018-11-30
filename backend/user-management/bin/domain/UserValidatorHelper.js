@@ -206,7 +206,7 @@ class UserValidatorHelper {
   static checkBusiness(args, roles, authToken) {
     //If the business ID to which the user belongs is not indicated, we must throw an error indicating the problem.
     if (!args.businessId || args.businessId.trim() == "") {
-      return this.createCustomError$(MISSING_BUSINESS_ERROR_CODE, method);
+      return this.createCustomError$(MISSING_BUSINESS_ERROR_CODE, 'Debe indicar la unidad de negocio del usuario');
     }
 
     //Only user with SYSADMIN and platform-admin role can update user that belongs to another businesses
@@ -214,7 +214,7 @@ class UserValidatorHelper {
       if (args.businessId.trim() != authToken.businessId) {
         return this.createCustomError$(
           USER_BELONG_TO_OTHER_BUSINESS_ERROR_CODE,
-          method
+          'Debe indicar la unidad de negocio del usuario'
         );
       }
     }   
