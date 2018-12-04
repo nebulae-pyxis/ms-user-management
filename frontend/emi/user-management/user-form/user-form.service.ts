@@ -214,7 +214,7 @@ export class UserFormService {
   }
 
   /**
-   * Resets the user password
+   * Resets the user password.
    * @param userId id of the user 
    * @param userPassword new password
    * @param businessId Id of the business to which the user belongs

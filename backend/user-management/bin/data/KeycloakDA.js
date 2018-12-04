@@ -13,7 +13,6 @@ class KeycloakDA {
   constructor({realmName, baseUrl, username, password, grant_type, client_id }) {
     this.settings = {realmName, baseUrl, username, password, grant_type, client_id};
     this.keycloakAdmin = new KeycloakAdminClient(this.settings);
-    console.log('Subject');
     this.tokenTimeSubject$ = new Rx.BehaviorSubject(1000);
   }
 
