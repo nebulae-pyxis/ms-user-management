@@ -60,7 +60,7 @@
       </div>
       <!-- / SEARCH USER FILTER -->
     
-      <button mat-raised-button class="mat-white-bg" [routerLink]="'user/' + selectedBusinessId + '/new'">
+      <button mat-raised-button class="mat-white-bg" [routerLink]="'user/' + selectedBusinessId + '/new'"  [disabled]="!selectedBusinessData">
         <span>{{ "USER.ADD_USER" | translate }}</span>
       </button>
     </div>

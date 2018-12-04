@@ -53,7 +53,13 @@ export const locale = {
       INVALID_PASSWORD: 'The password must be at least 8 characters and consist of numbers, letters or period (.)',
       NEW_PASSWORD_REQUIRED: 'Password required',
       NOT_EQUIVALENT_PASSWORD: 'The verification password does not match.',
-      MY_BUSINESS: 'Business unit'
+      MY_BUSINESS: 'Business unit',
+      ROLES_LIST: {
+        'BUSINESS-OWNER': 'Business owner',
+        'POS': 'POS',
+        'PLATFORM-ADMIN': 'Platform admin',
+        'SYSADMIN': 'System admin'
+      }
     }
   },
   ERRORS: {

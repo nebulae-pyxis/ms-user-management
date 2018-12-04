@@ -53,7 +53,13 @@ export const locale = {
       INVALID_PASSWORD: 'La contraseña debe ser de mínimo 8 caracteres y estar compuesta por números y letras o puntos(.)',
       NEW_PASSWORD_REQUIRED: 'Contraseña requerida',
       NOT_EQUIVALENT_PASSWORD: 'La contraseña de verificación no coincide.',
-      MY_BUSINESS: 'Unidad de negocio'
+      MY_BUSINESS: 'Unidad de negocio',
+      ROLES_LIST: {
+        'BUSINESS-OWNER': 'Propietario unidad de negocio',
+        'POS': 'POS',
+        'PLATFORM-ADMIN': 'Administrador plataforma',
+        'SYSADMIN': 'Administrador de sistema'
+      }
     },
     ERRORS: {
       15001: 'Error interno de servidor',

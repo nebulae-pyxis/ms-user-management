@@ -184,7 +184,7 @@
                                   <mat-icon aria-label="Roles of the user">vpn_key</mat-icon>
                               </div>                          
                           <mat-list-option #item *ngFor="let userRole of userRoles" [value]="{id: userRole.id, name: userRole.name}" [selected]="userRole.selected" (click)="onUserRolesChange(item)">
-                            {{userRole.name}}
+                            {{'USER.ROLES_LIST.'+userRole.name | translate}}
                           </mat-list-option>
                         </mat-selection-list>
                       </div>

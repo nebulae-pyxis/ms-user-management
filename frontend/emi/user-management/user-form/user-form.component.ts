@@ -179,7 +179,9 @@ export class UserFormComponent implements OnInit {
    */
   goToUserDetail(username) {
     if(username){
-      this.router.navigate(['user-management/'] , { queryParams: {}});
+      setTimeout(() => {
+        this.router.navigate(['user-management/'] , { queryParams: {}})
+      }, 1000);
     }
   }
 
