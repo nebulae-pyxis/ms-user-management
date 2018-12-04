@@ -84,7 +84,7 @@ export class UserManagementComponent implements OnInit, OnDestroy {
   businessFilterCtrl: FormControl;
   businessQueryFiltered$: Observable<any>;
   //selectedBusinessSubject$ = new Subject<any>();
-  isSystemAdmin: Boolean = false;
+  isAdmin: Boolean = false;
   selectedUser: any;
   selectedBusinessData: any = null;
   selectedBusinessId: any = null;
@@ -226,18 +226,15 @@ export class UserManagementComponent implements OnInit, OnDestroy {
   }
 
     /**
-   * Checks if the logged user has role SYSADMIN
+   * Checks if the logged user has role PLATFORM-ADMIN
    */
   checkIfUserIsAdmin$() {
     return Rx.Observable.of(this.keycloakService.getUserRoles(true)).pipe(
-      //tap(data => console.log('userRoles => ', data.some(role => role === 'SYSADMIN' || role === 'platform-admin'))),
       map(userRoles => {
-        console.log('userRoles => ', userRoles.some(role => role === 'SYSADMIN' || role === 'platform-admin'));
-        return userRoles.some(role => role === 'SYSADMIN' || role === 'platform-admin');
+        return userRoles.some(role => role === 'PLATFORM-ADMIN');
       }),
       tap(isAdmin => {
-        console.log('this.isSystemAdmin 1=> ', isAdmin);
-        this.isSystemAdmin = isAdmin;
+        this.isAdmin = isAdmin;
       }),
     );
   }

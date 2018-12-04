@@ -22,19 +22,19 @@
         <form fxLayout="row wrap" fxFlex="100">
       
           <div class="mr-8" fxLayoutAlign="start center" fxFlex>
-            <label for="searchBusiness" class="mr-8" *ngIf="isSystemAdmin">
+            <label for="searchBusiness" class="mr-8" *ngIf="isAdmin">
               <mat-icon class="secondary-text">search</mat-icon>
             </label>
       
             <mat-form-field floatPlaceholder="never" fxFlex="1 0 auto">
               <input id="searchBusiness" matInput placeholder="{{'USER.SELECT_BUSINESS' | translate}}" [matAutocomplete]="auto"
-                [(value)]="selectedBusinessData" [formControl]="businessFilterCtrl" *ngIf="isSystemAdmin">
+                [(value)]="selectedBusinessData" [formControl]="businessFilterCtrl" *ngIf="isAdmin">
               <button mat-button *ngIf="false" matSuffix mat-icon-button aria-label="Clear" (click)="onSelectBusinessEvent(undefined)">
                 <mat-icon>close</mat-icon>
               </button>
       
               <input id="myBusiness" matInput placeholder="{{'USER.MY_BUSINESS' | translate}}" [matAutocomplete]="auto"
-                [(value)]="selectedBusinessData" [formControl]="businessFilterCtrl" *ngIf="!isSystemAdmin" readonly="true" />
+                [(value)]="selectedBusinessData" [formControl]="businessFilterCtrl" *ngIf="!isAdmin" readonly="true" />
             </mat-form-field>
       
             <mat-autocomplete #auto="matAutocomplete" (optionSelected)='onSelectBusinessEvent($event.option.value)'
