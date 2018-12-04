@@ -26,7 +26,7 @@
                 "path": "user-management",
                 "loadChildren": "./main/content/user-management/user-management.module#UserManagementModule",
                 "priority": 2000,
-                "roles" : ["SYSADMIN", "platform-admin", "business-owner"],
+                "roles" : ["PLATFORM-ADMIN", "BUSINESS-OWNER"],
                 "default" : false
             }            
         ],

@@ -222,7 +222,7 @@ export class UserFormService {
   resetUserPassword$(userId, userPassword, businessId): Observable<any> {
     const userPasswordInput = {
       password: userPassword.password,
-      temporary: userPassword.temporary
+      temporary: userPassword.temporary || false
     };
 
     return this.gateway.apollo.mutate<any>({

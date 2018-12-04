@@ -36,7 +36,7 @@ class User {
       "getUsers$()",
       PERMISSION_DENIED_ERROR_CODE,
       "Permission denied",
-      ["SYSADMIN", "platform-admin", "business-owner"]
+      ["PLATFORM-ADMIN", "BUSINESS-OWNER"]
     )
     .do(roles => {
       UserValidatorHelper.checkBusiness(args, roles, authToken)
@@ -69,7 +69,7 @@ class User {
       "getUser$()",
       PERMISSION_DENIED_ERROR_CODE,
       "Permission denied",
-      ["SYSADMIN", "platform-admin", "business-owner"]
+      ["PLATFORM-ADMIN", "BUSINESS-OWNER"]
     )
     .do(roles => {
       UserValidatorHelper.checkBusiness(args, roles, authToken)
@@ -101,7 +101,7 @@ class User {
       "getUser$()",
       PERMISSION_DENIED_ERROR_CODE,
       "Permission denied",
-      ["SYSADMIN", "platform-admin", "business-owner"]
+      ["PLATFORM-ADMIN", "BUSINESS-OWNER"]
     )
       .mergeMap(val => {
         return UserKeycloakDA.getRoles$(
@@ -128,7 +128,7 @@ class User {
       "getUser$()",
       PERMISSION_DENIED_ERROR_CODE,
       "Permission denied",
-      ["SYSADMIN", "platform-admin", "business-owner"]
+      ["PLATFORM-ADMIN", "BUSINESS-OWNER"]
     )
       .mergeMap(val => {
         return UserKeycloakDA.getUserRoleMapping$(
@@ -152,7 +152,7 @@ class User {
       "changeUserState$()",
       PERMISSION_DENIED_ERROR_CODE,
       "Permission denied",
-      ["SYSADMIN", "platform-admin", "business-owner"]
+      ["PLATFORM-ADMIN", "BUSINESS-OWNER"]
     )
       .mergeMap(val => {
         return UserKeycloakDA.getUserCount$();

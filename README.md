@@ -205,7 +205,7 @@ Time-based jobs that are configured and triggered by the [CronJob MicroService](
 
 To be able to perform all of the operations that the user management microservice provides, you have to do some configurations on Keycloak.
 
-1. Create "business-owner" role.
+1. Create "BUSINESS-OWNER" role.
 
 ![Business owner role](docs/images/createRole.png "Business_owner_role")
 
@@ -223,7 +223,7 @@ The first user of a business has to be create manually through Keycloak
 
 2. Set a password to the user.
 
-3. Associate the "business-owner" to the user.
+3. Associate the "BUSINESS-OWNER" to the user.
 
 ![Assigned role](docs/images/assigned_roles.png "Assigned_role")
 

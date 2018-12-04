@@ -55,9 +55,9 @@ class UserValidatorHelper {
             return this.createCustomError$(MISSING_BUSINESS_ERROR_CODE, method);
           }
 
-          //If the user that is performing the operation is not SYSADMIN or platfrom-admin,
+          //If the user that is performing the operation is not PLATFORM-ADMIN or platfrom-admin,
           // we must check that the business id match with the id of the token
-          if (!(roles["SYSADMIN"] || roles["platform-admin"])) {
+          if (!roles["PLATFORM-ADMIN"]) {
             if (businessId != authToken.businessId) {
               return this.createCustomError$(
                 USER_BELONG_TO_OTHER_BUSINESS_ERROR_CODE,
@@ -115,10 +115,10 @@ class UserValidatorHelper {
             return this.createCustomError$(MISSING_BUSINESS_ERROR_CODE, method);
           }
 
-          //If the user that is performing the operation is not SYSADMIN or platfrom-admin,
+          //If the user that is performing the operation is not PLATFORM-ADMIN,
           // we must check that the business id match with the id of the token
           console.log("Roles ======> ", roles);
-          if (!(roles["SYSADMIN"] || roles["platform-admin"])) {
+          if (!roles["PLATFORM-ADMIN"]) {
             if (businessId != authToken.businessId) {
               return this.createCustomError$(
                 USER_BELONG_TO_OTHER_BUSINESS_ERROR_CODE,
@@ -183,8 +183,8 @@ class UserValidatorHelper {
             return this.createCustomError$(MISSING_BUSINESS_ERROR_CODE, method);
           }
 
-          //Only user with SYSADMIN and platform-admin role can update user that belongs to another businesses
-          if (!(roles["SYSADMIN"] || roles["platform-admin"])) {
+          //Only user with PLATFORM-ADMIN role can update user that belongs to another businesses
+          if (!roles["PLATFORM-ADMIN"]) {
             if (businessId != authToken.businessId) {
               return this.createCustomError$(
                 USER_BELONG_TO_OTHER_BUSINESS_ERROR_CODE,
@@ -209,8 +209,8 @@ class UserValidatorHelper {
       return this.createCustomError$(MISSING_BUSINESS_ERROR_CODE, 'Debe indicar la unidad de negocio del usuario');
     }
 
-    //Only user with SYSADMIN and platform-admin role can update user that belongs to another businesses
-    if (!(roles["SYSADMIN"] || roles["platform-admin"])) {
+    //Only user with PLATFORM-ADMIN role can update user that belongs to another businesses
+    if (!roles["PLATFORM-ADMIN"]) {
       if (args.businessId.trim() != authToken.businessId) {
         return this.createCustomError$(
           USER_BELONG_TO_OTHER_BUSINESS_ERROR_CODE,
@@ -341,7 +341,7 @@ class UserValidatorHelper {
       method,
       PERMISSION_DENIED_ERROR_CODE.code,
       PERMISSION_DENIED_ERROR_CODE.description,
-      ["SYSADMIN", "platform-admin", "business-owner"]
+      ["PLATFORM-ADMIN", "BUSINESS-OWNER"]
     );
   }
 

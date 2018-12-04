@@ -64,7 +64,7 @@ module.exports = {
         "getUsers",
         USERS_PERMISSION_DENIED_ERROR_CODE,
         "Permission denied",
-        ["SYSADMIN", "platform-admin", "business-owner"]
+        ["PLATFORM-ADMIN", "BUSINESS-OWNER"]
       )
         .mergeMap(response => {
           return broker.forwardAndGetReply$(
@@ -85,7 +85,7 @@ module.exports = {
         "getUser",
         USERS_PERMISSION_DENIED_ERROR_CODE,
         "Permission denied",
-        ["SYSADMIN", "platform-admin", "business-owner"]
+        ["PLATFORM-ADMIN", "BUSINESS-OWNER"]
       )
         .mergeMap(response => {
           return broker.forwardAndGetReply$(
@@ -106,7 +106,7 @@ module.exports = {
         "getUserRoleMapping",
         USERS_PERMISSION_DENIED_ERROR_CODE,
         "Permission denied",
-        ["SYSADMIN", "platform-admin", "business-owner"]
+        ["PLATFORM-ADMIN", "BUSINESS-OWNER"]
       )
         .mergeMap(response => {
           return broker.forwardAndGetReply$(
@@ -127,7 +127,7 @@ module.exports = {
         "getRoles",
         USERS_PERMISSION_DENIED_ERROR_CODE,
         "Permission denied",
-        ["SYSADMIN", "platform-admin", "business-owner"]
+        ["PLATFORM-ADMIN", "BUSINESS-OWNER"]
       )
         .mergeMap(response => {
           return broker.forwardAndGetReply$(
@@ -152,7 +152,7 @@ module.exports = {
         "createUser",
         USERS_PERMISSION_DENIED_ERROR_CODE,
         "Permission denied",
-        ["SYSADMIN", "platform-admin", "business-owner"]
+        ["PLATFORM-ADMIN", "BUSINESS-OWNER"]
       )
         .mergeMap(response => {
           return context.broker.forwardAndGetReply$(
@@ -173,7 +173,7 @@ module.exports = {
         "updateUserGeneralInfo",
         USERS_PERMISSION_DENIED_ERROR_CODE,
         "Permission denied",
-        ["SYSADMIN", "platform-admin", "business-owner"]
+        ["PLATFORM-ADMIN", "BUSINESS-OWNER"]
       )
         .mergeMap(response => {
           return context.broker.forwardAndGetReply$(
@@ -194,7 +194,7 @@ module.exports = {
         "updateUserState",
         USERS_PERMISSION_DENIED_ERROR_CODE,
         "Permission denied",
-        ["SYSADMIN", "platform-admin", "business-owner"]
+        ["PLATFORM-ADMIN", "BUSINESS-OWNER"]
       )
         .mergeMap(response => {
           return context.broker.forwardAndGetReply$(
@@ -215,7 +215,7 @@ module.exports = {
         "resetUserPassword",
         USERS_PERMISSION_DENIED_ERROR_CODE,
         "Permission denied",
-        ["SYSADMIN", "platform-admin", "business-owner"]
+        ["PLATFORM-ADMIN", "BUSINESS-OWNER"]
       )
         .mergeMap(response => {
           return context.broker.forwardAndGetReply$(
@@ -236,7 +236,7 @@ module.exports = {
         "addRolesToTheUser",
         USERS_PERMISSION_DENIED_ERROR_CODE,
         "Permission denied",
-        ["SYSADMIN", "platform-admin", "business-owner"]
+        ["PLATFORM-ADMIN", "BUSINESS-OWNER"]
       )
         .mergeMap(response => {
           return context.broker.forwardAndGetReply$(
@@ -257,7 +257,7 @@ module.exports = {
         "removeRolesFromUser",
         USERS_PERMISSION_DENIED_ERROR_CODE,
         "Permission denied",
-        ["SYSADMIN", "platform-admin", "business-owner"]
+        ["PLATFORM-ADMIN", "BUSINESS-OWNER"]
       )
         .mergeMap(response => {
           return context.broker.forwardAndGetReply$(
@@ -281,7 +281,7 @@ module.exports = {
           //Checks the roles of the user, if the user does not have at least one of the required roles, an error will be thrown
           RoleValidator.checkAndThrowError(
             context.authToken.realm_access.roles,
-            ["SYSADMIN", "platform-admin", "business-owner"],
+            ["PLATFORM-ADMIN", "BUSINESS-OWNER"],
             contextName,
             "UserUpdatedSubscription",
             USERS_PERMISSION_DENIED_ERROR_CODE,
