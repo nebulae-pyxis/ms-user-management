@@ -7,15 +7,28 @@
             "id": "BUSINESS_UNIT_MANAGER",
             "icon": "location_searching",
             "translate": {
-                "en": "Business unit manager",
-                "es": "Administración unidad de negocio"
+                "en": "Business units",
+                "es": "Unidades de negocio"
             },
             "priority": 200
             }
           ],
+          "subgroups": [
+            {
+                "groupId": "BUSINESS_UNIT_MANAGER",
+                "id": "management",
+                "icon": "settings",
+                "translate": {
+                    "en": "Management",
+                    "es": "Gestión"
+                },
+                "priority": 2000
+            }
+        ],
         "contents": [
             {
                 "groupId": "BUSINESS_UNIT_MANAGER",
+                "subgroupId": "management",
                 "id": "user-management",
                 "icon": "face",
                 "translate": {
