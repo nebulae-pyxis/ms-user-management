@@ -1,3 +1,4 @@
+import { UserManagementService } from './../user-management.service';
 import { FuseTranslationLoaderService } from "../../../../core/services/translation-loader.service";
 import { TranslateService } from "@ngx-translate/core";
 import { Component, OnDestroy, OnInit, ViewEncapsulation } from "@angular/core";
@@ -12,14 +13,16 @@ import { UserFormService } from "./user-form.service";
 ////////// RXJS ///////////
 // tslint:disable-next-line:import-blacklist
 import * as Rx from "rxjs/Rx";
-import { first, filter, tap, mergeMap, map, toArray } from "rxjs/operators";
+import { of, from, Subject, Observable} from "rxjs";
+import { takeUntil, first, filter, tap, mergeMap, map, toArray, take } from "rxjs/operators";
 
 @Component({
   selector: "app-user-form",
   templateUrl: "./user-form.component.html",
   styleUrls: ["./user-form.component.scss"]
 })
-export class UserFormComponent implements OnInit {
+export class UserFormComponent implements OnInit, OnDestroy {
+  private ngUnsubscribe = new Subject();
   // User data
   user = new User();
   pageType: string;
@@ -39,6 +42,7 @@ export class UserFormComponent implements OnInit {
     private translationLoader: FuseTranslationLoaderService,
     private translate: TranslateService,
     private userFormService: UserFormService,
+    private userManagementService: UserManagementService,
     private formBuilder: FormBuilder,
     public snackBar: MatSnackBar,
     private router: Router,
@@ -58,10 +62,41 @@ export class UserFormComponent implements OnInit {
     this.findUser();
   }
 
+  getBusinessFiltered$(filterText: String, limit: number): Observable<any[]> {
+    return this.userManagementService.getBusinessByFilter(filterText, limit).pipe(      
+      mergeMap(resp => this.graphQlAlarmsErrorHandler$(resp)),
+      filter(resp => !resp.errors),
+      mergeMap(result => from(result.data.getBusinessByFilterText)),
+      takeUntil(this.ngUnsubscribe)
+    );
+  }
+
   findUser() {
     this.activatedRouter.params
       .pipe(
-
+        mergeMap(params => {
+          return this.userManagementService.selectedBusinessEvent$
+          .pipe(
+            take(1),
+            mergeMap(selectedBusiness => {
+              if(!selectedBusiness || (selectedBusiness && selectedBusiness._id != params.businessId)){
+                return of(params.businessId)
+                .pipe(
+                  mergeMap(businessId => {
+                    return this.getBusinessFiltered$(businessId+'', 1)
+                    .pipe(
+                      take(1),
+                      tap(business => this.userManagementService.selectBusiness(business)),
+                      mergeMap(business => of(params))
+                    );
+                  })
+                );
+              }else{
+                return of(params);
+              }
+            })
+          )
+        }),
         mergeMap(params => {
           if(params.username === "new"){
             return Rx.Observable.of([undefined, params.businessId, params.username]);
@@ -71,7 +106,8 @@ export class UserFormComponent implements OnInit {
               map(userData => [userData, params.businessId, params.username])
             );
           }          
-        })
+        }),
+        takeUntil(this.ngUnsubscribe)
       )
       .subscribe(([userData, businessId, username]) => {
         this.paramBusinessId = businessId;
@@ -217,7 +253,8 @@ export class UserFormComponent implements OnInit {
       .createUser$(data, this.paramBusinessId)
       .pipe(
         mergeMap(resp => this.graphQlAlarmsErrorHandler$(resp)),
-        filter((resp: any) => !resp.errors || resp.errors.length === 0)
+        filter((resp: any) => !resp.errors || resp.errors.length === 0),
+        takeUntil(this.ngUnsubscribe)
       )
       .subscribe(
         model => {          
@@ -243,7 +280,8 @@ export class UserFormComponent implements OnInit {
       .updateUser$(this.user.id, data, this.paramBusinessId)
       .pipe(
         mergeMap(resp => this.graphQlAlarmsErrorHandler$(resp)),
-        filter((resp: any) => !resp.errors || resp.errors.length === 0)
+        filter((resp: any) => !resp.errors || resp.errors.length === 0),
+        takeUntil(this.ngUnsubscribe)
       )
       .subscribe(
         model => {
@@ -265,7 +303,8 @@ export class UserFormComponent implements OnInit {
       .getRoles$()
       .pipe(
         mergeMap(resp => this.graphQlAlarmsErrorHandler$(resp)),
-        filter((resp: any) => !resp.errors || resp.errors.length === 0)
+        filter((resp: any) => !resp.errors || resp.errors.length === 0),
+        takeUntil(this.ngUnsubscribe)
       )
       .subscribe(roles => {
         this.roles = roles.data.getRoles;
@@ -280,7 +319,8 @@ export class UserFormComponent implements OnInit {
       .getUserRoleMapping$(this.user.id, this.paramBusinessId)
       .pipe(
         mergeMap(resp => this.graphQlAlarmsErrorHandler$(resp)),
-        filter((resp: any) => !resp.errors || resp.errors.length === 0)
+        filter((resp: any) => !resp.errors || resp.errors.length === 0),
+        takeUntil(this.ngUnsubscribe)
       )
       .subscribe(roles => {
         this.userRoles = roles.data.getUserRoles;
@@ -295,7 +335,8 @@ export class UserFormComponent implements OnInit {
     if (this.pageType == "new") {
       return;
     }
-    this.userFormService.getUserRoleMapping$(this.user.id, this.paramBusinessId).pipe(
+    this.userFormService.getUserRoleMapping$(this.user.id, this.paramBusinessId)
+    .pipe(
       mergeMap(userRolesData => Rx.Observable.from(userRolesData.data.getUserRoleMapping)),
       map((role: { id, name } | any) => {
           return {
@@ -316,7 +357,8 @@ export class UserFormComponent implements OnInit {
         }),
         toArray()
       )
-      })
+      }),
+      takeUntil(this.ngUnsubscribe)
     ).subscribe(result => {
       this.userRoles = result;
           })
@@ -346,7 +388,8 @@ export class UserFormComponent implements OnInit {
       .addRolesToTheUser$(this.user.id, rolesToAdd, this.paramBusinessId)
       .pipe(
         mergeMap(resp => this.graphQlAlarmsErrorHandler$(resp)),
-        filter((resp: any) => !resp.errors || resp.errors.length === 0)
+        filter((resp: any) => !resp.errors || resp.errors.length === 0),
+        takeUntil(this.ngUnsubscribe)
       )
       .subscribe(
         model => {
@@ -372,7 +415,8 @@ export class UserFormComponent implements OnInit {
       .removeRolesFromUser$(this.user.id, rolesToRemove, this.paramBusinessId)
       .pipe(
         mergeMap(resp => this.graphQlAlarmsErrorHandler$(resp)),
-        filter((resp: any) => !resp.errors || resp.errors.length === 0)
+        filter((resp: any) => !resp.errors || resp.errors.length === 0),
+        takeUntil(this.ngUnsubscribe)
       )
       .subscribe(
         model => {
@@ -418,7 +462,8 @@ export class UserFormComponent implements OnInit {
       .updateUserState$(this.user.id, this.user.username, $event.checked, this.paramBusinessId)
       .pipe(
         mergeMap(resp => this.graphQlAlarmsErrorHandler$(resp)),
-        filter((resp: any) => !resp.errors || resp.errors.length === 0)
+        filter((resp: any) => !resp.errors || resp.errors.length === 0),
+        takeUntil(this.ngUnsubscribe)
       )
       .subscribe(
         model => {
@@ -446,7 +491,8 @@ export class UserFormComponent implements OnInit {
       .resetUserPassword$(this.user.id, data, this.paramBusinessId)
       .pipe(
         mergeMap(resp => this.graphQlAlarmsErrorHandler$(resp)),
-        filter((resp: any) => !resp.errors || resp.errors.length === 0)
+        filter((resp: any) => !resp.errors || resp.errors.length === 0),
+        takeUntil(this.ngUnsubscribe)
       )
       .subscribe(
         model => {
@@ -525,5 +571,10 @@ export class UserFormComponent implements OnInit {
         }
       );
     });
+  }
+
+  ngOnDestroy() {
+    this.ngUnsubscribe.next();
+    this.ngUnsubscribe.complete();
   }
 }

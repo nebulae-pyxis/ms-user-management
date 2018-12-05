@@ -184,13 +184,11 @@ export class UserManagementComponent implements OnInit, OnDestroy {
         return businessFilter != null;
       }),
       mergeMap(([userFilter, businessFilter, paginator]) => {
-        console.log('refreshTable111111111 ', [userFilter, businessFilter, paginator]);
         return this.getUsers$(paginator.pageIndex, paginator.pageSize, userFilter, businessFilter._id)
       }),
       takeUntil(this.ngUnsubscribe)
     )
     .subscribe(model => {
-      console.log('refreshTable2222222222 => ', model);
       this.dataSource.data = model.data.getUsers;
     });
   }
@@ -253,11 +251,8 @@ export class UserManagementComponent implements OnInit, OnDestroy {
    * Listens when a new business have been selected
    * @param business  selected business
    */
-  onSelectBusinessEvent(business) {
-    console.log('onSelectBusinessEvent1 => ', business);   
-    
+  onSelectBusinessEvent(business) {    
     if(business){
-      console.log('onSelectBusinessEvent2 => ', business);   
       this.selectedBusinessId = business._id;
     }    
 
@@ -266,8 +261,6 @@ export class UserManagementComponent implements OnInit, OnDestroy {
   }
 
   displayFn(business) {
-    console.log('display => ', business);
-    console.log('display2 => ', (business || {generalInfo: {}}).generalInfo.name);
     return (business || {generalInfo: {}}).generalInfo.name;
   }
 
