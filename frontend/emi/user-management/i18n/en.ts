@@ -59,7 +59,8 @@ export const locale = {
         'POS': 'POS',
         'PLATFORM-ADMIN': 'Platform admin',
         'SYSADMIN': 'System admin'
-      }
+      },
+      CLOSE: 'Close',
     }
   },
   ERRORS: {

@@ -13,6 +13,8 @@ import {
   Validators
 } from "@angular/forms";
 
+import { Router } from "@angular/router";
+
 //////////// i18n ////////////
 import { FuseTranslationLoaderService } from "./../../../core/services/translation-loader.service";
 import { TranslateService } from "@ngx-translate/core";
@@ -33,7 +35,6 @@ import {
 import { fuseAnimations } from '../../../core/animations';
 
 //////////// RXJS ////////////
-import * as Rx from "rxjs/Rx";
 import { Subject, BehaviorSubject, Subscription, fromEvent, of, from, Observable, combineLatest } from "rxjs";
 import {
   first,
@@ -51,6 +52,7 @@ import {
 
 //////////// Services ////////////
 import { KeycloakService } from "keycloak-angular";
+import { ToolbarService } from "../../toolbar/toolbar.service";
 
 @Component({
   // tslint:disable-next-line:component-selector
@@ -96,7 +98,9 @@ export class UserManagementComponent implements OnInit, OnDestroy {
     private translate: TranslateService,
     private dialog: MatDialog,
     private formBuilder: FormBuilder,
-    private snackBar: MatSnackBar
+    private toolbarService: ToolbarService,
+    private snackBar: MatSnackBar,
+    private router: Router,
   ) {
     this.translationLoader.loadTranslations(english, spanish);
     this.businessFilterCtrl = new FormControl();
@@ -113,6 +117,22 @@ export class UserManagementComponent implements OnInit, OnDestroy {
     this.loadFilterCache();
     // Refresh the users table
     this.refreshTable();
+  }
+
+      /**
+   * Navigates to the detail page
+   */
+  goToDetail(){
+    this.toolbarService.onSelectedBusiness$
+    .pipe(
+      take(1)
+    ).subscribe(selectedBusiness => {
+      if (!selectedBusiness || !selectedBusiness.id){
+        this.showSnackBar('USER.SELECT_BUSINESS');
+      }else{
+        this.router.navigate(['user-management/user/' + 'new']);
+      }
+    });
   }
 
   loadFilterCache(){
@@ -227,13 +247,9 @@ export class UserManagementComponent implements OnInit, OnDestroy {
    * Checks if the logged user has role PLATFORM-ADMIN
    */
   checkIfUserIsAdmin$() {
-    return Rx.Observable.of(this.keycloakService.getUserRoles(true)).pipe(
-      map(userRoles => {
-        return userRoles.some(role => role === 'PLATFORM-ADMIN');
-      }),
-      tap(isAdmin => {
-        this.isAdmin = isAdmin;
-      }),
+    return of(this.keycloakService.getUserRoles(true)).pipe(
+      map(userRoles => userRoles.some(role => role === 'PLATFORM-ADMIN')),
+      tap(isAdmin => { this.isAdmin = isAdmin; }),
     );
   }
 
@@ -264,30 +280,19 @@ export class UserManagementComponent implements OnInit, OnDestroy {
     return (business || {generalInfo: {}}).generalInfo.name;
   }
 
-  /**
-   * Finds the users and updates the table data
-   * @param page page number
-   * @param count Max amount of users that will be return.
-   * @param searchFilter Search filter
-   * @param businessId business id filter
-   */
-  // refreshDataTable(page, count, searchFilter, businessId) {
-  //   this.userManagementService
-  //     .getUsers$(page, count, searchFilter, businessId)
-  //     .pipe(
-  //       mergeMap(resp => this.graphQlAlarmsErrorHandler$(resp)),
-  //       filter((resp: any) => !resp.errors || resp.errors.length === 0),
-  //     ).subscribe(model => {
-  //       this.dataSource.data = model.data.getUsers;
-  //     });
-  // }
+  showSnackBar(message) {
+    this.snackBar.open(this.translationLoader.getTranslate().instant(message),
+      this.translationLoader.getTranslate().instant('USER.CLOSE'), {
+        duration: 4000
+      });
+  }
 
   /**
    * Handles the Graphql errors and show a message to the user
    * @param response
    */
   graphQlAlarmsErrorHandler$(response){
-    return Rx.Observable.of(JSON.parse(JSON.stringify(response)))
+    return of(JSON.parse(JSON.stringify(response)))
     .pipe(
       tap((resp: any) => {
         this.showSnackBarError(resp);

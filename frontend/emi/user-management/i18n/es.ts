@@ -59,7 +59,8 @@ export const locale = {
         'POS': 'POS',
         'PLATFORM-ADMIN': 'Administrador plataforma',
         'SYSADMIN': 'Administrador de sistema'
-      }
+      },
+      CLOSE: 'Cerrar',
     },
     ERRORS: {
       15001: 'Error interno de servidor',
