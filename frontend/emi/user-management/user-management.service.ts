@@ -1,8 +1,7 @@
 import { query } from '@angular/animations';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
-import * as Rx from 'rxjs';
-import { BehaviorSubject } from "rxjs";
+import { BehaviorSubject } from 'rxjs';
 import { GatewayService } from '../../../api/gateway.service';
 import {
   getUsers,
@@ -34,9 +33,9 @@ export class UserManagementService {
   }
 
   /**
-   * 
-   * @param filterText 
-   * @param limit 
+   *
+   * @param filterText
+   * @param limit
    */
   getBusinessByFilter(filterText: String, limit: number): Observable<any> {
     return this.gateway.apollo
@@ -64,6 +63,8 @@ export class UserManagementService {
       });
   }
 
+
+
 /**
  * Gets the users filtered by page, count and a search filter.
  * @param pageValue Page number of the user table that you want to recover.
@@ -72,6 +73,7 @@ export class UserManagementService {
  * @param businessId Id of the business which will be use to filter the users
  */
   getUsers$(pageValue, countValue, searchFilter, businessId){
+    //console.log('#########', businessId);
     return this.gateway.apollo
     .query<any>({
       query: getUsers,

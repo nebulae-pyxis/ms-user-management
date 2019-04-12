@@ -1,6 +1,7 @@
 "use strict";
 
 const Rx = require("rxjs");
+const request = require('request');
 const KeycloakAdminClient = require('@nebulae/keycloak-admin-client');
 let instance = null;
 
@@ -10,12 +11,11 @@ class KeycloakDA {
    * initialize and configure keycloak admin client
    * @param { { url, dbName } } ops
    */
-  constructor({realmName, baseUrl, username, password, grant_type, client_id }) {
+  constructor({realmName, baseUrl, username, password, grant_type, client_id }) {    
     this.settings = {realmName, baseUrl, username, password, grant_type, client_id};
     this.keycloakAdmin = new KeycloakAdminClient(this.settings);
     this.tokenTimeSubject$ = new Rx.BehaviorSubject(1000);
   }
-
 
   /**
    * Authenticates with Keycloak and evaluate the expiration time of the token to refresh it
@@ -87,6 +87,64 @@ class KeycloakDA {
     //     }
     //   );
   }
+
+  /**
+  A function to check if the token is valid.
+  @returns {Promise} A promise that will resolve toekn validity
+ */
+  getUserInfo(realmName) {
+    return new Promise((resolve, reject) => {
+      const req = {
+        auth: {
+          bearer: this.keycloakToken.access_token
+        },
+        json: true,
+        url: `${this.settings.baseUrl}/realms/${this.settings.realmName}/protocol/openid-connect/userinfo`
+      };
+
+      request(req, (err, resp, body) => {
+        if (err) {
+          return reject(err);
+        }
+
+        if (resp.statusCode !== 200) {
+          return reject(body);
+        }
+
+        return resolve(body);
+      });
+    });
+  };
+
+
+  /**
+   * Check token validity
+   */
+  checkTokenValidity$(){
+    return Rx.Observable.defer(() =>
+      this.getUserInfo(
+        process.env.KEYCLOAK_BACKEND_REALM_NAME
+      )
+    );
+  }
+
+  // checkTokenValidity$(){
+  //   return Rx.Observable.of(this.keycloakToken)
+  //   .mergeMap(token => Rx.Observable.bindNodeCallback(request.get)({
+  //     headers: { 'content-type': 'application/json' },
+  //     url: `${this.settings.baseUrl}/realms/${this.settings.realmName}/protocol/openid-connect/userinfo`,
+  //     auth: {
+  //       bearer: token.access_token
+  //     },
+  //     json: true,
+  //     // form: args
+  //   }))
+  //   .do(data => {
+  //     console.log('checkTokenValidity1 => ', data[0].err);
+  //     console.log('checkTokenValidity2 => ', data[0].resp);
+  //     console.log('checkTokenValidity3 => ', data[0].body);
+  //   })
+  // }
 
   /**
    * Starts Keycloak connections and execute the token refresher ()

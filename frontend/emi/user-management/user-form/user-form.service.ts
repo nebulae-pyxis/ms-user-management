@@ -1,25 +1,27 @@
-import { query } from "@angular/animations";
-import { Injectable } from "@angular/core";
+import { query } from '@angular/animations';
+import { Injectable } from '@angular/core';
 import {
   ActivatedRouteSnapshot,
   Resolve,
   RouterStateSnapshot
-} from "@angular/router";
-import { GatewayService } from "../../../../api/gateway.service";
-import * as Rx from "rxjs";
-import { Observable } from "rxjs/Observable";
-import { BehaviorSubject } from "rxjs/BehaviorSubject";
+} from '@angular/router';
+import { GatewayService } from '../../../../api/gateway.service';
+import * as Rx from 'rxjs';
+import { Observable } from 'rxjs/Observable';
+import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import {
   getUser,
   getRoles,
   getUserRoleMapping,
   createUser,
+  createUserAuth,
+  removeUserAuth,
   updateUserGeneralInfo,
   updateUserState,
   resetUserPassword,
   addRolesToTheUser,
   removeRolesFromUser
-} from "../gql/UserManagement";
+} from '../gql/UserManagement';
 
 @Injectable()
 export class UserFormService {
@@ -49,19 +51,17 @@ export class UserFormService {
   // }
 
   /**
-   * Gets the users by its username
-   * @param username Username of the user
-   * @param businessId Id of the business to which the user belongs
+   * Gets the users by its id
+   * @param id User ID
    */
-  getUser$(username, businessId) {
+  getUser$(id) {
     return this.gateway.apollo.query<any>({
       query: getUser,
       variables: {
-        username: username,
-        businessId: businessId
+        id: id
       },
-      fetchPolicy: "network-only",
-      errorPolicy: "all"
+      fetchPolicy: 'network-only',
+      errorPolicy: 'all'
     });
   }
 
@@ -72,8 +72,8 @@ export class UserFormService {
   getRoles$() {
     return this.gateway.apollo.query<any>({
       query: getRoles,
-      fetchPolicy: "network-only",
-      errorPolicy: "all"
+      fetchPolicy: 'network-only',
+      errorPolicy: 'all'
     });
   }
 
@@ -89,8 +89,8 @@ export class UserFormService {
         userId: userId,
         businessId: businessId
       },
-      fetchPolicy: "network-only",
-      errorPolicy: "all"
+      fetchPolicy: 'network-only',
+      errorPolicy: 'all'
     });
   }
 
@@ -98,9 +98,8 @@ export class UserFormService {
    * Adds roles to the specified user
    * @param userId Id of the user to which the roles will be added
    * @param roles Roles to be added
-   * @param businessId Id of the business to which the user belongs
    */
-  addRolesToTheUser$(userId, roles, businessId): Observable<any> {
+  addRolesToTheUser$(userId, roles): Observable<any> {
     const rolesInput = {
       roles: roles
     };
@@ -109,10 +108,9 @@ export class UserFormService {
       mutation: addRolesToTheUser,
       variables: {
         userId: userId,
-        businessId: businessId,
         input: rolesInput
       },
-      errorPolicy: "all"
+      errorPolicy: 'all'
     });
   }
 
@@ -134,7 +132,7 @@ export class UserFormService {
         businessId: businessId,
         input: rolesInput
       },
-      errorPolicy: "all"
+      errorPolicy: 'all'
     });
   }
 
@@ -144,24 +142,14 @@ export class UserFormService {
    * @param businessId Id of the business to which the user belongs
    */
   createUser$(user, businessId): Observable<any> {
-    const userInput = {
-      username: user.username,
-      name: user.name,
-      lastname: user.lastname,
-      documentType: user.documentType,
-      documentId: user.documentId,
-      email: user.email,
-      phone: user.phone,
-      state: user.state
-    };
 
     return this.gateway.apollo.mutate<any>({
       mutation: createUser,
       variables: {
-        input: userInput,
+        input: user,
         businessId: businessId
       },
-      errorPolicy: "all"
+      errorPolicy: 'all'
     });
   }
 
@@ -171,25 +159,17 @@ export class UserFormService {
    * @param user New general info of the user
    * @param businessId Id of the business to which the user belongs
    */
-  updateUser$(userId, user, businessId): Observable<any> {
+  updateUserGeneralInfo$(userId, user): Observable<any> {
     const userInput = {
-      username: user.username,
-      name: user.name,
-      lastname: user.lastname,
-      documentType: user.documentType,
-      documentId: user.documentId,
-      email: user.email,
-      phone: user.phone
+      generalInfo: user.generalInfo
     };
-
     return this.gateway.apollo.mutate<any>({
       mutation: updateUserGeneralInfo,
       variables: {
         userId: userId,
-        businessId: businessId,
         input: userInput
       },
-      errorPolicy: "all"
+      errorPolicy: 'all'
     });
   }
 
@@ -209,17 +189,57 @@ export class UserFormService {
         businessId: businessId,
         state: newState
       },
-      errorPolicy: "all"
+      errorPolicy: 'all'
+    });
+  }
+
+  /**
+   * Create auth for the user.
+   * @param userId userId
+   * @param userPassword Password object
+   * @param userPassword.username username
+   * @param userPassword.password new password
+   * @param userPassword.temporary Booleand that indicates if the password is temporal
+   */
+  createUserAuth$(userId, userPassword): Observable<any> {
+    const authInput = {
+      username: userPassword.username,
+      password: userPassword.password,
+      temporary: userPassword.temporary || false
+    };
+
+    return this.gateway.apollo.mutate<any>({
+      mutation: createUserAuth,
+      variables: {
+        userId: userId,
+        username: userPassword.username,
+        input: authInput
+      },
+      errorPolicy: 'all'
+    });
+  }
+
+    /**
+   * Removes auth credentials from user
+   * @param userId Id of the user
+   */
+  removeUserAuth$(userId): Observable<any> {
+    return this.gateway.apollo.mutate<any>({
+      mutation: removeUserAuth,
+      variables: {
+        userId: userId
+      },
+      errorPolicy: 'all'
     });
   }
 
   /**
    * Resets the user password.
-   * @param userId id of the user 
+   * @param userId id of the user
    * @param userPassword new password
    * @param businessId Id of the business to which the user belongs
    */
-  resetUserPassword$(userId, userPassword, businessId): Observable<any> {
+  resetUserPassword$(userId, userPassword): Observable<any> {
     const userPasswordInput = {
       password: userPassword.password,
       temporary: userPassword.temporary || false
@@ -229,10 +249,29 @@ export class UserFormService {
       mutation: resetUserPassword,
       variables: {
         userId: userId,
-        businessId: businessId,
         input: userPasswordInput
       },
-      errorPolicy: "all"
+      errorPolicy: 'all'
+    });
+  }
+
+  /**
+   * Update the roles of an user the user password.
+   * @param userId id of the user
+   * @param roles new roles
+   */
+  updateUserRoles$(userId, roles): Observable<any> {
+    const rolesInput = {
+      roles: roles,
+    };
+
+    return this.gateway.apollo.mutate<any>({
+      mutation: resetUserPassword,
+      variables: {
+        userId: userId,
+        input: rolesInput
+      },
+      errorPolicy: 'all'
     });
   }
 }

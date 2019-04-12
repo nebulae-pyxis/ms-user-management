@@ -13,7 +13,7 @@ spec:
         app: user-management
     spec:      
       containers:
-      - image: nebulaepyxis/user-management.backend.user-management:0.0.44
+      - image: nebulaepyxis/user-management.backend.user-management:0.0.45
         name: user-management
         volumeMounts:
         - name: google-application-credentials
@@ -45,7 +45,10 @@ spec:
           value: user-management
         # JWT CONGIF        
         - name: JWT_PUBLIC_KEY
-          value: -----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAsQBquKLlhsh1IObDD+KP45iBjelCjiF4mxLEqFkwHpGBZZckjQRPeXCc/z/nhJd47VnmyFiRFNGifpIraneLJYz1XrJ6B1fqGyfLf4mFErIffk4lQpCVUeaW/QyMFdwHN2jhe3S7yWx3gaD3ZKOX7egqZhD5gTEaYldhJX26kmJJHvuuG8t/etjxeNLy0GhLi2E1WhP6M9NGtVKS/02P16CJPr0SFQVXOUdgi5kQUS74rHB/CzEjQNziO2v2BnZVDMbKckSpzWl/zcu388/81hIlLvYpO+NtseioIQYB9sHBoaEs2cKwNEUEGKzcDezfR8fdSoGJ2wYQBnhQTMH0ewIDAQAB\n-----END PUBLIC KEY-----
+          valueFrom:
+            configMapKeyRef:
+              name: keycloak-jwt-public-key
+              key: jwt_public_key
         # API - gateway CONFIG
         - name: gateway_REPLIES_TOPIC_SUBSCRIPTION
           value: emi-gateway-replies-topic-mbe-user-management
@@ -58,7 +61,10 @@ spec:
           value: "initial_lock"
         # KEYCLOAK BACKEND
         - name: KEYCLOAK_BACKEND_BASE_URL
-          value: "https://pyxis.nebulae.com.co/auth"
+          valueFrom:
+            configMapKeyRef:
+              name: environment-variables
+              key: keycloak-backend-base-url
         - name: KEYCLOAK_BACKEND_USER
           valueFrom:
             secretKeyRef:
@@ -76,7 +82,7 @@ spec:
         - name: KEYCLOAK_BACKEND_CLIENT_ID
           value: "admin-cli"
         - name: KEYCLOAK_BACKEND_REALM_NAME
-          value: "PYXIS"        
+          value: "PYXIS"
       volumes:
       - name: google-application-credentials
         secret:

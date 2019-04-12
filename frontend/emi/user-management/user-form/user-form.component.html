@@ -19,11 +19,11 @@
 
         <div fxLayout="column" fxLayoutAlign="start start" *fuseIfOnDom>
 
-          <div class="h2" *ngIf="user.id">
-            {{user.username}}
+          <div class="h2" *ngIf="user._id">
+            {{user.auth ? user.auth.username: user.generalInfo.name}}
           </div>
 
-          <div class="h2" *ngIf="!user.id">
+          <div class="h2" *ngIf="!user._id">
             {{'USER.NEW_USER' | translate}}
           </div>
 
@@ -58,25 +58,25 @@
                 </form>
               </div>
 
-              <mat-form-field class="w-100-p">
-                <input matInput name="username" formControlName="username" maxlength="15" placeholder="{{'USER.USERNAME' | translate}}">
-                <mat-error *ngIf="userGeneralInfoForm.hasError('required', ['username'])">
-                  {{'USER.USERNAME_REQUIRED' | translate}}
-                </mat-error>
-                <mat-error *ngIf="userGeneralInfoForm.hasError('pattern', ['username'])">
-                  {{'USER.INVALID_USERNAME_FORMAT' | translate}}
-                </mat-error>
-              </mat-form-field>
+              <!-- <mat-form-field class="w-100-p">
+                        <input matInput name="username" formControlName="username" maxlength="15" placeholder="{{'USER.USERNAME' | translate}}">
+                        <mat-error *ngIf="userGeneralInfoForm.hasError('required', ['username'])">
+                          {{'USER.USERNAME_REQUIRED' | translate}}
+                        </mat-error>
+                        <mat-error *ngIf="userGeneralInfoForm.hasError('pattern', ['username'])">
+                          {{'USER.INVALID_USERNAME_FORMAT' | translate}}
+                        </mat-error>
+                      </mat-form-field> -->
 
               <mat-form-field class="w-100-p">
-                <input matInput name="name" formControlName="name" maxlength="40" placeholder="{{'USER.NAME' | translate}}">
+                <input matInput name="name" formControlName="name" maxlength="30" placeholder="{{'USER.NAME' | translate}}">
                 <mat-error *ngIf="userGeneralInfoForm.hasError('required', ['name'])">
                   {{'USER.NAME_REQUIRED' | translate}}
                 </mat-error>
               </mat-form-field>
 
               <mat-form-field class="w-100-p">
-                <input matInput name="lastname" formControlName="lastname" maxlength="40" placeholder="{{'USER.LASTNAME' | translate}}">
+                <input matInput name="lastname" formControlName="lastname" maxlength="30" placeholder="{{'USER.LASTNAME' | translate}}">
                 <mat-error *ngIf="userGeneralInfoForm.hasError('required', ['lastname'])">
                   {{'USER.LASTNAME_REQUIRED' | translate}}
                 </mat-error>
@@ -94,7 +94,7 @@
               </mat-form-field>
 
               <mat-form-field class="w-100-p">
-                <input matInput name="documentId" formControlName="documentId" placeholder="{{'USER.DOCUMENT_ID' | translate}}">
+                <input matInput name="documentId" maxlength="30" formControlName="documentId" placeholder="{{'USER.DOCUMENT_ID' | translate}}">
                 <mat-error *ngIf="userGeneralInfoForm.hasError('required', ['documentId'])">
                   {{'USER.DOCUMENT_ID_REQUIRED' | translate}}
                 </mat-error>
@@ -102,22 +102,25 @@
 
               <mat-form-field class="w-100-p">
                 <input matInput name="email" formControlName="email" maxlength="50" placeholder="{{'USER.EMAIL' | translate}}">
-                <mat-error *ngIf="userGeneralInfoForm.hasError('pattern', ['email'])">
+                <mat-error *ngIf="userGeneralInfoForm.hasError('email', ['email'])">
                   {{'USER.EMAIL_FORMAT' | translate}}
                 </mat-error>
               </mat-form-field>
 
               <mat-form-field class="w-100-p">
-                <input matInput name="phone" formControlName="phone" maxlength="15" placeholder="{{'USER.PHONE' | translate}}">
+                <input matInput name="phone" type="number" formControlName="phone" maxlength="15" placeholder="{{'USER.PHONE' | translate}}">
                 <mat-error *ngIf="userGeneralInfoForm.hasError('required', ['phone'])">
                   {{'USER.PHONE_REQUIRED' | translate}}
+                </mat-error>
+                <mat-error *ngIf="userGeneralInfoForm.hasError('max', ['phone'])">
+                  {{'USER.PHONE_MAX_LENGTH' | translate}}
                 </mat-error>
               </mat-form-field>
 
               <div class="mt-16">
-                <button mat-raised-button *ngIf="!user.id" (click)="createUser()" [disabled]="userGeneralInfoForm.invalid || userGeneralInfoForm.pristine">{{'USER.CREATE'
+                <button mat-raised-button *ngIf="!user._id" (click)="createUser()" [disabled]="userGeneralInfoForm.invalid || userGeneralInfoForm.pristine">{{'USER.CREATE'
                   | translate}}</button>
-                <button mat-raised-button *ngIf="user.id" (click)="updateUserGeneralInfo()" [disabled]="userGeneralInfoForm.invalid || userGeneralInfoForm.pristine">{{'USER.SAVE'
+                <button mat-raised-button *ngIf="user._id" (click)="updateUserGeneralInfo()" [disabled]="userGeneralInfoForm.invalid || userGeneralInfoForm.pristine">{{'USER.SAVE'
                   | translate}}</button>
               </div>
 
@@ -126,32 +129,44 @@
           </div>
         </mat-tab>
 
-        <mat-tab label="{{'USER.CREDENTIALS' | translate}}" *ngIf="user.id">
+        <mat-tab label="{{'USER.AUTH' | translate}}" *ngIf="user._id">
           <div class="tab-content p-24" fusePerfectScrollbar>
 
-            <form name="userCredentialsForm" [formGroup]="userCredentialsForm" class="user w-100-p" fxLayout="column" class="mat-white-bg p-24 mr-24 mb-24">
+            <form name="userAuthForm" [formGroup]="userAuthForm" #formDirective="ngForm" class="user w-100-p" fxLayout="column" class="mat-white-bg p-24 mr-24 mb-24">
               <div fxLayout="row">
-                <div fxFlex="80" fxLayoutAlign="start start" class="h2">{{'USER.RESET_CREDENTIALS' | translate}}</div>
+                <div fxFlex="80" *ngIf="user.auth && user.auth.userKeycloakId" fxLayoutAlign="start start" class="h2">{{'USER.RESET_AUTH' | translate}}</div>
+                <div fxFlex="80" *ngIf="!user.auth || !user.auth.userKeycloakId" fxLayoutAlign="start start" class="h2">{{'USER.CREATE_AUTH' | translate}}</div>
+                <button mat-raised-button *ngIf="user.auth && user.auth.username" color="'accent'" type="button" (click)="removeUserAuth(formDirective)">{{'USER.REMOVE_USER_AUTH' | translate}}</button>
               </div>
 
               <mat-form-field class="w-100-p">
+                <input matInput name="username" formControlName="username" maxlength="40" placeholder="{{'USER.USERNAME' | translate}}">
+                <mat-error *ngIf="userAuthForm.hasError('required', ['username'])">
+                  {{'USER.USERNAME_REQUIRED' | translate}}
+                </mat-error>
+                <mat-error *ngIf="userAuthForm.hasError('pattern', ['username'])">
+                  {{'USER.INVALID_USERNAME_FORMAT' | translate}}
+                </mat-error>
+              </mat-form-field>
+
+              <mat-form-field class="w-100-p">
                 <input matInput name="password" formControlName="password" placeholder="{{'USER.NEW_PASSWORD' | translate}}" type="password">
-                <mat-error *ngIf="userCredentialsForm.hasError('required', ['password'])">
+                <mat-error *ngIf="userAuthForm.hasError('required', ['password'])">
                   {{'USER.NEW_PASSWORD_REQUIRED' | translate}}
                 </mat-error>
-                <mat-error *ngIf="userCredentialsForm.hasError('pattern', ['password'])">
+                <mat-error *ngIf="userAuthForm.hasError('pattern', ['password'])">
                   {{'USER.INVALID_PASSWORD' | translate}}
                 </mat-error>
-                
+
               </mat-form-field>
 
               <mat-form-field class="w-100-p">
                 <input matInput name="passwordConfirmation" formControlName="passwordConfirmation" placeholder="{{'USER.PASSWORD_CONFIRMATION' | translate}}"
                   type="password">
-                <mat-error *ngIf="userCredentialsForm.hasError('required', 'passwordConfirmation')">
+                <mat-error *ngIf="userAuthForm.hasError('required', 'passwordConfirmation')">
                   {{'USER.PASSWORD_CONFIRMATION_REQUIRED' | translate}}
                 </mat-error>
-                <mat-error *ngIf="userCredentialsForm.hasError('notEquivalent', ['passwordConfirmation'])">
+                <mat-error *ngIf="userAuthForm.hasError('notEquivalent', ['passwordConfirmation'])">
                   {{'USER.NOT_EQUIVALENT_PASSWORD' | translate}}
                 </mat-error>
               </mat-form-field>
@@ -161,8 +176,12 @@
               </mat-slide-toggle>
 
               <div class="mt-16">
-                <button mat-raised-button *ngIf="user.id" (click)="resetUserPassword()">{{'USER.SAVE'
-                  | translate}}</button>
+                <button mat-raised-button *ngIf="user._id && (!user.auth || !user.auth.username)"
+                  (click)="createUserAuth(formDirective)"
+                  [disabled]="userAuthForm.invalid || userAuthForm.pristine">{{'USER.SAVE' | translate}}</button>
+                <button mat-raised-button *ngIf="user._id && user.auth && user.auth.username"
+                  (click)="resetUserPassword(formDirective)"
+                  [disabled]="userAuthForm.invalid || userAuthForm.pristine">{{'USER.RESET_PASSWORD' | translate}}</button>
               </div>
 
             </form>
@@ -171,31 +190,45 @@
           </div>
         </mat-tab>
 
-        <mat-tab label="{{'USER.ROLES' | translate}}" *ngIf="user.id">
+        <mat-tab label="{{'USER.ROLES' | translate}}" *ngIf="user._id">
           <div class="tab-content p-24" fusePerfectScrollbar>
 
               <div fxLayout="column" class="mat-white-bg p-24 mr-24 mb-24">
-                  <div fxLayoutAlign="start start" class="h2">{{'USER.ROLES' | translate}}</div>
+                  <div fxLayoutAlign="start start" class="h2">{{'USER.USER_ROLES_ASSIGNED' | translate}}</div>
                   <div fxLayout="row">
-                      <div fxLayoutAlign="center start" fxFlex="30" style="margin:7px;">
-                        <mat-selection-list #list [(ngModel)]="selectedUserRoles" fxFlex="100">
+
+                    <form name="userRolesForm" [formGroup]="userRolesForm" class="user w-100-p" fxLayout="column" class="mat-white-bg p-24 mr-24 mb-24">
+
+                      <div fxFlex="100" formArrayName="roles" *ngFor="let role of userRolesForm.get('roles').controls ; let i = index;">
+                          <div [formGroupName]="i" >
+                              <mat-checkbox *ngIf="role.get('key')" [formControlName]="'active'" (change)="onUserRolesChange(role.get('key').value, $event)">
+                                  {{ 'USER.ROLES_LIST.' + role.get('key').value | translate }}
+                              </mat-checkbox>
+                          </div>
+                         <!-- orderForm.controls.items.controls[i].controls.name.value -->
+                      </div>
+
+                    </form>
+
+                      <div fxLayoutAlign="center start" fxFlex="30" style="margin:7px;" *ngIf="false">
+                        <mat-selection-list #list [(ngModel)]="selectedUserRoles" fxFlex="100" *ngIf="false">
                             <div fxLayout="row" fxLayoutAlign="start center">
                                 <h3 mat-subheader>{{'USER.USER_ROLES_ASSIGNED' | translate}}</h3>
                                   <mat-icon aria-label="Roles of the user">vpn_key</mat-icon>
-                              </div>                          
-                          <mat-list-option #item *ngFor="let userRole of userRoles" [value]="{id: userRole.id, name: userRole.name}" [selected]="userRole.selected" (click)="onUserRolesChange(item)">
+                              </div>
+                          <mat-list-option #item *ngFor="let userRole of user.roles" [value]="userRole" [selected]="userRole.selected" (click)="onUserRolesChange(item)">
                             {{'USER.ROLES_LIST.'+userRole.name | translate}}
                           </mat-list-option>
                         </mat-selection-list>
                       </div>
                     </div>
               </div>
-            
+
 
           </div>
         </mat-tab>
 
-        <mat-tab label="{{'USER.SESSIONS' | translate}}" *ngIf="!user.id">
+        <mat-tab label="{{'USER.SESSIONS' | translate}}" *ngIf="false">
           <div class="tab-content p-24" fusePerfectScrollbar>
             <!--app-device-network deviceValue="{{deviceVal}}"></app-device-network-->
           </div>

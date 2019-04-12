@@ -151,6 +151,18 @@ class GraphQlService {
       },
       {
         aggregateType: "User",
+        messageType: "emigateway.graphql.mutation.createUserAuth",
+        onErrorHandler,
+        onCompleteHandler
+      },
+      {
+        aggregateType: "User",
+        messageType: "emigateway.graphql.mutation.removeUserAuth",
+        onErrorHandler,
+        onCompleteHandler
+      },
+      {
+        aggregateType: "User",
         messageType: "emigateway.graphql.mutation.resetUserPassword",
         onErrorHandler,
         onCompleteHandler
@@ -219,6 +231,14 @@ class GraphQlService {
       },
       'emigateway.graphql.mutation.resetUserPassword': {
         fn: user.resetUserPassword$,
+        obj: user
+      },
+      'emigateway.graphql.mutation.createUserAuth': {
+        fn: user.createUserAuth$,
+        obj: user
+      },
+      'emigateway.graphql.mutation.removeUserAuth': {
+        fn: user.removeUserAuth$,
         obj: user
       },
       'emigateway.graphql.mutation.addRolesToTheUser': {

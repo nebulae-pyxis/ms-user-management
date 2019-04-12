@@ -5,6 +5,7 @@
 
   <!-- CENTER -->
   <div class="center">
+    
     <!-- HEADER -->
     <div class="header white-fg" fxLayout="column" fxLayoutAlign="center center" fxLayout.gt-xs="row" fxLayoutAlign.gt-xs="space-between center">
       <!-- APP TITLE -->
@@ -13,28 +14,27 @@
         <span class="logo-text h1" *fuseIfOnDom [@animate]="{ value: '*', params: { delay: '100ms', x: '-25px' } }">{{
           "USER.USER" | translate }}</span>
       </div>
-    
-      
+
       <!-- / APP TITLE -->
-    
+
       <!-- SEARCH USER FILTER -->
       <div class="search-input-wrapper mx-12 m-md-0" fxLayoutAlign="start center" fxFlex="70">
         <form fxLayout="row wrap" fxFlex="100">
-      
+        
           <div fxLayoutAlign="start center" fxFlex>
             <label for="search" class="mr-8">
               <mat-icon class="secondary-text">search</mat-icon>
             </label>
-      
+        
             <mat-form-field floatPlaceholder="never" fxFlex="1 0 auto">
               <input id="search" matInput #filter placeholder="{{'USER.SEARCH_USER' | translate}}" />
             </mat-form-field>
           </div>
-      
+        
         </form>
       </div>
       <!-- / SEARCH USER FILTER -->
-    
+
       <button mat-raised-button class="mat-white-bg" (click)="goToDetail()">
         <span>{{ "USER.ADD_USER" | translate }}</span>
       </button>
@@ -45,24 +45,13 @@
     <div class="content-card mat-white-bg">
       <div fxLayout="column" style="width: 100%; justify-content: space-between" fxLayout.gt-sm="row">
         <div fxLayout="column" fxFlex="100" fxFlex.gt-sm="100" fxFlex.gt-md="100">
-          <mat-table id="user-table" class="item-table" #table [dataSource]="dataSource" matSort [@animateStagger]="{ value: '50' }"
+          <mat-table id="user-table" class="item-table" #table [dataSource]="dataSource" [@animateStagger]="{ value: '50' }"
             fusePerfectScrollbar>
-            <!-- Username Column -->
-            <ng-container cdkColumnDef="username">
-              <mat-header-cell mat-sort-header="username" *cdkHeaderCellDef>{{
-                "USER.USERNAME" | translate
-                }}</mat-header-cell>
-              <mat-cell *cdkCellDef="let user">
-                <p class="text-truncate">{{ user.username }}</p>
-              </mat-cell>
-            </ng-container>
 
             <!-- Fullname Column -->
             <ng-container cdkColumnDef="fullname">
-              <mat-header-cell mat-sort-header="fullname" *cdkHeaderCellDef>{{
-                "USER.FULLNAME" | translate
-                }}</mat-header-cell>
-              <mat-cell *cdkCellDef="let user">
+              <mat-header-cell *cdkHeaderCellDef fxFlex="50" fxFlex.gt-xs="25">{{ "USER.FULLNAME" | translate }}</mat-header-cell>
+              <mat-cell *cdkCellDef="let user" fxFlex="50" fxFlex.gt-xs="25">
                 <p class="text-truncate">
                   {{ user.generalInfo.name }} {{ user.generalInfo.lastname }}
                 </p>
@@ -71,10 +60,8 @@
 
             <!-- Type Column -->
             <ng-container cdkColumnDef="doc_type">
-              <mat-header-cell *cdkHeaderCellDef>{{
-                "USER.DOC_TYPE" | translate
-                }}</mat-header-cell>
-              <mat-cell *cdkCellDef="let user">
+              <mat-header-cell *cdkHeaderCellDef  fxHide fxShow.gt-xs fxFlex="30" fxFlex.gt-xs="20">{{ "USER.DOC_TYPE" | translate }}</mat-header-cell>
+              <mat-cell *cdkCellDef="let user"  fxHide fxShow.gt-xs fxFlex="30" fxFlex.gt-xs="20">
                 <p class="text-truncate" *ngIf="user.generalInfo.documentType == 'CITIZENSHIP_CARD'">
                   {{ "USER.CITIZENSHIP_CARD" | translate }}
                 </p>
@@ -87,24 +74,29 @@
               </mat-cell>
             </ng-container>
 
-            <!-- Name Column -->
+            <!-- Doc ID Column -->
             <ng-container cdkColumnDef="doc_id">
-              <mat-header-cell mat-sort-header="doc_id" *cdkHeaderCellDef>{{
-                "USER.DOC_ID" | translate
-                }}</mat-header-cell>
-              <mat-cell *cdkCellDef="let user">
+              <mat-header-cell *cdkHeaderCellDef fxFlex="30" fxFlex.gt-xs="25">{{ "USER.DOC_ID" | translate }}
+              </mat-header-cell>
+              <mat-cell *cdkCellDef="let user" fxFlex="30" fxFlex.gt-xs="25">
                 <p class="text-truncate">{{ user.generalInfo.documentId }}</p>
               </mat-cell>
             </ng-container>
 
             <!-- Active Column -->
             <ng-container cdkColumnDef="state">
-              <mat-header-cell *cdkHeaderCellDef fxHide fxShow.gt-xs>{{
-                "USER.ACTIVE" | translate
-                }}</mat-header-cell>
-              <mat-cell *cdkCellDef="let user" fxHide fxShow.gt-xs>
+              <mat-header-cell *cdkHeaderCellDef  fxFlex="20" fxFlex.gt-xs="10">{{ "USER.ACTIVE" | translate }}</mat-header-cell>
+              <mat-cell *cdkCellDef="let user" fxFlex="20" fxFlex.gt-xs="10">
                 <mat-icon *ngIf="user.state" class="active-icon mat-green-600-bg s-16">check</mat-icon>
                 <mat-icon *ngIf="!user.state" class="active-icon mat-red-500-bg s-16">close</mat-icon>
+              </mat-cell>
+            </ng-container>
+
+            <!-- Username Column -->
+            <ng-container cdkColumnDef="username">
+              <mat-header-cell *cdkHeaderCellDef fxHide fxShow.gt-xs fxFlex="20" fxFlex.gt-xs="20">{{ "USER.USERNAME" | translate }}</mat-header-cell>
+              <mat-cell *cdkCellDef="let user" fxHide fxShow.gt-xs fxFlex="20" fxFlex.gt-xs="20">
+                <p class="text-truncate">{{ user.auth ? user.auth.username : ''}}</p>
               </mat-cell>
             </ng-container>
 
@@ -118,13 +110,14 @@
                 </mat-cell>
               </ng-container>
             -->
+            
             <mat-header-row *cdkHeaderRowDef="displayedColumns"></mat-header-row>
 
-            <mat-row *cdkRowDef="let user; columns: displayedColumns" class="item" matRipple [routerLink]="'user/' + selectedBusinessId + '/' + user.username">
+            <mat-row *cdkRowDef="let user; columns: displayedColumns" class="item" matRipple [routerLink]="'user/' + user._id">
             </mat-row>
           </mat-table>
 
-          <mat-paginator #paginator [length]="1000" [pageIndex]="0" [pageSize]="10" [pageSizeOptions]="[5, 10, 25, 100]">
+          <mat-paginator #paginator [length]="1000" [pageIndex]="0" [pageSize]="25" [pageSizeOptions]="[5, 10, 25, 100]">
           </mat-paginator>
         </div>
       </div>

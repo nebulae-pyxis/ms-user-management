@@ -1,7 +1,6 @@
 export class User{
 
-  id: string;
-  username: string;
+  _id: string;
   generalInfo: {
     name: string;
     lastname: string;
@@ -10,14 +9,21 @@ export class User{
     email: string;
     phone: string;
   };
+  auth: {
+    username: string,
+    userKeycloakId: string
+  };
+  businessId: string;
+  roles: string[];
   state: boolean;
 
   constructor(user?){
     user = user || {};
-    this.id = user.id;
-    this.username = user.username;
+    this._id = user._id;
+    this.auth = user.auth || {};
     this.state = user.state;
     this.generalInfo = user.generalInfo || {};
+    this.roles = user.roles || [];
   }
 
 }

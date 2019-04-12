@@ -1,25 +1,28 @@
 import { UserManagementService } from './../user-management.service';
-import { FuseTranslationLoaderService } from "../../../../core/services/translation-loader.service";
-import { TranslateService } from "@ngx-translate/core";
-import { Component, OnDestroy, OnInit, ViewEncapsulation } from "@angular/core";
-import { FormBuilder, FormGroup, Validators } from "@angular/forms";
-import { Router, ActivatedRoute } from "@angular/router";
-import { locale as english } from "../i18n/en";
-import { locale as spanish } from "../i18n/es";
-import { MatSnackBar } from "@angular/material";
-import { User } from "./../model/user.model";
-import { UserFormService } from "./user-form.service";
+import { FuseTranslationLoaderService } from '../../../../core/services/translation-loader.service';
+import { TranslateService } from '@ngx-translate/core';
+import { Component, OnDestroy, OnInit, ViewEncapsulation } from '@angular/core';
+import { FormBuilder, FormGroup, Validators, FormArray, FormControl, FormGroupDirective } from '@angular/forms';
+import { Router, ActivatedRoute } from '@angular/router';
+import { locale as english } from '../i18n/en';
+import { locale as spanish } from '../i18n/es';
+import { MatSnackBar } from '@angular/material';
+import { User } from './../model/user.model';
+import { UserFormService } from './user-form.service';
+import { ToolbarService } from '../../../toolbar/toolbar.service';
 
-////////// RXJS ///////////
+
+////////// RXJS //////////
 // tslint:disable-next-line:import-blacklist
-import * as Rx from "rxjs/Rx";
-import { of, from, Subject, Observable} from "rxjs";
-import { takeUntil, first, filter, tap, mergeMap, map, toArray, take } from "rxjs/operators";
+import * as Rx from 'rxjs/Rx';
+import { of, from, Subject, Observable} from 'rxjs';
+import { takeUntil, first, filter, tap, mergeMap, map, toArray, take, debounceTime } from 'rxjs/operators';
 
 @Component({
-  selector: "app-user-form",
-  templateUrl: "./user-form.component.html",
-  styleUrls: ["./user-form.component.scss"]
+  // tslint:disable-next-line:component-selector
+  selector: 'app-user-form',
+  templateUrl: './user-form.component.html',
+  styleUrls: ['./user-form.component.scss']
 })
 export class UserFormComponent implements OnInit, OnDestroy {
   private ngUnsubscribe = new Subject();
@@ -27,7 +30,7 @@ export class UserFormComponent implements OnInit, OnDestroy {
   user = new User();
   pageType: string;
   userGeneralInfoForm: FormGroup;
-  userCredentialsForm: FormGroup;
+  userAuthForm: FormGroup;
   userRolesForm: FormGroup;
   userStateForm: FormGroup;
   selectedRoles: any;
@@ -36,7 +39,7 @@ export class UserFormComponent implements OnInit, OnDestroy {
   userRoles = [];
 
   paramBusinessId: any;
-  paramUsername: any;
+  paramId: any;
 
   constructor(
     private translationLoader: FuseTranslationLoaderService,
@@ -45,6 +48,7 @@ export class UserFormComponent implements OnInit, OnDestroy {
     private userManagementService: UserManagementService,
     private formBuilder: FormBuilder,
     public snackBar: MatSnackBar,
+    private toolbarService: ToolbarService,
     private router: Router,
     private activatedRouter: ActivatedRoute
   ) {
@@ -52,18 +56,19 @@ export class UserFormComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    // this.user = new User(this.router.snapshot.data.data ? this.router.snapshot.data.data.data.getUser : undefined);
-    this.pageType = this.user.id ? 'edit' : 'new';
+    //this.user = new User(this.router.snapshot.data.data ? this.router.snapshot.data.data.data.getUser : undefined);
+    this.pageType = this.user._id ? 'edit' : 'new';
     this.userGeneralInfoForm = this.createUserGeneralInfoForm();
-    this.userCredentialsForm = this.createUserCredentialsForm();
+    this.userAuthForm = this.createUserAuthForm();
     this.userStateForm = this.createUserStateForm();
     this.userRolesForm = this.createUserRolesForm();
-    this.refreshRoles();
+    // this.refreshRoles();
     this.findUser();
+
   }
 
   getBusinessFiltered$(filterText: String, limit: number): Observable<any[]> {
-    return this.userManagementService.getBusinessByFilter(filterText, limit).pipe(      
+    return this.userManagementService.getBusinessByFilter(filterText, limit).pipe(
       mergeMap(resp => this.graphQlAlarmsErrorHandler$(resp)),
       filter(resp => !resp.errors),
       mergeMap(result => from(result.data.getBusinessByFilterText)),
@@ -75,54 +80,43 @@ export class UserFormComponent implements OnInit, OnDestroy {
     this.activatedRouter.params
       .pipe(
         mergeMap(params => {
-          return this.userManagementService.selectedBusinessEvent$
+          return this.toolbarService.onSelectedBusiness$
           .pipe(
+            debounceTime(500),
             take(1),
-            mergeMap(selectedBusiness => {
-              if(!selectedBusiness || (selectedBusiness && selectedBusiness._id != params.businessId)){
-                return of(params.businessId)
-                .pipe(
-                  mergeMap(businessId => {
-                    return this.getBusinessFiltered$(businessId+'', 1)
-                    .pipe(
-                      take(1),
-                      tap(business => this.userManagementService.selectBusiness(business)),
-                      mergeMap(business => of(params))
-                    );
-                  })
-                );
-              }else{
-                return of(params);
-              }
+            mergeMap(business => {
+              return of({...params, businessId: business.id});
             })
-          )
+          );
         }),
-        mergeMap(params => {
-          if(params.username === "new"){
+        mergeMap((params: any) => {
+          if (params.id === 'new'){
             return Rx.Observable.of([undefined, params.businessId, params.username]);
           }else{
-            return this.userFormService.getUser$(params.username, params.businessId)
+            return this.userFormService.getUser$(params.id)
             .pipe(
-              map(userData => [userData, params.businessId, params.username])
+              map(userData => [userData, params.businessId, params.id])
             );
-          }          
+          }
         }),
         takeUntil(this.ngUnsubscribe)
       )
-      .subscribe(([userData, businessId, username]) => {
+      .subscribe(([userData, businessId, id]) => {
         this.paramBusinessId = businessId;
-        this.paramUsername = username;
+        this.paramId = id;
         this.user = new User(
           userData
             ? userData.data.getUser
             : undefined
         );
-        this.pageType = this.user.id ? "edit" : "new";
+        this.pageType = this.user._id ? 'edit' : 'new';
 
         this.userGeneralInfoForm = this.createUserGeneralInfoForm();
-        this.userCredentialsForm = this.createUserCredentialsForm();
+        this.userAuthForm = this.createUserAuthForm();
         this.userStateForm = this.createUserStateForm();
         this.userRolesForm = this.createUserRolesForm();
+        // this.loadRoles();
+
         this.refreshRoles();
       });
   }
@@ -132,34 +126,27 @@ export class UserFormComponent implements OnInit, OnDestroy {
    */
   createUserGeneralInfoForm() {
     return this.formBuilder.group({
-      username: [
-        { value: this.user.username, disabled: this.pageType != "new" },
-        Validators.compose([
-          Validators.required,
-          Validators.pattern("^[a-zA-Z0-9._-]{8,}$")
-        ])
-      ],
       name: [
-        this.user.generalInfo ? this.user.generalInfo.name : "",
+        this.user.generalInfo ? this.user.generalInfo.name : '',
         Validators.required
       ],
       lastname: [
-        this.user.generalInfo ? this.user.generalInfo.lastname : "",
+        this.user.generalInfo ? this.user.generalInfo.lastname : '',
         Validators.required
       ],
       documentType: [
-        this.user.generalInfo ? this.user.generalInfo.documentType : "",
+        this.user.generalInfo ? this.user.generalInfo.documentType : '',
         Validators.required
       ],
       documentId: [
-        this.user.generalInfo ? this.user.generalInfo.documentId : "",
+        this.user.generalInfo ? this.user.generalInfo.documentId : '',
         Validators.required
       ],
       email: [
-        this.user.generalInfo ? this.user.generalInfo.email : "",
+        this.user.generalInfo ? this.user.generalInfo.email : '',
         Validators.email
       ],
-      phone: [this.user.generalInfo ? this.user.generalInfo.phone : "", Validators.required]
+      phone: [this.user.generalInfo ? this.user.generalInfo.phone : '', [Validators.required, Validators.max(999999999999999)]]
     });
   }
 
@@ -168,36 +155,40 @@ export class UserFormComponent implements OnInit, OnDestroy {
    */
   createUserStateForm() {
     return this.formBuilder.group({
-      state: [
-        {
-          value: this.user.state
-        }
-      ]
+      state: [this.user.state]
     });
   }
 
   /**
-   * Creates the user credentials reactive form
+   * Creates the user auth reactive form
    */
-  createUserCredentialsForm() {
+  createUserAuthForm() {
     return this.formBuilder.group(
       {
+        username: [
+        {
+          value: this.user.auth ? this.user.auth.username : '',
+          disabled: (this.pageType !== 'new' && this.user.auth && this.user.auth.username)
+        },
+        Validators.compose([
+          Validators.required,
+          Validators.pattern('^[a-zA-Z0-9._@-]{8,}$')
+        ])
+      ],
         password: [
-          "",
+          '',
           Validators.compose([
             Validators.required,
-            Validators.pattern(
-              "^(?=[a-zA-Z0-9.]{8,}$)(?=.*?[a-z])(?=.*?[0-9]).*"
-            )
+            Validators.pattern('^(?=[a-zA-Z0-9.]{8,}$)(?=.*?[a-z])(?=.*?[0-9]).*')
           ])
         ],
-        passwordConfirmation: ["", Validators.required],
-        temporary: [false, Validators.required]
+        passwordConfirmation: ['', Validators.required],
+        temporary: [true, Validators.required]
       },
       {
         validator: this.checkIfMatchingPasswords(
-          "password",
-          "passwordConfirmation"
+          'password',
+          'passwordConfirmation'
         )
       }
     );
@@ -207,18 +198,20 @@ export class UserFormComponent implements OnInit, OnDestroy {
    * Creates the user roles reactive form
    */
   createUserRolesForm() {
-    return this.formBuilder.group({});
+    const rolesForm = new FormGroup({
+      roles : new FormArray([])
+    });
+
+    return rolesForm;
   }
 
    /**
    * Navigates to the user detail page of the selected user
    */
-  goToUserDetail(username) {
-    if(username){
+  goToUserDetail() {
       setTimeout(() => {
-        this.router.navigate(['user-management/'] , { queryParams: {}})
+        this.router.navigate(['user-management/'] , { queryParams: {}});
       }, 1000);
-    }
   }
 
   /**
@@ -231,7 +224,7 @@ export class UserFormComponent implements OnInit, OnDestroy {
     passwordConfirmationKey: string
   ) {
     return (group: FormGroup) => {
-      let passwordInput = group.controls[passwordKey],
+      const passwordInput = group.controls[passwordKey],
         passwordConfirmationInput = group.controls[passwordConfirmationKey];
       if (passwordInput.value !== passwordConfirmationInput.value) {
         return passwordConfirmationInput.setErrors({ notEquivalent: true });
@@ -245,10 +238,15 @@ export class UserFormComponent implements OnInit, OnDestroy {
    * Creates a new user according to the info entered into the form
    */
   createUser() {
-    const data = this.userGeneralInfoForm.getRawValue();
-    data.username = data.username.trim();
+    const generalInfoRawValue = this.userGeneralInfoForm.getRawValue();
+    const data: any = {};
+    data.generalInfo = { ...generalInfoRawValue,
+      name: generalInfoRawValue.name.toUpperCase(),
+      lastname: generalInfoRawValue.lastname.toUpperCase(),
+    };
+    data.generalInfo.email = data.generalInfo.email.toLowerCase();
+    data.generalInfo.phone = data.generalInfo.phone.toString();
     data.state = this.userStateForm.getRawValue().state;
-
     this.userFormService
       .createUser$(data, this.paramBusinessId)
       .pipe(
@@ -257,15 +255,15 @@ export class UserFormComponent implements OnInit, OnDestroy {
         takeUntil(this.ngUnsubscribe)
       )
       .subscribe(
-        model => {          
-          this.snackBar.open("El usuario ha sido creada", "Cerrar", {
-            duration: 2000
+        model => {
+          this.snackBar.open('El usuario ha sido creada', 'Cerrar', {
+            duration: 4000
           });
-          this.goToUserDetail(data.username);
-          //this.businessCreated.emit(this.selectedBusiness);
+          this.goToUserDetail();
+          // this.businessCreated.emit(this.selectedBusiness);
         },
         error => {
-          console.log("Error creando usuario => ", error);
+          console.log('Error creando usuario => ', error);
         }
       );
   }
@@ -274,10 +272,14 @@ export class UserFormComponent implements OnInit, OnDestroy {
    * Updates the user general info according to the info entered into the form
    */
   updateUserGeneralInfo() {
-    const data = this.userGeneralInfoForm.getRawValue();
-
+    const data: any = {};
+    data.generalInfo = this.userGeneralInfoForm.getRawValue();
+    data.generalInfo.email = data.generalInfo.email.toLowerCase();
+    data.generalInfo.name = data.generalInfo.name.toUpperCase();
+    data.generalInfo.lastname = data.generalInfo.lastname.toUpperCase();
+    data.generalInfo.phone = data.generalInfo.phone.toString();
     this.userFormService
-      .updateUser$(this.user.id, data, this.paramBusinessId)
+      .updateUserGeneralInfo$(this.user._id, data)
       .pipe(
         mergeMap(resp => this.graphQlAlarmsErrorHandler$(resp)),
         filter((resp: any) => !resp.errors || resp.errors.length === 0),
@@ -285,12 +287,12 @@ export class UserFormComponent implements OnInit, OnDestroy {
       )
       .subscribe(
         model => {
-          this.snackBar.open("El usuario ha sido actualizado", "Cerrar", {
+          this.snackBar.open('El usuario ha sido actualizado', 'Cerrar', {
             duration: 2000
           });
         },
         error => {
-          console.log("Error updating user general info => ", error);
+          console.log('Error updating user general info => ', error);
         }
       );
   }
@@ -298,7 +300,18 @@ export class UserFormComponent implements OnInit, OnDestroy {
   /**
    * Loads the roles that the petitioner user can assign to other users
    */
-  loadRoles() {
+  loadRoles$() {
+    return this.userFormService
+      .getRoles$()
+      .pipe(
+        mergeMap(resp => this.graphQlAlarmsErrorHandler$(resp)),
+        filter((resp: any) => !resp.errors || resp.errors.length === 0),
+        map(roles => roles.data.getRoles),
+        takeUntil(this.ngUnsubscribe)
+      );
+  }
+
+  loadRoles1() {
     this.userFormService
       .getRoles$()
       .pipe(
@@ -312,97 +325,52 @@ export class UserFormComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Loads the roles of the selected user
-   */
-  loadUserRoles() {
-    this.userFormService
-      .getUserRoleMapping$(this.user.id, this.paramBusinessId)
-      .pipe(
-        mergeMap(resp => this.graphQlAlarmsErrorHandler$(resp)),
-        filter((resp: any) => !resp.errors || resp.errors.length === 0),
-        takeUntil(this.ngUnsubscribe)
-      )
-      .subscribe(roles => {
-        this.userRoles = roles.data.getUserRoles;
-      });
-  }
-
-
-  /**
    * Refresh roles
    */
   refreshRoles() {
-    if (this.pageType == "new") {
+    if (this.pageType === 'new') {
       return;
     }
-    this.userFormService.getUserRoleMapping$(this.user.id, this.paramBusinessId)
+    this.loadRoles$()
     .pipe(
-      mergeMap(userRolesData => Rx.Observable.from(userRolesData.data.getUserRoleMapping)),
-      map((role: { id, name } | any) => {
-          return {
-            id: role.id,
-            name: role.name
-          };
-        }),
-      toArray(),
-      mergeMap((userRolesMap: any) => {
-        return this.userFormService.getRoles$().pipe(
-          mergeMap(rolesData => Rx.Observable.from(rolesData.data.getRoles)),
-          map((role: { id, name }) => {
-          return {
-            id: role.id,
-            name: role.name,
-            selected: userRolesMap.some(userRole => userRole.id == role.id)
-          };
-        }),
-        toArray()
-      )
-      }),
+      map(roles => [roles, this.user.roles]),
       takeUntil(this.ngUnsubscribe)
-    ).subscribe(result => {
-      this.userRoles = result;
+    )
+    .subscribe(([roles, userRoles]) => {
+      roles.forEach(role => {
+        (this.userRolesForm.get('roles') as FormArray).push(
+          new FormGroup({
+            key: new FormControl(role),
+            active: new FormControl(userRoles.includes(role))
           })
+        );
+      });
+    });
   }
 
-  removeRoles(roles) {
-    for (var i = 0; i < this.roles.length; i++) {
-      var obj = this.roles[i];
-
-      if (
-        roles
-          .map(data => {
-            data.id;
-          })
-          .indexOf(obj.id) !== -1
-      ) {
-        this.roles.splice(i, 1);
-      }
-    }
-  }
 
   /**
    * Adds the selected roles to the selected user
    */
   addRolesToUser(rolesToAdd) {
     this.userFormService
-      .addRolesToTheUser$(this.user.id, rolesToAdd, this.paramBusinessId)
+      .addRolesToTheUser$(this.user._id, rolesToAdd)
       .pipe(
         mergeMap(resp => this.graphQlAlarmsErrorHandler$(resp)),
         filter((resp: any) => !resp.errors || resp.errors.length === 0),
         takeUntil(this.ngUnsubscribe)
       )
       .subscribe(
+        // 'Se han agregado nuevos roles al usuario',
         model => {
           this.snackBar.open(
-            "Se han agregado nuevos roles al usuario",
-            "Cerrar",
-            {
-              duration: 2000
-            }
+            this.translationLoader.getTranslate().instant('USER.CREDENTIALS.ROLE_ADDED'),
+            this.translationLoader.getTranslate().instant('USER.CLOSE'),
+            { duration: 2000 }
           );
         },
         error => {
-          console.log("Error adding roles to the user ==> ", error);
+          console.log('Error adding roles to the user ==> ', error);
         }
       );
   }
@@ -412,7 +380,7 @@ export class UserFormComponent implements OnInit, OnDestroy {
    */
   removeRolesFromUser(rolesToRemove) {
     this.userFormService
-      .removeRolesFromUser$(this.user.id, rolesToRemove, this.paramBusinessId)
+      .removeRolesFromUser$(this.user._id, rolesToRemove, this.paramBusinessId)
       .pipe(
         mergeMap(resp => this.graphQlAlarmsErrorHandler$(resp)),
         filter((resp: any) => !resp.errors || resp.errors.length === 0),
@@ -420,31 +388,34 @@ export class UserFormComponent implements OnInit, OnDestroy {
       )
       .subscribe(
         model => {
-          this.snackBar.open("Se han eliminado roles de usuario", "Cerrar", {
-            duration: 2000
-          });
+          this.snackBar.open(
+            this.translationLoader.getTranslate().instant('USER.CREDENTIALS.ROLE_REMOVED'),
+            this.translationLoader.getTranslate().instant('USER.CLOSE'),
+            { duration: 2000 }
+          );
         },
         error => {
-          console.log("Error removing roles from the user ==> ", error);
-          this.refreshRoles();
+          console.log('Error removing roles from the user ==> ', error);
+          // this.refreshRoles();
         }
       );
   }
 
   /**
    * Detects when a roles has been added or deleted to a user
-   * @param $event 
+   * @param $event
    */
-  onUserRolesChange(roleEvent) {
-    if(roleEvent.selected){
+  onUserRolesChange(key, roleEvent) {
+    if (roleEvent.checked) {
       const rolesToAdd = [];
-      rolesToAdd.push({id: roleEvent.value.id, name: roleEvent.value.name});
+      rolesToAdd.push(key);
       this.addRolesToUser(rolesToAdd);
-    }else{
+    } else {
       const rolesToRemove = [];
-      rolesToRemove.push({id: roleEvent.value.id, name: roleEvent.value.name});
+      rolesToRemove.push(key);
       this.removeRolesFromUser(rolesToRemove);
     }
+
   }
 
   /**
@@ -454,12 +425,12 @@ export class UserFormComponent implements OnInit, OnDestroy {
    * @param $event
    */
   onUserStateChange($event) {
-    if (this.pageType == "new") {
+    if (this.pageType === 'new') {
       return;
     }
 
     this.userFormService
-      .updateUserState$(this.user.id, this.user.username, $event.checked, this.paramBusinessId)
+      .updateUserState$(this.user._id, this.user._id, $event.checked, this.paramBusinessId)
       .pipe(
         mergeMap(resp => this.graphQlAlarmsErrorHandler$(resp)),
         filter((resp: any) => !resp.errors || resp.errors.length === 0),
@@ -468,15 +439,63 @@ export class UserFormComponent implements OnInit, OnDestroy {
       .subscribe(
         model => {
           this.snackBar.open(
-            "El estado del usuario ha sido actualizado",
-            "Cerrar",
+            'El estado del usuario ha sido actualizado',
+            'Cerrar',
             {
               duration: 2000
             }
           );
         },
         error => {
-          console.log("Error updating user state => ", error);
+          console.log('Error updating user state => ', error);
+        }
+      );
+  }
+
+  /**
+   * Create the user auth on Keycloak
+   */
+  createUserAuth(formDirective: FormGroupDirective) {
+    const data = this.userAuthForm.getRawValue();
+
+    this.userFormService
+      .createUserAuth$(this.user._id, data)
+      .pipe(
+        mergeMap(resp => this.graphQlAlarmsErrorHandler$(resp)),
+        filter((resp: any) => !resp.errors || resp.errors.length === 0),
+        takeUntil(this.ngUnsubscribe)
+      )
+      .subscribe(
+        model => {
+          this.snackBar.open('El usuario ha sido actualizado', 'Cerrar', {
+            duration: 2000
+          });
+
+          this.user.auth = { username: data.username, userKeycloakId: '' };
+
+          formDirective.resetForm();
+          this.userAuthForm = this.createUserAuthForm();
+          // this.userAuthForm.reset();
+          // console.log('DATA DEL FORM => ', data);
+          // this.userAuthForm.get('username').setValue(data.username);
+          // this.userAuthForm.get('username').disable();
+
+          // this.userAuthForm.get('password').setValue('');
+          // this.userAuthForm.get('passwordConfirmation').setValue('');
+
+
+
+        },
+        error => {
+          console.log('Error resetting user password => ', error);
+          this.snackBar.open(
+            'Error reseteando contraseña del usuario',
+            'Cerrar',
+            {
+              duration: 2000
+            }
+          );
+          this.userAuthForm.reset();
         }
       );
   }
@@ -484,11 +503,10 @@ export class UserFormComponent implements OnInit, OnDestroy {
   /**
    * Reset the user password
    */
-  resetUserPassword() {
-    const data = this.userCredentialsForm.getRawValue();
-
+  changeUserRoles() {
+    const data = this.userRolesForm.getRawValue();
     this.userFormService
-      .resetUserPassword$(this.user.id, data, this.paramBusinessId)
+      .updateUserRoles$(this.user._id, data)
       .pipe(
         mergeMap(resp => this.graphQlAlarmsErrorHandler$(resp)),
         filter((resp: any) => !resp.errors || resp.errors.length === 0),
@@ -496,21 +514,91 @@ export class UserFormComponent implements OnInit, OnDestroy {
       )
       .subscribe(
         model => {
-          this.snackBar.open("El usuario ha sido actualizado", "Cerrar", {
+          this.snackBar.open('Los roles del usuario han sido actualizados', 'Cerrar', {
             duration: 2000
           });
-          this.userCredentialsForm.reset();
+          this.userAuthForm.reset();
         },
         error => {
-          console.log("Error resetting user password => ", error);
+          console.log('Error updating user roles => ', error);
           this.snackBar.open(
-            "Error reseteando contraseña del usuario",
-            "Cerrar",
+            'Error actualizando roles del usuario',
+            'Cerrar',
             {
               duration: 2000
             }
           );
-          this.userCredentialsForm.reset();
+          this.userAuthForm.reset();
+        }
+      );
+  }
+
+  /**
+   * Reset the user password
+   */
+  removeUserAuth(formDirective: FormGroupDirective) {
+    this.userFormService
+      .removeUserAuth$(this.user._id)
+      .pipe(
+        mergeMap(resp => this.graphQlAlarmsErrorHandler$(resp)),
+        filter((resp: any) => !resp.errors || resp.errors.length === 0),
+        takeUntil(this.ngUnsubscribe)
+      )
+      .subscribe(
+        model => {
+          this.snackBar.open('Las credenciales de autenticación han sido eliminadas', 'Cerrar', {
+            duration: 2000
+          });
+          this.user.auth = null;
+          formDirective.resetForm();
+          this.userAuthForm = this.createUserAuthForm();
+        },
+        error => {
+          console.log('Error removing user auth credentials => ', error);
+          this.snackBar.open(
+            'Error eliminando credenciales de autenticación',
+            'Cerrar',
+            {
+              duration: 2000
+            }
+          );
+          this.userAuthForm.reset();
+        }
+      );
+  }
+
+  /**
+   * Reset the user password
+   */
+  resetUserPassword(formDirective: FormGroupDirective) {
+    const data = this.userAuthForm.getRawValue();
+
+    this.userFormService
+      .resetUserPassword$(this.user._id, data)
+      .pipe(
+        mergeMap(resp => this.graphQlAlarmsErrorHandler$(resp)),
+        filter((resp: any) => !resp.errors || resp.errors.length === 0),
+        takeUntil(this.ngUnsubscribe)
+      )
+      .subscribe(
+        model => {
+          this.snackBar.open('El usuario ha sido actualizado', 'Cerrar', {
+            duration: 2000
+          });
+
+          formDirective.resetForm();
+          this.userAuthForm = this.createUserAuthForm();
+        },
+        error => {
+          console.log('Error resetting user password => ', error);
+          this.snackBar.open(
+            'Error reseteando contraseña del usuario',
+            'Cerrar',
+            {
+              duration: 2000
+            }
+          );
+          this.userAuthForm.reset();
         }
       );
   }
@@ -535,11 +623,11 @@ export class UserFormComponent implements OnInit, OnDestroy {
         response.errors.forEach(error => {
           if (Array.isArray(error)) {
             error.forEach(errorDetail => {
-              this.showMessageSnackbar("ERRORS." + errorDetail.message.code);
+              this.showMessageSnackbar('ERRORS.' + errorDetail.message.code);
             });
           } else {
-            response.errors.forEach(error => {
-              this.showMessageSnackbar("ERRORS." + error.message.code);
+            response.errors.forEach(err => {
+              this.showMessageSnackbar('ERRORS.' + err.message.code);
             });
           }
         });
@@ -553,7 +641,7 @@ export class UserFormComponent implements OnInit, OnDestroy {
    * @param detailMessageKey Key of the detail message to i18n
    */
   showMessageSnackbar(messageKey, detailMessageKey?) {
-    let translationData = [];
+    const translationData = [];
     if (messageKey) {
       translationData.push(messageKey);
     }
@@ -564,8 +652,8 @@ export class UserFormComponent implements OnInit, OnDestroy {
 
     this.translate.get(translationData).subscribe(data => {
       this.snackBar.open(
-        messageKey ? data[messageKey] : "",
-        detailMessageKey ? data[detailMessageKey] : "",
+        messageKey ? data[messageKey] : '',
+        detailMessageKey ? data[detailMessageKey] : '',
         {
           duration: 2000
         }
