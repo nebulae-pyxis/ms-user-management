@@ -7,7 +7,6 @@ const Rx = require("rxjs");
 const broker = require("../../broker/BrokerFactory")();
 
 const {handleError$} = require('../../tools/GraphqlResponseTools');
-
 const { of } = require('rxjs');
 const { map, mergeMap, catchError } = require('rxjs/operators');
 const contextName = "User-Management";

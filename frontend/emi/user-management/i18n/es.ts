@@ -64,7 +64,7 @@ export const locale = {
     },
     ERRORS: {
       15001: 'Error interno de servidor',
-      16001: 'Error interno de servidor',
+      16001: 'Error interno de servidor.',
       16002: 'Permiso denegado.',
       16010: 'Datos faltantes del usuario',
       16011: 'El nombre de usuario ya está siendo usado',

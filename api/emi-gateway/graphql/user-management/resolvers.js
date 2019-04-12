@@ -308,7 +308,6 @@ eventDescriptors.forEach(descriptor => {
         : evt.data;
       pubsub.publish(descriptor.gqlSubscriptionName, payload);
     },
-
     error => {
       if (descriptor.onError) {
         descriptor.onError(error, descriptor);
