@@ -204,7 +204,7 @@ export class UserManagementComponent implements OnInit, OnDestroy {
         return businessFilter != null;
       }),
       mergeMap(([userFilter, businessFilter, paginator]) => {
-        return this.getUsers$(paginator.pageIndex, paginator.pageSize, userFilter, businessFilter._id)
+        return this.getUsers$(paginator.pageIndex, paginator.pageSize, userFilter, businessFilter.id)
       }),
       takeUntil(this.ngUnsubscribe)
     )
