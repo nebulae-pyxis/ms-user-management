@@ -186,7 +186,7 @@ export class UserManagementComponent implements OnInit, OnDestroy {
   }
 
   getBusinessFilter$(){
-    return this.userManagementService.selectedBusinessEvent$
+    return this.toolbarService.onSelectedBusiness$
     .pipe(
       debounceTime(150),
       distinctUntilChanged()
